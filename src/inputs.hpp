@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine/camera.hpp"
+#include "engine/Camera.hpp"
 
 void processInput(GLFWwindow* window, Camera* camera);
 

@@ -1,7 +1,7 @@
-#ifndef TYPES_H
-#define TYPES_H
+#pragma once
 
 #include <stdint.h>
+#include <filesystem>
 
 typedef uint8_t u8;
 typedef uint16_t u16;
@@ -15,4 +15,4 @@ typedef int64_t s64;
 
 typedef u8 byte;
 
-#endif
+typedef std::filesystem::path fspath;

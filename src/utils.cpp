@@ -3,7 +3,7 @@
 #include <fstream>
 #include <sstream>
 
-std::string readFile(const std::string& path) {
+std::string readFile(const fspath& path) {
   std::ifstream ifs(path);
   std::ostringstream oss;
   oss << ifs.rdbuf();

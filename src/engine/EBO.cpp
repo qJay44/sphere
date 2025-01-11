@@ -1,5 +1,7 @@
 #include "EBO.hpp"
 
+EBO::EBO() {}
+
 EBO::EBO(GLsizei size, const void* data, GLsizeiptr dataSize) : size(size) {
   glGenBuffers(size, &id);
   bind();

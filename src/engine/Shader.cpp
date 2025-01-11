@@ -4,8 +4,8 @@
 
 #include "glm/gtc/type_ptr.hpp"
 
-static GLuint load(const std::string& path, int type) {
-  std::string shaderStr = readFile(path);
+static GLuint load(const fspath& filename, int type) {
+  std::string shaderStr = readFile("engine/shaders" / filename);
   const char* shaderStrPtr = shaderStr.c_str();
   GLuint shaderId = glCreateShader(type);
   glShaderSource(shaderId, 1, &shaderStrPtr, NULL);
@@ -13,8 +13,8 @@ static GLuint load(const std::string& path, int type) {
   return shaderId;
 }
 
-static GLuint compile(const std::string& path, int type) {
-  GLuint shaderId = load(path, type);
+static GLuint compile(const fspath& filename, int type) {
+  GLuint shaderId = load(filename, type);
   GLint hasCompiled;
   char infoLog[1024];
 
@@ -24,7 +24,7 @@ static GLuint compile(const std::string& path, int type) {
   // if GL_FALSE
   if (!hasCompiled) {
     glGetShaderInfoLog(shaderId, 1024, NULL, infoLog);
-    printf("\nShader: %s\n", path.c_str());
+    printf("\nShader: %s\n", filename.string().c_str());
     printf("\n===== Shader compilation error =====\n\n%s", infoLog);
     printf("====================================\n\n");
   }
@@ -47,17 +47,17 @@ static void link(GLuint program) {
   }
 }
 
-Shader::Shader(const std::string& vsPath, const std::string& fsPath, const std::string& gsPath)
-  : vsPath(vsPath), fsPath(fsPath), gsPath(gsPath) {
+Shader::Shader(const fspath& vsName, const fspath& fsName, const fspath& gsName)
+  : vsName(vsName), fsName(fsName), gsName(gsName) {
   program = glCreateProgram();
   GLuint shaders[3];
   u8 idx = 0;
 
-  shaders[idx++] = compile(vsPath, GL_VERTEX_SHADER);
-  shaders[idx++] = compile(fsPath, GL_FRAGMENT_SHADER);
+  shaders[idx++] = compile(vsName, GL_VERTEX_SHADER);
+  shaders[idx++] = compile(fsName, GL_FRAGMENT_SHADER);
 
-  if (gsPath.size())
-    shaders[idx++] = compile(gsPath, GL_GEOMETRY_SHADER);
+  if (!gsName.empty())
+    shaders[idx++] = compile(gsName, GL_GEOMETRY_SHADER);
 
   for (int i = 0; i < idx; i++)
     glAttachShader(program, shaders[i]);
@@ -68,19 +68,22 @@ Shader::Shader(const std::string& vsPath, const std::string& fsPath, const std::
     glDeleteShader(shaders[i]);
 }
 
-const std::string& Shader::getVertexShaderPath() const {return vsPath;}
-const std::string& Shader::getFragmentShaderPath() const {return vsPath;}
-const std::string& Shader::getGeometryShaderPath() const {return vsPath;}
-
-void Shader::activate() const {
-  glUseProgram(program);
-}
+const fspath& Shader::getVertexShaderName() const {return vsName;}
+const fspath& Shader::getFragmentShaderName() const {return vsName;}
+const fspath& Shader::getGeometryShaderName() const {return vsName;}
 
 void Shader::setUniform3f(const std::string& name, const vec3& v) const {
+  glUseProgram(program);
   glUniform3f(glGetUniformLocation(program, name.c_str()), v.x, v.y, v.z);
 }
 
+void Shader::setUniform4f(const std::string& name, const vec4& v) const {
+  glUseProgram(program);
+  glUniform4f(glGetUniformLocation(program, name.c_str()), v.x, v.y, v.z, v.w);
+}
+
 void Shader::setUniformMatrix4f(const std::string& name, const mat4& m) const {
+  glUseProgram(program);
   glUniformMatrix4fv(glGetUniformLocation(program, name.c_str()), 1, GL_FALSE, value_ptr(m));
 }
 

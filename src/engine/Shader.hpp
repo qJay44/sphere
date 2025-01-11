@@ -4,20 +4,19 @@
 
 class Shader {
 public:
-  Shader(const std::string& vsPath, const std::string& fsPath, const std::string& gsPath = "");
+  Shader(const fspath& vsName, const fspath& fsName, const fspath& gsName = "");
 
-  const std::string& getVertexShaderPath() const;
-  const std::string& getFragmentShaderPath() const;
-  const std::string& getGeometryShaderPath() const;
-
-  void activate() const;
+  const fspath& getVertexShaderName() const;
+  const fspath& getFragmentShaderName() const;
+  const fspath& getGeometryShaderName() const;
 
   void setUniform3f(const std::string& name, const vec3& v) const;
+  void setUniform4f(const std::string& name, const vec4& v) const;
   void setUniformMatrix4f(const std::string& name, const mat4& m) const;
 
 private:
   GLint program;
-  const std::string& vsPath;
-  const std::string& fsPath;
-  const std::string& gsPath;
+  const fspath& vsName;
+  const fspath& fsName;
+  const fspath& gsName;
 };

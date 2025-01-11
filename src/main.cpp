@@ -2,10 +2,11 @@
 #include <cstdlib>
 #include <windows.h>
 
+#include "engine/Light.hpp"
+#include "engine/meshes.hpp"
 #include "inputs.hpp"
 #include "engine/Mesh.hpp"
 #include "engine/Shader.hpp"
-#include "engine/templates/cube.hpp"
 
 int main() {
   // Change cwd to where "src" directory located (since launching the executable always from the directory where its located)
@@ -36,10 +37,13 @@ int main() {
 
   glViewport(0, 0, _gState.winWidth, _gState.winHeight);
 
-  Shader mainShader("engine/shaders/main.vert", "engine/shaders/main.frag");
+  Shader mainShader("main.vert", "main.frag");
+  Shader linesShader("lines.vert", "main.frag", "lines.geom");
+  Shader lightShader("light.vert", "light.frag");
 
   Camera camera({-1.f, 1.f, 2.f}, {0.5f, -0.3f, -1.f}, 100.f);
-  Mesh cube = templateCube({0.f, 0.f, 0.5f});
+  Light light({3.5f, 1.5f, 1.2f});
+  Mesh sphere = meshes::sphere(2.f, 100, {1.f, 0.f, 1.f});
 
   double titleTimer = glfwGetTime();
   double prevTime = titleTimer;
@@ -67,7 +71,12 @@ int main() {
     camera.move(mouseX, mouseY);
     camera.update(dt);
 
-    cube.draw(camera, mainShader);
+    mainShader.setUniform3f("lightPos", light.getPosition());
+    mainShader.setUniform4f("lightColor", light.getColor());
+
+    sphere.draw(camera, mainShader);
+    /* sphere.draw(camera, linesShader); */
+    light.draw(camera, lightShader);
 
     glfwSwapBuffers(window);
     glfwPollEvents();

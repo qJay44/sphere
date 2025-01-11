@@ -3,6 +3,7 @@
 // Element Buffer Object
 class EBO {
 public:
+  EBO();
   EBO(GLsizei size, const void* data, GLsizeiptr dataSize);
 
   void bind() const;
