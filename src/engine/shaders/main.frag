@@ -11,18 +11,18 @@ uniform vec3 camPos;
 uniform vec3 lightPos;
 uniform vec4 lightColor;
 
-vec4 direcLight() {
+vec4 pointLight() {
 	// used in two variables so I calculate it here to not have to do it twice
 	vec3 lightVec = lightPos - vertPos;
 
 	// intensity of light with respect to distance
 	float dist = length(lightVec);
-	float a = 0.2f;
-	float b = 0.2f;
+	float a = 0.5f;
+	float b = 0.7f;
 	float inten = 1.f / (a * dist * dist + b * dist + 1.f);
 
 	// ambient lighting
-	float ambient = 0.1f;
+	float ambient = 0.2f;
 
 	// diffuse lighting
 	vec3 n = normalize(normal);
@@ -40,6 +40,6 @@ vec4 direcLight() {
 }
 
 void main() {
-	FragColor = direcLight();
+	FragColor = pointLight();
 }
 

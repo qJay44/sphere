@@ -3,6 +3,7 @@
 // Vertex Buffer Object
 class VBO {
 public:
+  VBO();
   VBO(GLsizei size, const void* data, GLsizeiptr dataSize);
 
   void bind() const;

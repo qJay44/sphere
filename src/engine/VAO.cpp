@@ -1,5 +1,7 @@
 #include "VAO.hpp"
 
+VAO::VAO() {}
+
 VAO::VAO(GLsizei size) : size(size) {
   glGenVertexArrays(size, &id);
 }

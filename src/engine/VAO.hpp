@@ -3,6 +3,7 @@
 // Vertex Array Object
 class VAO {
 public:
+  VAO();
   VAO(GLsizei size);
 
   void linkAttrib(GLuint layout, GLuint numComponents, GLenum type, GLsizeiptr stride, void* offset) const;

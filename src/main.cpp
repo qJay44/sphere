@@ -1,15 +1,17 @@
+#include "engine/Light.hpp"
+#include "engine/Mesh.hpp"
+#include "engine/Shader.hpp"
+#include "engine/meshes.hpp"
+#include "engine/planet/Planet.hpp"
+#include "inputs.hpp"
+
 #include <cstdio>
 #include <cstdlib>
 #include <windows.h>
 
-#include "engine/Light.hpp"
-#include "engine/meshes.hpp"
-#include "inputs.hpp"
-#include "engine/Mesh.hpp"
-#include "engine/Shader.hpp"
-
 int main() {
-  // Change cwd to where "src" directory located (since launching the executable always from the directory where its located)
+  // Change cwd to where "src" directory located (since launching the executable always from the directory where its
+  // located)
   SetCurrentDirectory("../../../src");
 
   // GLFW init
@@ -38,11 +40,12 @@ int main() {
   glViewport(0, 0, _gState.winWidth, _gState.winHeight);
 
   Shader mainShader("main.vert", "main.frag");
-  Shader linesShader("lines.vert", "main.frag", "lines.geom");
+  Shader linesShader("lines.vert", "lines.frag", "lines.geom");
   Shader lightShader("light.vert", "light.frag");
 
   Camera camera({-1.f, 1.f, 2.f}, {0.5f, -0.3f, -1.f}, 100.f);
   Light light({3.5f, 1.5f, 1.2f});
+  Planet planet = Planet(100);
   Mesh sphere = meshes::sphere(2.f, 100, {1.f, 0.f, 1.f});
 
   double titleTimer = glfwGetTime();
@@ -71,11 +74,10 @@ int main() {
     camera.move(mouseX, mouseY);
     camera.update(dt);
 
-    mainShader.setUniform3f("lightPos", light.getPosition());
+    mainShader.setUniform3f("lightPos", camera.getPosition());
     mainShader.setUniform4f("lightColor", light.getColor());
 
-    sphere.draw(camera, mainShader);
-    /* sphere.draw(camera, linesShader); */
+    planet.draw(camera, mainShader);
     light.draw(camera, lightShader);
 
     glfwSwapBuffers(window);
@@ -84,6 +86,5 @@ int main() {
 
   glfwTerminate();
 
-	return 0;
+  return 0;
 }
-

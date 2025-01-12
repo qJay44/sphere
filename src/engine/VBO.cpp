@@ -1,5 +1,7 @@
 #include "VBO.hpp"
 
+VBO::VBO() {}
+
 VBO::VBO(GLsizei size, const void* data, GLsizeiptr dataSize) : size(size) {
   glGenBuffers(size, &id);
   bind();

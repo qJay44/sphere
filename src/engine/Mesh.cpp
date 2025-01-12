@@ -1,5 +1,8 @@
 #include "Mesh.hpp"
+
 #include "glm/ext/matrix_transform.hpp"
+
+Mesh::Mesh() {}
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices)
   : vertices(vertices),
@@ -7,8 +10,8 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices)
     mat(identity<mat4>()),
     vao(VAO(1)),
     vbo(VBO(1, vertices.data(), sizeof(Vertex) * vertices.size())),
-    ebo(1, indices.data(), sizeof(GLuint) * indices.size())
-{
+    ebo(1, indices.data(), sizeof(GLuint) * indices.size()) {
+
   vao.bind();
   vbo.bind();
   ebo.bind();
@@ -30,8 +33,8 @@ Mesh::Mesh(std::vector<Vertex> vertices)
   : vertices(vertices),
     mat(identity<mat4>()),
     vao(VAO(1)),
-    vbo(VBO(1, vertices.data(), sizeof(Vertex) * vertices.size()))
-{
+    vbo(VBO(1, vertices.data(), sizeof(Vertex) * vertices.size())) {
+
   vao.bind();
   vbo.bind();
 
@@ -60,4 +63,3 @@ void Mesh::draw(const Camera& camera, const Shader& shader) const {
     glDrawArrays(GL_TRIANGLES, 0, vertices.size());
   vao.unbind();
 }
-
