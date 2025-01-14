@@ -10,6 +10,12 @@
 #include <windows.h>
 
 int main() {
+  const std::string file = "C:\\Users\\gerku\\Downloads\\gebco_2024\\tos_O1_2001-2002.nc";
+  Planet planet = Planet(20);
+  planet.readGeoData(file);
+  printf("done");
+  exit(0);
+
   // Change cwd to where "src" directory located (since launching the executable always from the directory where its
   // located)
   SetCurrentDirectory("../../../src");
@@ -45,7 +51,6 @@ int main() {
 
   Camera camera({-1.f, 1.f, 2.f}, {0.5f, -0.3f, -1.f}, 100.f);
   Light light({3.5f, 1.5f, 1.2f});
-  Planet planet = Planet(100);
   Mesh sphere = meshes::sphere(2.f, 100, {1.f, 0.f, 1.f});
 
   double titleTimer = glfwGetTime();
@@ -69,15 +74,17 @@ int main() {
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    processInput(window, &camera);
-
-    camera.move(mouseX, mouseY);
-    camera.update(dt);
+    if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
+      processInput(window, &camera);
+      camera.move(mouseX, mouseY);
+      camera.update(dt);
+    }
 
     mainShader.setUniform3f("lightPos", camera.getPosition());
     mainShader.setUniform4f("lightColor", light.getColor());
 
     planet.draw(camera, mainShader);
+    planet.draw(camera, linesShader);
     light.draw(camera, lightShader);
 
     glfwSwapBuffers(window);

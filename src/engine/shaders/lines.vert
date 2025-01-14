@@ -15,7 +15,7 @@ uniform mat4 model;
 
 void main() {
   vec3 vertPos = vec3(model * vec4(in_pos, 1.f));
-  data_out.color = vec3(0.25f);
+  data_out.color = vec3(0.5f);
   data_out.texCoord = in_tex;
   data_out.normal = in_normal;
   gl_Position = vec4(vertPos, 1.f);

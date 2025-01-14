@@ -20,4 +20,7 @@ private:
 
 private:
   Mesh constructMesh();
+
+  vec3 pointOnSphereDefault(const vec3& v) const;
+  vec3 pointOnSphereFancy(const vec3& v) const;
 };

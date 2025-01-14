@@ -1,8 +1,7 @@
 #include "inputs.hpp"
 
 void processInput(GLFWwindow* window, Camera* camera) {
-  if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-    glfwSetWindowShouldClose(window, GLFW_TRUE);
+  if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) glfwSetWindowShouldClose(window, GLFW_TRUE);
 
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) camera->moveForward();
   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camera->moveLeft();
@@ -15,4 +14,3 @@ void processInput(GLFWwindow* window, Camera* camera) {
   if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) camera->setIncreasedSpeed();
   else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) camera->setNormalSpeed();
 }
-

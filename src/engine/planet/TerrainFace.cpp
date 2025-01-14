@@ -2,6 +2,7 @@
 
 #include "glm/geometric.hpp"
 
+#include <cmath>
 #include <vector>
 
 TerrainFace::TerrainFace() {}
@@ -24,9 +25,8 @@ Mesh TerrainFace::constructMesh() {
       u32 idx = x + y * resolution;
       vec2 percent = vec2(x, y) / (resolution - 1.f);
       vec3 point = localUp + (percent.x - 0.5f) * 2.f * axisA + (percent.y - 0.5f) * 2.f * axisB; // Point on plane
-      vertices[idx] = {point, color};
+      vertices[idx] = {pointOnSphereFancy(point), color};
       vertices[idx].normal = localUp;
-      vertices[idx].position /= length(point); // Point on sphere
 
       if (x != resolution - 1 && y != resolution - 1) {
         indices[triIndex + 0] = idx;
@@ -45,3 +45,16 @@ Mesh TerrainFace::constructMesh() {
 }
 
 void TerrainFace::draw(const Camera& c, const Shader& s) const { mesh.draw(c, s); }
+
+vec3 TerrainFace::pointOnSphereDefault(const vec3& v) const { return v / length(v); }
+
+vec3 TerrainFace::pointOnSphereFancy(const vec3& v) const {
+  float x2 = v.x * v.x;
+  float y2 = v.y * v.y;
+  float z2 = v.z * v.z;
+  float x = v.x * sqrtf(1.f - (y2 + z2) * 0.5f + (y2 * z2) / 3.f);
+  float y = v.y * sqrtf(1.f - (z2 + x2) * 0.5f + (z2 * x2) / 3.f);
+  float z = v.z * sqrtf(1.f - (x2 + y2) * 0.5f + (x2 * y2) / 3.f);
+
+  return vec3(x, y, z);
+}

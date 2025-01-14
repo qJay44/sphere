@@ -23,13 +23,16 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${GLAD_PATH}/include
   ${GLFW_PATH}/include
   ${GLM_PATH}/include
+  ${NETCDF_PATH}/include
 )
 
 target_link_directories(${PROJECT_NAME} PUBLIC
   ${GLM_PATH}/bin
   ${GLM_PATH}/lib
   ${GLFW_PATH}/lib-mingw-w64
+  ${NETCDF_PATH}/lib
+  ${NETCDF_PATH}/bin
 )
 
-target_link_libraries(${PROJECT_NAME} glfw3 glm)
+target_link_libraries(${PROJECT_NAME} glfw3 glm netcdf)
 
