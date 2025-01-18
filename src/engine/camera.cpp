@@ -11,20 +11,16 @@ Camera::Camera(vec3 pos, vec3 orientation, float sensitivity)
     sensitivity(sensitivity),
     fov(45.f) {};
 
-const vec3& Camera::getPosition() const {
-  return position;
-}
+const vec3& Camera::getPosition() const { return position; }
 
-const mat4& Camera::getMatrix() const {
-  return mat;
-}
+const mat4& Camera::getMatrix() const { return mat; }
 
-void Camera::update(float dt) {
+void Camera::update(double dt) {
   mat4 view = identity<mat4>();
   mat4 proj = identity<mat4>();
 
   float aspectRatio = (float)_gState.winWidth / _gState.winHeight;
-  speed *= dt;
+  speed *= static_cast<float>(dt);
 
   vec3 lookPos = position + orientation;
 
@@ -66,22 +62,20 @@ void Camera::moveDown() {
   position = position + quotient;
 }
 
-void Camera::setIncreasedSpeed() {
-  speed = 4.f;
-}
+void Camera::setIncreasedSpeed() { speed = 4.f; }
 
-void Camera::setNormalSpeed() {
-  speed = 3.f;
-}
+void Camera::setNormalSpeed() { speed = 3.f; }
 
 void Camera::move(double x, double y) {
   // Normalizes and shifts the coordinates of the cursor such that they begin in the middle of the screen
   // and then "transforms" them into degrees
-  float rotX = sensitivity * (y - _gState.winHeight * 0.5f) / _gState.winHeight;
-  float rotY = sensitivity * (x - _gState.winWidth * 0.5f) / _gState.winWidth;
+  double rotX = sensitivity * (y - _gState.winHeight * 0.5f) / _gState.winHeight;
+  double rotY = sensitivity * (x - _gState.winWidth * 0.5f) / _gState.winWidth;
+  float radRotX = static_cast<float>(radians(-rotX));
+  float radRotY = static_cast<float>(radians(-rotY));
 
   // Calculates upcoming vertical change in the Orientation
-  vec3 newOrientation = rotate(orientation, radians(-rotX), normalize(cross(orientation, up)));
+  vec3 newOrientation = rotate(orientation, radRotX, normalize(cross(orientation, up)));
   vec3 upOpposite = up * -1.f;
 
   // Decides whether or not the next vertical Orientation is legal or not
@@ -89,6 +83,5 @@ void Camera::move(double x, double y) {
     orientation = newOrientation;
 
   // Rotates the Orientation left and right
-  orientation = rotate(orientation, radians(-rotY), up);
+  orientation = rotate(orientation, radRotY, up);
 }
-

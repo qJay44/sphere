@@ -2,18 +2,19 @@
 cls
 
 Rem Build
-if not exist Build\Release mkdir Build\Release\Run
-cd Build\Release
-cmake.exe -S ..\..\ -B . -G"MinGW Makefiles" -D CMAKE_EXPORT_COMPILE_COMMANDS=ON -D CMAKE_BUILD_TYPE=Release
-C:\Users\gerku\Documents\mingw64\bin\mingw32-make.exe
-xcopy /y compile_commands.json ..\compile_commands.json
+if not exist Build mkdir Build
+cd Build
+cmake -S .. -B . -G "Visual Studio 17 2022"
+cmake --build . --config Release
 
-cd Run
-echo n | copy /-y "C:/Users/gerku/Documents/netCDF 4.9.2/bin"\netcdf.dll .
-echo n | copy /-y "C:/Users/gerku/Documents/netCDF 4.9.2/bin"\hdf5.dll .
-echo n | copy /-y "C:/Users/gerku/Documents/netCDF 4.9.2/bin"\hdf5_hl.dll .
+Rem Copy dlls
+cd Release
+echo n | copy /-y "C:\\Users\\q44\\Documents\\Libs\\netCDF 4.9.2\\bin\\netcdf.dll" .
+echo n | copy /-y "C:\\Users\\q44\\Documents\\Libs\\netCDF 4.9.2\\bin\\hdf5.dll" .
+echo n | copy /-y "C:\\Users\\q44\\Documents\\Libs\\netCDF 4.9.2\\bin\\hdf5_hl.dll" .
+echo n | copy /-y "C:\\Users\\q44\\Documents\\Libs\\netCDF 4.9.2\\bin\\libcurl.dll" .
 
 Rem Lauch
 MyProject.exe
-cd ..\..\..
+cd ..\..
 

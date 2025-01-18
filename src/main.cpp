@@ -1,19 +1,18 @@
+#include <cstdio>
+#include <cstdlib>
+#include <windows.h>
+
 #include "engine/Light.hpp"
 #include "engine/Mesh.hpp"
 #include "engine/Shader.hpp"
 #include "engine/meshes.hpp"
 #include "engine/planet/Planet.hpp"
 #include "inputs.hpp"
-
-#include <cstdio>
-#include <cstdlib>
-#include <windows.h>
+#include "nc/File.hpp"
 
 int main() {
-  const std::string file = "C:\\Users\\gerku\\Downloads\\gebco_2024\\tos_O1_2001-2002.nc";
-  Planet planet = Planet(20);
-  planet.readGeoData(file);
-  printf("done");
+  nc::File ncFile("C:\\Users\\q44\\Downloads\\gebco_2024\\GEBCO_2024.nc", true);
+  printf("exit\n");
   exit(0);
 
   // Change cwd to where "src" directory located (since launching the executable always from the directory where its
@@ -52,6 +51,7 @@ int main() {
   Camera camera({-1.f, 1.f, 2.f}, {0.5f, -0.3f, -1.f}, 100.f);
   Light light({3.5f, 1.5f, 1.2f});
   Mesh sphere = meshes::sphere(2.f, 100, {1.f, 0.f, 1.f});
+  Planet planet(20);
 
   double titleTimer = glfwGetTime();
   double prevTime = titleTimer;

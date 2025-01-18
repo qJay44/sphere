@@ -4,7 +4,7 @@ struct State {
   const float nearPlane, farPlane;
   int winWidth, winHeight;
   float gamma;
-  float time;
+  double time;
   u8 aaSamples;
 };
 

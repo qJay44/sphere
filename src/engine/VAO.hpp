@@ -6,7 +6,7 @@ public:
   VAO();
   VAO(GLsizei size);
 
-  void linkAttrib(GLuint layout, GLuint numComponents, GLenum type, GLsizeiptr stride, void* offset) const;
+  void linkAttrib(GLuint layout, GLuint numComponents, GLenum type, GLsizei stride, void* offset) const;
   void bind() const;
   void clear() const;
   void unbind() const;

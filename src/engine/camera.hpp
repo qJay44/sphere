@@ -7,7 +7,7 @@ public:
   const vec3& getPosition() const;
   const mat4& getMatrix() const;
 
-  void update(float dt);
+  void update(double dt);
   void moveForward();
   void moveBack();
   void moveLeft();

@@ -11,3 +11,8 @@ std::string readFile(const fspath& path) {
 
   return entireFile;
 }
+
+void printTabs(u8 n) {
+  for (int i = 0; i < n; i++)
+    printf("\t");
+}

@@ -27,9 +27,8 @@ Planet::Planet(u32 resolution) {
 }
 
 void Planet::readGeoData(const std::string& path) const {
-  int ncid, varid;
-  int dataIn[5][5];
-  int x, y, retval;
+  int ncid;
+  int retval;
 
   if ((retval = nc_open(path.c_str(), NC_NOWRITE, &ncid))) ERR(retval);
 

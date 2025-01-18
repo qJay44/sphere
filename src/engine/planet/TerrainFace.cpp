@@ -1,9 +1,9 @@
 #include "TerrainFace.hpp"
 
-#include "glm/geometric.hpp"
-
 #include <cmath>
 #include <vector>
+
+#include "glm/geometric.hpp"
 
 TerrainFace::TerrainFace() {}
 
