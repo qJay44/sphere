@@ -7,6 +7,8 @@ public:
   TerrainFace();
   TerrainFace(u16 resolution, vec3 localUp, vec3 color = {1.f, 1.f, 1.f});
 
+  void add(const Texture& texture);
+
   void draw(const Camera& camera, const Shader& shader) const;
 
 private:

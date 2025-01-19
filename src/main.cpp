@@ -7,17 +7,14 @@
 #include "engine/Shader.hpp"
 #include "engine/meshes.hpp"
 #include "engine/planet/Planet.hpp"
+#include "engine/texture/Texture.hpp"
 #include "inputs.hpp"
 #include "nc/File.hpp"
 
 int main() {
-  nc::File ncFile("C:\\Users\\q44\\Downloads\\gebco_2024\\GEBCO_2024.nc", true);
-  printf("exit\n");
-  exit(0);
-
   // Change cwd to where "src" directory located (since launching the executable always from the directory where its
   // located)
-  SetCurrentDirectory("../../../src");
+  SetCurrentDirectory("../../src");
 
   // GLFW init
   glfwInit();
@@ -48,10 +45,15 @@ int main() {
   Shader linesShader("lines.vert", "lines.frag", "lines.geom");
   Shader lightShader("light.vert", "light.frag");
 
+  Texture earthTexture(R"(res\geo\textures\wem2560.png)", TEXTURE_DIFFUSE);
+  nc::File ncFile(R"(res\geo\data\GEBCO_2024.nc)");
+
   Camera camera({-1.f, 1.f, 2.f}, {0.5f, -0.3f, -1.f}, 100.f);
   Light light({3.5f, 1.5f, 1.2f});
   Mesh sphere = meshes::sphere(2.f, 100, {1.f, 0.f, 1.f});
-  Planet planet(20);
+
+  Planet planet(40);
+  planet.add(earthTexture);
 
   double titleTimer = glfwGetTime();
   double prevTime = titleTimer;
@@ -80,11 +82,11 @@ int main() {
       camera.update(dt);
     }
 
-    mainShader.setUniform3f("lightPos", camera.getPosition());
+    mainShader.setUniform3f("lightPos", light.getPosition());
     mainShader.setUniform4f("lightColor", light.getColor());
 
     planet.draw(camera, mainShader);
-    planet.draw(camera, linesShader);
+    /* planet.draw(camera, linesShader); */
     light.draw(camera, lightShader);
 
     glfwSwapBuffers(window);

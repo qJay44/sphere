@@ -50,14 +50,53 @@ Mesh::Mesh(std::vector<Vertex> vertices)
   vbo.unbind();
 }
 
+void Mesh::add(const Texture& texture) {
+  if (texCount < MESH_TEXTURE_LIMIT) //
+    textures[texCount++] = &texture;
+  else //
+    printf("[Warning] Trying to add a texture above limit\n");
+}
+
 void Mesh::draw(const Camera& camera, const Shader& shader) const {
   vao.bind();
+
+  u8 numDiffuse = 0;
+  u8 numSpecular = 0;
+  u8 numNormal = 0;
+  u8 numDisplacement = 0;
+
+  for (u8 i = 0; i < texCount; i++) {
+    const Texture* tex = textures[i];
+    char uniform[256];
+    switch (tex->getType()) {
+      case TEXTURE_DIFFUSE:
+        sprintf_s(uniform, "diffuse%d", numDiffuse++);
+        break;
+      case TEXTURE_SPECULAR:
+        sprintf_s(uniform, "specular%d", numSpecular++);
+        break;
+      case TEXTURE_NORMAL:
+        sprintf_s(uniform, "normal%d", numNormal++);
+        break;
+      case TEXTURE_DISPLACEMENT:
+        sprintf_s(uniform, "displacement%d", numDisplacement++);
+        break;
+      default:
+        continue;
+    }
+
+    shader.setUniformTexture(uniform, tex->getUnit());
+    tex->bind();
+  }
 
   shader.setUniform3f("camPos", camera.getPosition());
   shader.setUniformMatrix4f("cam", camera.getMatrix());
   shader.setUniformMatrix4f("model", mat);
 
-  if (indices.size()) glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
-  else glDrawArrays(GL_TRIANGLES, 0, (GLsizei)vertices.size());
+  if (indices.size()) //
+    glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
+  else //
+    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)vertices.size());
+
   vao.unbind();
 }

@@ -5,7 +5,6 @@ cmake_minimum_required(VERSION 3.21)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_PREFIX_PATH "install")
 
 project(MyProject VERSION 1.0)
 
@@ -22,6 +21,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${GLFW_PATH}/include
   ${GLM_PATH}/include
   ${NETCDF_PATH}/include
+  ${GENERAL_INCLUDES}
 )
 
 target_link_directories(${PROJECT_NAME} PUBLIC

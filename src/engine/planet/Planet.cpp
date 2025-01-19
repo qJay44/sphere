@@ -1,8 +1,6 @@
 #include "Planet.hpp"
 
-#include "netcdf.h"
-
-#define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(1);}
+#include "TerrainFace.hpp"
 
 Planet::Planet(u32 resolution) {
   static const vec3 directions[6]{
@@ -26,17 +24,12 @@ Planet::Planet(u32 resolution) {
     terrainFaces[i] = TerrainFace(resolution, directions[i], palette[i]);
 }
 
-void Planet::readGeoData(const std::string& path) const {
-  int ncid;
-  int retval;
-
-  if ((retval = nc_open(path.c_str(), NC_NOWRITE, &ncid))) ERR(retval);
-
-  if ((retval = nc_close(ncid))) ERR(retval);
+void Planet::add(const Texture& texture) {
+  for (TerrainFace& tf : terrainFaces)
+    tf.add(texture);
 }
 
 void Planet::draw(const Camera& camera, const Shader& shader) const {
-  for (const TerrainFace& face : terrainFaces) {
+  for (const TerrainFace& face : terrainFaces)
     face.draw(camera, shader);
-  }
 }

@@ -1,2 +1,4 @@
 Build/
 .cache/
+src/res/geo/data/
+src/res/geo/textures/

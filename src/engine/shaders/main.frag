@@ -10,6 +10,9 @@ in vec2 texCoord;
 uniform vec3 camPos;
 uniform vec3 lightPos;
 uniform vec4 lightColor;
+uniform sampler2D diffuse0;
+
+const float PI = 3.141592265359;
 
 vec4 pointLight() {
 	// used in two variables so I calculate it here to not have to do it twice
@@ -36,10 +39,13 @@ vec4 pointLight() {
 	float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.f), 16);
 	float specular = specAmount * specularLight;
 
-	return vec4(color, 1.f) * (diffuse * inten + ambient) * lightColor;
+	return texture(diffuse0, texCoord) * (diffuse * inten + ambient) * lightColor;
 }
 
 void main() {
-	FragColor = pointLight();
+  float lon = 0.5f - atan(normal.z, normal.x) / (2.f * PI);
+  float lat = 0.5f + asin(normal.y) / PI;
+  vec3 col = vec3(texture(diffuse0, vec2(lon, lat)).r);
+	FragColor = vec4(col, 1.f);
 }
 

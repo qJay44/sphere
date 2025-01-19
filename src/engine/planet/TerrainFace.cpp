@@ -25,8 +25,8 @@ Mesh TerrainFace::constructMesh() {
       u32 idx = x + y * resolution;
       vec2 percent = vec2(x, y) / (resolution - 1.f);
       vec3 point = localUp + (percent.x - 0.5f) * 2.f * axisA + (percent.y - 0.5f) * 2.f * axisB; // Point on plane
-      vertices[idx] = {pointOnSphereFancy(point), color};
-      vertices[idx].normal = localUp;
+      vertices[idx] = {pointOnSphereFancy(point), color, percent};
+      vertices[idx].normal = vertices[idx].position;
 
       if (x != resolution - 1 && y != resolution - 1) {
         indices[triIndex + 0] = idx;
@@ -43,6 +43,8 @@ Mesh TerrainFace::constructMesh() {
 
   return Mesh(vertices, indices);
 }
+
+void TerrainFace::add(const Texture& texture) { mesh.add(texture); }
 
 void TerrainFace::draw(const Camera& c, const Shader& s) const { mesh.draw(c, s); }
 
