@@ -2,7 +2,7 @@
 
 #include "TerrainFace.hpp"
 
-Planet::Planet(u32 resolution) {
+Planet::Planet(u32 resolution, const GEBCO* data) : data(data) {
   static const vec3 directions[6]{
     {0.f,  1.f,  0.f }, // Up
     {0.f,  -1.f, 0.f }, // Down
@@ -21,7 +21,7 @@ Planet::Planet(u32 resolution) {
   };
 
   for (int i = 0; i < 6; i++)
-    terrainFaces[i] = TerrainFace(resolution, directions[i], palette[i]);
+    terrainFaces[i] = TerrainFace(resolution, directions[i], data, palette[i]);
 }
 
 void Planet::add(const Texture& texture) {

@@ -1,20 +1,17 @@
 #include <cstdio>
 #include <cstdlib>
-#include <windows.h>
 
 #include "engine/Light.hpp"
-#include "engine/Mesh.hpp"
 #include "engine/Shader.hpp"
-#include "engine/meshes.hpp"
 #include "engine/planet/Planet.hpp"
 #include "engine/texture/Texture.hpp"
+#include "glad/glad.h"
 #include "inputs.hpp"
-#include "nc/File.hpp"
+#include "nc/GEBCO.hpp"
 
 int main() {
-  // Change cwd to where "src" directory located (since launching the executable always from the directory where its
-  // located)
-  SetCurrentDirectory("../../src");
+  // Assuming the executable is launching from its own directory
+  SetCurrentDirectory("../../../src");
 
   // GLFW init
   glfwInit();
@@ -46,14 +43,13 @@ int main() {
   Shader lightShader("light.vert", "light.frag");
 
   Texture earthTexture(R"(res\geo\textures\wem2560.png)", TEXTURE_DIFFUSE);
-  nc::File ncFile(R"(res\geo\data\GEBCO_2024.nc)");
+  GEBCO gebco(R"(res\geo\data\GEBCO_2024.nc)");
 
   Camera camera({-1.f, 1.f, 2.f}, {0.5f, -0.3f, -1.f}, 100.f);
   Light light({3.5f, 1.5f, 1.2f});
-  Mesh sphere = meshes::sphere(2.f, 100, {1.f, 0.f, 1.f});
 
-  Planet planet(40);
-  planet.add(earthTexture);
+  Planet planet(20, &gebco);
+  /* planet.add(earthTexture); */
 
   double titleTimer = glfwGetTime();
   double prevTime = titleTimer;

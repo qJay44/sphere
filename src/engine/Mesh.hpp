@@ -2,11 +2,11 @@
 
 #include <vector>
 
+#include "Camera.hpp"
+#include "EBO.hpp"
+#include "Shader.hpp"
 #include "VAO.hpp"
 #include "VBO.hpp"
-#include "EBO.hpp"
-#include "Camera.hpp"
-#include "Shader.hpp"
 #include "Vertex.hpp"
 #include "texture/Texture.hpp"
 
@@ -29,7 +29,7 @@ private:
   mat4 mat;
 
   const Texture* textures[MESH_TEXTURE_LIMIT];
-  u8 texCount;
+  u8 texCount = 0;
 
   VAO vao;
   VBO vbo;

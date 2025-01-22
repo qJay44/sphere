@@ -7,15 +7,15 @@
 
 TerrainFace::TerrainFace() {}
 
-TerrainFace::TerrainFace(u16 resolution, vec3 localUp, vec3 color)
+TerrainFace::TerrainFace(u16 resolution, vec3 localUp, const GEBCO* data, vec3 color)
   : resolution(resolution),
     localUp(localUp),
     color(color),
     axisA(vec3(localUp.y, localUp.z, localUp.x)),
     axisB(cross(localUp, axisA)),
-    mesh(constructMesh()) {}
+    mesh(constructMesh(data)) {}
 
-Mesh TerrainFace::constructMesh() {
+Mesh TerrainFace::constructMesh(const GEBCO* data) const {
   std::vector<Vertex> vertices(resolution * resolution);
   std::vector<GLuint> indices((resolution - 1) * (resolution - 1) * 2 * 3);
   u32 triIndex = 0;
@@ -25,8 +25,15 @@ Mesh TerrainFace::constructMesh() {
       u32 idx = x + y * resolution;
       vec2 percent = vec2(x, y) / (resolution - 1.f);
       vec3 point = localUp + (percent.x - 0.5f) * 2.f * axisA + (percent.y - 0.5f) * 2.f * axisB; // Point on plane
-      vertices[idx] = {pointOnSphereFancy(point), color, percent};
-      vertices[idx].normal = vertices[idx].position;
+      Vertex& vertex = vertices[idx];
+
+      vertex = {pointOnSphereFancy(point), color};
+      vertex.normal = vertex.position;
+
+      float lat = asin(vertex.position.y);
+      float lon = atan2(vertex.position.x, -vertex.position.z);
+      short elevation = data->elevation(lat, lon, true);
+      vertex.position += vertex.normal * (elevation * 0.00005f);
 
       if (x != resolution - 1 && y != resolution - 1) {
         indices[triIndex + 0] = idx;

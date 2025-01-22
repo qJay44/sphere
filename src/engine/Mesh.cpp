@@ -82,7 +82,8 @@ void Mesh::draw(const Camera& camera, const Shader& shader) const {
         sprintf_s(uniform, "displacement%d", numDisplacement++);
         break;
       default:
-        continue;
+        printf("Unknown texture type: [%d]\n", tex->getType());
+        exit(EXIT_FAILURE);
     }
 
     shader.setUniformTexture(uniform, tex->getUnit());

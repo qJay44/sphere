@@ -4,16 +4,21 @@ namespace nc {
 
 class File {
 public:
-  File(const fspath& path, bool analyze = false);
+  File(const fspath& path, bool print = false);
   ~File();
 
   static void setPrintLimit(u32 n);
 
-private:
+  u32 getDimensionSize(int dim) const;
+
+protected:
+  static int status;
   static u32 printLimit;
 
   int ncid;
   int ndims, nvars, natts, unlimdimid;
+
+  static void error(const int& e);
 
 private:
   static bool checkPrintLimit(const int& i, const int& end);
@@ -22,4 +27,4 @@ private:
   void readVariables(int dimid, u8 tabs) const;
   void readAttributes(int varid, int var_natts, u8 tabs) const;
 };
-} // nc
+} // namespace nc
