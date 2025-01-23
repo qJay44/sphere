@@ -31,9 +31,10 @@ Mesh TerrainFace::constructMesh(const GEBCO* data) const {
       vertex.normal = vertex.position;
 
       float lat = asin(vertex.position.y);
-      float lon = atan2(vertex.position.x, -vertex.position.z);
-      short elevation = data->elevation(lat, lon, true);
-      vertex.position += vertex.normal * (elevation * 0.00005f);
+      float lon = atan2(-vertex.position.z, vertex.position.x);
+      short elevation = data->elevation(lat, lon);
+      vertex.position += vertex.normal * (elevation * 0.000025f);
+      vertex.position *= 2.f;
 
       if (x != resolution - 1 && y != resolution - 1) {
         indices[triIndex + 0] = idx;

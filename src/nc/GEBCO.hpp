@@ -9,7 +9,7 @@ public:
   const u32& getLongitudes() const;
   const u32& getLatitudes() const;
 
-  short elevation(float lon, float lat, bool radians) const;
+  short elevation(float lon, float lat) const;
 
 private:
   const u32 longitudes;

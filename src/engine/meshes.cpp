@@ -3,6 +3,22 @@
 #include <vector>
 
 namespace meshes {
+Mesh plane(vec3 position, vec2 size, vec3 color) {
+  std::vector<Vertex> vertices{
+    {{-0.1f * size.x + position.x, -0.1f * size.y + position.y, position.z}, color},
+    {{-0.1f * size.x + position.x,  0.1f * size.y + position.y, position.z}, color},
+    {{ 0.1f * size.x + position.x,  0.1f * size.y + position.y, position.z}, color},
+    {{ 0.1f * size.x + position.x, -0.1f * size.y + position.y, position.z}, color},
+  };
+
+  std::vector<GLuint> indices{
+    0, 1, 2,
+    2, 3, 0
+  };
+
+  return Mesh(vertices, indices);
+}
+
 Mesh cube(vec3 position, vec3 color) {
   //        5--------6
   //       /|       /|
@@ -17,16 +33,14 @@ Mesh cube(vec3 position, vec3 color) {
   //      z: - to rear, + to front
 
   std::vector<Vertex> vertices{
-    // Front
-    {{-0.1f + position.x, -0.1f + position.y, 0.1f + position.y},  color},
-    {{-0.1f + position.x, 0.1f + position.y, 0.1f + position.y},   color},
-    {{0.1f + position.x, 0.1f + position.y, 0.1f + position.y},    color},
-    {{0.1f + position.x, -0.1f + position.y, 0.1f + position.y},   color},
-    // Rear + position.x
+    {{-0.1f + position.x, -0.1f + position.y,  0.1f + position.y}, color},
+    {{-0.1f + position.x,  0.1f + position.y,  0.1f + position.y}, color},
+    {{ 0.1f + position.x,  0.1f + position.y,  0.1f + position.y}, color},
+    {{ 0.1f + position.x, -0.1f + position.y,  0.1f + position.y}, color},
     {{-0.1f + position.x, -0.1f + position.y, -0.1f + position.y}, color},
-    {{-0.1f + position.x, 0.1f + position.y, -0.1f + position.y},  color},
-    {{0.1f + position.x, 0.1f + position.y, -0.1f + position.y},   color},
-    {{0.1f + position.x, -0.1f + position.y, -0.1f + position.y},  color},
+    {{-0.1f + position.x,  0.1f + position.y, -0.1f + position.y}, color},
+    {{ 0.1f + position.x,  0.1f + position.y, -0.1f + position.y}, color},
+    {{ 0.1f + position.x, -0.1f + position.y, -0.1f + position.y}, color},
   };
 
   std::vector<GLuint> indices{
