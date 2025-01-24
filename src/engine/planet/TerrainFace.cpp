@@ -21,10 +21,14 @@ Mesh TerrainFace::constructMesh(const GEBCO* data) const {
   u32 triIndex = 0;
 
   for (u32 y = 0; y < resolution; y++) {
+    float percentY = static_cast<float>(y) / (resolution - 1);
+    vec3 pY = (percentY - 0.5f) * 2.f * axisB;
+
     for (u32 x = 0; x < resolution; x++) {
       u32 idx = x + y * resolution;
-      vec2 percent = vec2(x, y) / (resolution - 1.f);
-      vec3 point = localUp + (percent.x - 0.5f) * 2.f * axisA + (percent.y - 0.5f) * 2.f * axisB; // Point on plane
+      float percentX = static_cast<float>(x) / (resolution - 1.f);
+      vec3 pX = (percentX - 0.5f) * 2.f * axisA;
+      vec3 point = localUp + pX + pY; // Point on plane
       Vertex& vertex = vertices[idx];
 
       vertex = {pointOnSphereFancy(point), color};

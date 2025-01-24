@@ -7,6 +7,7 @@ public:
   Planet(u32 resolution, const GEBCO* data);
 
   void add(const Texture& texture);
+  void rebuild();
 
   void draw(const Camera& camera, const Shader& shader) const;
 

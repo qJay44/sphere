@@ -29,6 +29,8 @@ void Planet::add(const Texture& texture) {
     tf.add(texture);
 }
 
+void Planet::rebuild() { *this = Planet(_gState.resolution, data); }
+
 void Planet::draw(const Camera& camera, const Shader& shader) const {
   for (const TerrainFace& face : terrainFaces)
     face.draw(camera, shader);

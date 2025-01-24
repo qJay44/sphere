@@ -4,9 +4,13 @@
 
 #include "engine/Light.hpp"
 #include "engine/Shader.hpp"
+#include "engine/gui.hpp"
 #include "engine/planet/Planet.hpp"
 #include "engine/texture/Texture.hpp"
 #include "glad/glad.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 #include "inputs.hpp"
 #include "nc/GEBCO.hpp"
 
@@ -39,6 +43,14 @@ int main() {
 
   glViewport(0, 0, _gState.winWidth, _gState.winHeight);
 
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO();
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+  io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplOpenGL3_Init();
+
   Shader mainShader("main.vert", "main.frag");
   Shader linesShader("lines.vert", "lines.frag", "lines.geom");
   Shader colorShader("default/color.vert", "default/color.frag");
@@ -51,26 +63,27 @@ int main() {
   Camera camera({-1.f, 1.f, 2.f}, {0.5f, -0.3f, -1.f}, 100.f);
   Light light({3.5f, 1.5f, 1.2f});
 
-  Planet planet(80, &gebco);
+  Planet planet(_gState.resolution, &gebco);
   planet.add(earthTexture);
+  gui::link(&planet);
 
   double titleTimer = glfwGetTime();
   double prevTime = titleTimer;
   double currTime = prevTime;
   double dt;
-  double mouseX, mouseY;
 
   glEnable(GL_DEPTH_TEST);
 
   // Render loop
   while (!glfwWindowShouldClose(window)) {
-    glfwGetCursorPos(window, &mouseX, &mouseY);
-    glfwSetCursorPos(window, _gState.winWidth * 0.5f, _gState.winHeight * 0.5f);
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
 
     currTime = glfwGetTime();
     dt = currTime - prevTime;
     prevTime = currTime;
-    _gState.time = currTime;
+    _gState.dt = dt;
 
     // Update window title every 0.3 seconds
     if (glfwGetTime() - titleTimer >= 0.3) {
@@ -79,14 +92,12 @@ int main() {
       titleTimer = currTime;
     }
 
-    glClearColor(0.f, 0.f, 0.f, 1.f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
       processInput(window, &camera);
-      camera.move(mouseX, mouseY);
-      camera.update(dt);
     }
+
+    glClearColor(0.f, 0.f, 0.f, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     mainShader.setUniform3f("lightPos", light.getPosition());
     mainShader.setUniform4f("lightColor", light.getColor());
@@ -96,10 +107,17 @@ int main() {
     /* planet.draw(camera, linesShader); */
     light.draw(camera, colorShader);
 
+    gui::draw();
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
 
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
   glfwTerminate();
 
   return 0;

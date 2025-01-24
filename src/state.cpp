@@ -6,6 +6,8 @@ State _gState = {
   .winWidth = 1'200,
   .winHeight = 720,
   .gamma = 2.2f,
-  .time = 0.f,
+  .dt = 0.f,
   .aaSamples = 8,
+  .guiFocused = false,
+  .resolution = 20
 };

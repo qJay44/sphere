@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(MyProject VERSION 1.0)
 
-file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp ${GLAD_PATH}/src/glad.c)
+file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp ${GLAD_PATH}/src/glad.c ${IMGUI_PATH}/*.cpp)
 set_source_files_properties(${GLAD_PATH}/src/glad.c PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
 set_source_files_properties(${GLAD_PATH}/src/glad.h PROPERTIES APPEND_STRING PROPERTY COMPILE_FLAGS " -Wnone")
 
@@ -22,6 +22,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${GLM_PATH}/include
   ${NETCDF_PATH}/include
   ${GENERAL_INCLUDES}
+  ${IMGUI_PATH}
 )
 
 target_link_directories(${PROJECT_NAME} PUBLIC
