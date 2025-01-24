@@ -1,6 +1,6 @@
 #include "Light.hpp"
 
-#include "meshes.hpp"
+#include "mesh/meshes.hpp"
 
 Light::Light(vec3 position, vec4 color) : Mesh(meshes::cube(position, color)), position(position), color(color) {}
 

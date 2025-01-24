@@ -2,9 +2,9 @@
 
 #include <vector>
 
-#include "Camera.hpp"
+#include "../Camera.hpp"
+#include "../Shader.hpp"
 #include "EBO.hpp"
-#include "Shader.hpp"
 #include "VAO.hpp"
 #include "VBO.hpp"
 #include "Vertex.hpp"

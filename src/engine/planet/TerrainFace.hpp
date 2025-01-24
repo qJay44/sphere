@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../nc/GEBCO.hpp"
-#include "../Mesh.hpp"
+#include "../mesh/Mesh.hpp"
+#include "nc/GEBCO.hpp"
 
 class TerrainFace {
 public:

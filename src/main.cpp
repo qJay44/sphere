@@ -5,14 +5,14 @@
 #include "engine/Light.hpp"
 #include "engine/Shader.hpp"
 #include "engine/gui.hpp"
+#include "engine/mesh/texture/Texture.hpp"
 #include "engine/planet/Planet.hpp"
-#include "engine/texture/Texture.hpp"
+#include "engine/planet/nc/GEBCO.hpp"
 #include "glad/glad.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "inputs.hpp"
-#include "nc/GEBCO.hpp"
 
 int main() {
   // Assuming the executable is launching from its own directory
