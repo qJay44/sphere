@@ -2,5 +2,6 @@
 
 #include "engine/Camera.hpp"
 
-void processInput(GLFWwindow* window, Camera* camera);
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void processInput(GLFWwindow* window, Camera& camera);
 

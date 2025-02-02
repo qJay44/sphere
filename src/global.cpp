@@ -1,6 +1,6 @@
-#include "state.hpp"
+#include "global.hpp"
 
-State _gState = {
+global_cfg _gcfg = {
   .nearPlane = 0.1f,
   .farPlane = 100.f,
   .winWidth = 1'200,
@@ -8,6 +8,8 @@ State _gState = {
   .gamma = 2.2f,
   .dt = 0.f,
   .aaSamples = 8,
+
   .guiFocused = false,
-  .resolution = 20
+  .drawWireframe = false,
+  .drawNormals = false
 };

@@ -19,13 +19,13 @@ void Camera::update(double dt) {
   mat4 view = identity<mat4>();
   mat4 proj = identity<mat4>();
 
-  float aspectRatio = (float)_gState.winWidth / _gState.winHeight;
+  float aspectRatio = (float)_gcfg.winWidth / _gcfg.winHeight;
   speed *= static_cast<float>(dt);
 
   vec3 lookPos = position + orientation;
 
   view = lookAt(position, lookPos, up);
-  proj = perspective(radians(fov), aspectRatio, _gState.nearPlane, _gState.farPlane);
+  proj = perspective(radians(fov), aspectRatio, _gcfg.nearPlane, _gcfg.farPlane);
 
   mat = proj * view;
 }
@@ -69,8 +69,8 @@ void Camera::setNormalSpeed() { speed = 3.f; }
 void Camera::move(double x, double y) {
   // Normalizes and shifts the coordinates of the cursor such that they begin in the middle of the screen
   // and then "transforms" them into degrees
-  double rotX = sensitivity * (y - _gState.winHeight * 0.5f) / _gState.winHeight;
-  double rotY = sensitivity * (x - _gState.winWidth * 0.5f) / _gState.winWidth;
+  double rotX = sensitivity * (y - _gcfg.winHeight * 0.5f) / _gcfg.winHeight;
+  double rotY = sensitivity * (x - _gcfg.winWidth * 0.5f) / _gcfg.winWidth;
   float radRotX = static_cast<float>(radians(-rotX));
   float radRotY = static_cast<float>(radians(-rotY));
 

@@ -4,15 +4,21 @@
 
 class Planet {
 public:
-  Planet(u32 resolution, const GEBCO* data);
+  Planet(u16 resolution, float radius);
+  ~Planet();
+
+  const u16& getResolutino() const;
+  const float& getRadius() const;
 
   void add(const Texture& texture);
-  void rebuild();
-
+  void rebuild(u16 resolution, float radius);
   void draw(const Camera& camera, const Shader& shader) const;
 
 private:
-  u32 resolution;
-  TerrainFace terrainFaces[6];
-  const GEBCO* data;
+  u16 resolution;
+  float radius;
+  TerrainFace* terrainFaces = nullptr;
+
+private:
+  void build();
 };

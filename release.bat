@@ -2,19 +2,12 @@
 cls
 
 Rem Build
-cmake -S . -B Build -G "Visual Studio 17 2022"
-cmake --build Build --config Release
+cmake -S . -B Build\Release -G "MinGW Makefiles" -D CMAKE_EXPORT_COMPILE_COMMANDS=ON -D CMAKE_BUILD_TYPE=Release
+cmake --build Build\Release --config Release
+cd Build\Release\Run
+move /y ..\compile_commands.json ..\..
 
-Rem Copy dlls
-cd Build\\Release
-if not exist Run mkdir Run
-cd Run
-move /y ..\\MyProject.exe .
-echo n | copy /-y "C:\\Users\\q44\\Documents\\Libs\\netCDF 4.9.2\\bin\\netcdf.dll" .
-echo n | copy /-y "C:\\Users\\q44\\Documents\\Libs\\netCDF 4.9.2\\bin\\hdf5.dll" .
-echo n | copy /-y "C:\\Users\\q44\\Documents\\Libs\\netCDF 4.9.2\\bin\\hdf5_hl.dll" .
-echo n | copy /-y "C:\\Users\\q44\\Documents\\Libs\\netCDF 4.9.2\\bin\\libcurl.dll" .
-echo n | copy /-y "C:\\Users\\q44\\Documents\\Libs\\tiff-4.7.0\\install\\bin\\tiff.dll" .
+echo n | copy /-y "C:\Users\q44\Documents\Libs\tiff-4.7.0\install\bin\tiff.dll" .
 
 Rem Lauch
 MyProject.exe

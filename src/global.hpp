@@ -1,13 +1,16 @@
 #pragma once
 
-struct State {
+struct global_cfg {
   const float nearPlane, farPlane;
   int winWidth, winHeight;
   float gamma;
   double dt;
   u8 aaSamples;
+  ThreadPool tp;
+
   bool guiFocused;
-  int resolution;
+  bool drawWireframe;
+  bool drawNormals;
 };
 
-extern State _gState;
+extern global_cfg _gcfg;

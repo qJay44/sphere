@@ -1,7 +1,7 @@
 #include "Texture.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb/stb_image.h"
+#include "stb_image.h"
 
 Texture::Texture() {}
 
@@ -9,7 +9,6 @@ Texture::Texture(const fspath& path, TextureType type)
   : type(type),            //
     glType(GL_TEXTURE_2D), //
     name(path.filename()) {
-
   glGenTextures(1, &id);
   glBindTexture(GL_TEXTURE_2D, id);
 
@@ -24,7 +23,7 @@ Texture::Texture(const fspath& path, TextureType type)
   byte* bytes = stbi_load(path.string().c_str(), &w, &h, &colorChannels, 0);
 
   switch (type) {
-    default:
+    case TEXTURE_DIFFUSE:
       switch (colorChannels) {
         case 1:
           glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, w, h, 0, GL_RED, GL_UNSIGNED_BYTE, bytes);
@@ -40,6 +39,11 @@ Texture::Texture(const fspath& path, TextureType type)
           printf("Path: %s\n", path.string().c_str());
           exit(EXIT_FAILURE);
       }
+      break;
+    default:
+      printf("Unhandled texture type (%d)\n", type);
+      printf("Path: %s\n", path.string().c_str());
+      exit(EXIT_FAILURE);
   }
 
   glGenerateMipmap(GL_TEXTURE_2D);

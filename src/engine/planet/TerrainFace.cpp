@@ -5,23 +5,22 @@
 
 #include "glm/geometric.hpp"
 
-TerrainFace::TerrainFace() {}
-
-TerrainFace::TerrainFace(u16 resolution, vec3 localUp, const GEBCO* data, vec3 color)
+TerrainFace::TerrainFace(const u16& resolution, const vec3& localUp, const vec3& color, const float& radius)
   : resolution(resolution),
     localUp(localUp),
     color(color),
-    axisA(vec3(localUp.y, localUp.z, localUp.x)),
-    axisB(cross(localUp, axisA)),
-    mesh(constructMesh(data)) {}
+    radius(radius),
+    mesh(build()) {}
 
-Mesh TerrainFace::constructMesh(const GEBCO* data) const {
+Mesh TerrainFace::build() const {
   std::vector<Vertex> vertices(resolution * resolution);
   std::vector<GLuint> indices((resolution - 1) * (resolution - 1) * 2 * 3);
+  vec3 axisA = vec3(localUp.y, localUp.z, localUp.x);
+  vec3 axisB = cross(localUp, axisA);
   u32 triIndex = 0;
 
   for (u32 y = 0; y < resolution; y++) {
-    float percentY = static_cast<float>(y) / (resolution - 1);
+    float percentY = static_cast<float>(y) / (resolution - 1.f);
     vec3 pY = (percentY - 0.5f) * 2.f * axisB;
 
     for (u32 x = 0; x < resolution; x++) {
@@ -31,14 +30,9 @@ Mesh TerrainFace::constructMesh(const GEBCO* data) const {
       vec3 point = localUp + pX + pY; // Point on plane
       Vertex& vertex = vertices[idx];
 
-      vertex = {pointOnSphereFancy(point), color};
+      vertex = {pointOnSphereFancy(point), color, {percentX, percentY}};
       vertex.normal = vertex.position;
-
-      float lat = asin(vertex.position.y);
-      float lon = atan2(-vertex.position.z, vertex.position.x);
-      short elevation = data->elevation(lat, lon);
-      vertex.position += vertex.normal * (elevation * 0.000025f);
-      vertex.position *= 2.f;
+      vertex.position *= radius;
 
       if (x != resolution - 1 && y != resolution - 1) {
         indices[triIndex + 0] = idx;
