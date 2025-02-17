@@ -3,12 +3,35 @@
 #include <vector>
 
 namespace meshes {
-Mesh plane(vec3 position, vec2 size, vec3 color) {
+
+Mesh line(vec3 p1, vec3 p2, vec3 color) {
   std::vector<Vertex> vertices{
-    {{-0.1f * size.x + position.x, -0.1f * size.y + position.y, position.z}, color},
-    {{-0.1f * size.x + position.x,  0.1f * size.y + position.y, position.z}, color},
-    {{ 0.1f * size.x + position.x,  0.1f * size.y + position.y, position.z}, color},
-    {{ 0.1f * size.x + position.x, -0.1f * size.y + position.y, position.z}, color},
+    {p1, color},
+    {p2, color}
+  };
+
+  return Mesh(vertices, GL_LINES);
+}
+
+Mesh axis(float size) {
+  std::vector<Vertex> vertices{
+    {{0.f, 0.f, 0.f}, {1.f, 0.f, 0.f}},
+    {{size, 0.f, 0.f}, {1.f, 0.f, 0.f}},
+    {{0.f, 0.f, 0.f}, {0.f, 1.f, 0.f}},
+    {{0.f, size, 0.f}, {0.f, 1.f, 0.f}},
+    {{0.f, 0.f, 0.f}, {0.f, 0.f, 1.f}},
+    {{0.f, 0.f, size}, {0.f, 0.f, 1.f}},
+  };
+
+  return Mesh(vertices, GL_LINES);
+}
+
+Mesh plane(vec3 pos, vec2 size, vec3 color) {
+  std::vector<Vertex> vertices{
+    {{-0.1f, -0.1f, pos.z}, color, {0.f, 0.f}},
+    {{-0.1f,  0.1f, pos.z}, color, {0.f, 1.f}},
+    {{ 0.1f,  0.1f, pos.z}, color, {1.f, 1.f}},
+    {{ 0.1f, -0.1f, pos.z}, color, {1.f, 0.f}},
   };
 
   std::vector<GLuint> indices{
@@ -16,10 +39,15 @@ Mesh plane(vec3 position, vec2 size, vec3 color) {
     2, 3, 0
   };
 
-  return Mesh(vertices, indices);
+
+  Mesh m = Mesh(vertices, indices);
+  m.scale(size);
+  m.translate(pos);
+
+  return m;
 }
 
-Mesh cube(vec3 position, vec3 color) {
+Mesh cube(vec3 pos, vec3 color) {
   //        5--------6
   //       /|       /|
   //      1--------2 |
@@ -32,15 +60,16 @@ Mesh cube(vec3 position, vec3 color) {
   //      y: - to down, + to up
   //      z: - to rear, + to front
 
+  vec2 tex{0.f, 0.f};
   std::vector<Vertex> vertices{
-    {{-0.1f + position.x, -0.1f + position.y,  0.1f + position.y}, color},
-    {{-0.1f + position.x,  0.1f + position.y,  0.1f + position.y}, color},
-    {{ 0.1f + position.x,  0.1f + position.y,  0.1f + position.y}, color},
-    {{ 0.1f + position.x, -0.1f + position.y,  0.1f + position.y}, color},
-    {{-0.1f + position.x, -0.1f + position.y, -0.1f + position.y}, color},
-    {{-0.1f + position.x,  0.1f + position.y, -0.1f + position.y}, color},
-    {{ 0.1f + position.x,  0.1f + position.y, -0.1f + position.y}, color},
-    {{ 0.1f + position.x, -0.1f + position.y, -0.1f + position.y}, color},
+    {{-1.f, -1.f,  1.f}, color, tex, {-1.f, -1.f,  1.f}},
+    {{-1.f,  1.f,  1.f}, color, tex, {-1.f,  1.f,  1.f}},
+    {{ 1.f,  1.f,  1.f}, color, tex, { 1.f,  1.f,  1.f}},
+    {{ 1.f, -1.f,  1.f}, color, tex, { 1.f, -1.f,  1.f}},
+    {{-1.f, -1.f, -1.f}, color, tex, {-1.f, -1.f, -1.f}},
+    {{-1.f,  1.f, -1.f}, color, tex, {-1.f,  1.f, -1.f}},
+    {{ 1.f,  1.f, -1.f}, color, tex, { 1.f,  1.f, -1.f}},
+    {{ 1.f, -1.f, -1.f}, color, tex, { 1.f, -1.f, -1.f}},
   };
 
   std::vector<GLuint> indices{
@@ -58,7 +87,10 @@ Mesh cube(vec3 position, vec3 color) {
     7, 3, 0, //
   };
 
-  return Mesh(vertices, indices);
+  Mesh m = Mesh(vertices, indices);
+  m.translate(pos);
+
+  return m;
 }
 
 // FIXME: Lacking one segment

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <format>
-
 namespace clrp {
 enum class ATTRIBUTE : u16 {
   DEFAULT,
@@ -63,6 +61,14 @@ enum class RESET : u16 {
   HIDDEN,
 };
 
+struct clrp_t {
+  ATTRIBUTE attr = ATTRIBUTE::DEFAULT;
+  FG fg = FG::DEFAULT;
+  BG bg = BG::DEFAULT;
+  RESET reset = RESET::ALL;
+};
+
+[[nodiscard]]
 std::string format(
   const std::string& str,
   ATTRIBUTE attr = ATTRIBUTE::DEFAULT,
@@ -71,11 +77,19 @@ std::string format(
   RESET reset = RESET::ALL
 );
 
+[[nodiscard]]
+std::string format(const std::string& str, clrp_t clrp);
+
 // @return string with %s
+[[nodiscard]]
 std::string prepare( //
   ATTRIBUTE attr = ATTRIBUTE::DEFAULT,
   FG fg = FG::DEFAULT,
   BG bg = BG::DEFAULT,
   RESET reset = RESET::ALL
 );
+
+// @return string with %s
+[[nodiscard]]
+std::string prepare(clrp_t clrp);
 } // namespace clrp

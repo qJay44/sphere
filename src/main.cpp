@@ -6,13 +6,28 @@
 #include "engine/Shader.hpp"
 #include "engine/gui.hpp"
 #include "engine/mesh/meshes.hpp"
-#include "engine/mesh/texture/Texture.hpp"
-#include "engine/planet/Planet.hpp"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "inputs.hpp"
-#include "engine/mesh/texture/Tif.hpp"
+
+void GLAPIENTRY MessageCallback(
+  GLenum source,
+  GLenum type,
+  GLuint id,
+  GLenum severity,
+  GLsizei length,
+  const GLchar* message,
+  const void* userParam
+) {
+  clrp::clrp_t clrpError;
+  clrpError.attr = clrp::ATTRIBUTE::BOLD;
+  clrpError.fg = clrp::FG::RED;
+  fprintf(
+    stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+    (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, clrp::format(message, clrpError).c_str()
+  );
+}
 
 int main() {
   // Assuming the executable is launching from its own directory
@@ -43,6 +58,8 @@ int main() {
   }
 
   glViewport(0, 0, _gcfg.winWidth, _gcfg.winHeight);
+  glEnable(GL_DEBUG_OUTPUT);
+  glDebugMessageCallback(MessageCallback, 0);
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -52,24 +69,20 @@ int main() {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init();
 
-  Shader mainShader("main.vert", "main.frag");
+  Shader planetShader("planet.vert", "planet.frag");
   Shader linesShader("lines.vert", "lines.frag", "lines.geom");
   Shader colorShader("default/color.vert", "default/color.frag");
   Shader normalsShader("default/normal.vert", "default/normal.frag", "default/normal.geom");
   Shader textureShader("default/texture.vert", "default/texture.frag");
 
-  Texture earthTexture(R"(res\geo\textures\wem2560.png)", TEXTURE_DIFFUSE);
-
   Camera camera({-1.f, 1.f, 2.f}, {0.5f, -0.3f, -1.f}, 100.f);
   Light light({3.5f, 1.5f, 1.2f});
+  light.scale(0.1f);
 
-  Tif tif(R"(C:\Users\q44\Downloads\GRAY_HR_SR_OB_DR\GRAY_HR_SR_OB_DR.tif)");
-  tif.printInfo();
-
-  Planet planet(20, 1.f);
-  planet.add(earthTexture);
+  Planet planet(10, 1.f, R"(res\geo\textures\wem2560.png)");
   gui::link(&planet);
-  /* Mesh plane = meshes::plane({}, {10.f, 20.f}); */
+
+  Mesh plane = meshes::plane(vec3(0.f), vec2(20.f, 10.f));
 
   double titleTimer = glfwGetTime();
   double prevTime = titleTimer;
@@ -78,8 +91,8 @@ int main() {
 
   glEnable(GL_DEPTH_TEST);
 
-  mainShader.setUniform3f("lightPos", light.getPosition());
-  mainShader.setUniform4f("lightColor", light.getColor());
+  planetShader.setUniform3f("lightPos", light.getPosition());
+  planetShader.setUniform4f("lightColor", light.getColor());
 
   // Render loop
   while (!glfwWindowShouldClose(window)) {
@@ -101,16 +114,19 @@ int main() {
 
     if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
       processInput(window, camera);
-    } else{
+    } else {
       glfwSetCursorPos(window, _gcfg.winWidth * 0.5f, _gcfg.winHeight * 0.5f);
     }
 
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    planet.draw(camera, mainShader);
+    planet.draw(camera, planetShader);
     if (_gcfg.drawWireframe) planet.draw(camera, linesShader);
     if (_gcfg.drawNormals) planet.draw(camera, normalsShader);
+    /* plane.draw(camera, textureShader); */
+    /* if (_gcfg.drawWireframe) plane.draw(camera, linesShader); */
+    /* if (_gcfg.drawNormals) plane.draw(camera, normalsShader); */
 
     light.draw(camera, colorShader);
 

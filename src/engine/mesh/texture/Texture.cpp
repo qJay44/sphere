@@ -1,54 +1,66 @@
 #include "Texture.hpp"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include <format>
+
+constexpr GLint gl_channels[4] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
 
 Texture::Texture() {}
 
-Texture::Texture(const fspath& path, TextureType type)
-  : type(type),            //
-    glType(GL_TEXTURE_2D), //
-    name(path.filename()) {
+Texture::Texture(const image2D& img, GLenum type, std::string uniform, GLuint unit) : unit(unit), uniformName(uniform) {
+  if (type != GL_TEXTURE_2D) //
+    error(std::format("Unhandled texture creation type: [{}]", type));
+  build2D(img);
+  unbind();
+}
+
+Texture::Texture(const fspath& path, GLenum type, std::string uniform, GLuint unit) : unit(unit), uniformName(uniform) {
   glGenTextures(1, &id);
-  glBindTexture(GL_TEXTURE_2D, id);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-  int w, h, colorChannels;
-  stbi_set_flip_vertically_on_load(true);
-  byte* bytes = stbi_load(path.string().c_str(), &w, &h, &colorChannels, 0);
 
   switch (type) {
-    case TEXTURE_DIFFUSE:
-      switch (colorChannels) {
-        case 1:
-          glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, w, h, 0, GL_RED, GL_UNSIGNED_BYTE, bytes);
-          break;
-        case 3:
-          glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, bytes);
-          break;
-        case 4:
-          glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, bytes);
-          break;
-        default:
-          printf("Unhandled texture image color channels type (%d)\n", colorChannels);
-          printf("Path: %s\n", path.string().c_str());
-          exit(EXIT_FAILURE);
-      }
+    case GL_TEXTURE_2D: {
+      build2D(image2D(path));
       break;
+    }
+    case GL_TEXTURE_CUBE_MAP: {
+      glTexParameteri(glType, GL_TEXTURE_WRAP_R, GL_REPEAT);
+      glType = GL_TEXTURE_CUBE_MAP;
+      image2D img;
+
+      WIN32_FIND_DATA fdFile;
+      HANDLE hFind = NULL;
+      if ((hFind = FindFirstFile((path / "*.*").string().c_str(), &fdFile)) == INVALID_HANDLE_VALUE)
+        error(std::format("Path not found: [{}]", path.string().c_str()));
+
+      // [FindNextFile] will always return "." on first call and ".." as the first two directories.
+      FindNextFile(hFind, &fdFile);
+      FindNextFile(hFind, &fdFile);
+      if (fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+        error(std::format("Found directory in the skybox folder: [{}]", fdFile.cFileName));
+
+      FindNextFile(hFind, &fdFile);
+      std::string extension = fspath(fdFile.cFileName).extension().string();
+      FindClose(hFind);
+
+      // NOTE: All files should have a same extension
+      for (u8 i = 0; i < 6; i++) {
+        constexpr char const* names[6] = {"right", "left", "top", "bottom", "back", "front"};
+        img.load(fspath(names[i]) / extension);
+        const GLint& imgFormat = gl_channels[img.channels - 1];
+        glTexImage2D(
+          GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, imgFormat, img.width, img.height, 0, imgFormat, GL_UNSIGNED_BYTE,
+          img.pixels
+        );
+      }
+
+      break;
+    }
     default:
       printf("Unhandled texture type (%d)\n", type);
       printf("Path: %s\n", path.string().c_str());
       exit(EXIT_FAILURE);
   }
 
-  glGenerateMipmap(GL_TEXTURE_2D);
   unbind();
-  stbi_image_free(bytes);
 }
 
 void Texture::bind() const {
@@ -64,5 +76,19 @@ void Texture::clear() {
   glDeleteTextures(1, &id); //
 }
 
-const TextureType& Texture::getType() const { return type; }
+const GLenum& Texture::getType() const { return glType; }
 const GLuint& Texture::getUnit() const { return unit; }
+const std::string& Texture::getUniformName() const { return uniformName; }
+
+void Texture::build2D(const image2D& img) {
+  glType = GL_TEXTURE_2D;
+  glGenTextures(1, &id);
+  glBindTexture(glType, id);
+  glTexParameteri(glType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(glType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(glType, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(glType, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+  GLint format = gl_channels[img.channels - 1];
+  glTexImage2D(glType, 0, format, img.width, img.height, 0, format, GL_UNSIGNED_BYTE, img.pixels);
+}

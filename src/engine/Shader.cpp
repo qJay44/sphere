@@ -1,6 +1,7 @@
 #include "Shader.hpp"
 
 #include <cstdio>
+#include <format>
 #include <string>
 
 #include "glm/gtc/type_ptr.hpp"
@@ -29,7 +30,9 @@ static GLuint compile(const fspath& filename, int type) {
     std::string head = std::format("\n===== Shader compilation error ({}) =====\n\n", filename.string().c_str());
     printf(fmt.c_str(), head.c_str());
     puts(infoLog);
-    printf(fmt.c_str(), "====================================\n");
+    for (int i = 0; i < head.length() - 3; i++)
+      printf(fmt.c_str(), "=");
+    puts("");
   }
 
   return shaderId;

@@ -3,7 +3,6 @@
 #include <cstdio>
 
 #include "imgui.h"
-#include "planet/Planet.hpp"
 
 using namespace ImGui;
 
@@ -32,15 +31,12 @@ void draw() {
 
   Begin("Settings");
 
-  SliderInt("Resolution", &planetResolution, 2, 1000);
+  SliderInt("Resolution", &planetResolution, 2, 1'000);
   SliderFloat("Radius", &planetRadius, 1.f, 10.f);
 
   if (Button("Apply")) {
     if (!planet) puts("The planet is not linked to gui");
-    else planet->rebuild(
-      static_cast<u16>(planetResolution),
-      static_cast<float>(planetRadius)
-    );
+    else planet->rebuild(static_cast<u16>(planetResolution), static_cast<float>(planetRadius));
   }
 
   End();

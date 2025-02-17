@@ -1,6 +1,6 @@
 #pragma once
 
-#include "planet/Planet.hpp"
+#include "mesh/planet/Planet.hpp"
 
 namespace gui {
 void link(Planet* p);

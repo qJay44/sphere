@@ -1,17 +1,19 @@
 #include "Mesh.hpp"
 
+#include <format>
+
 #include "glm/ext/matrix_transform.hpp"
 
 Mesh::Mesh() {}
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, GLenum mode)
   : vertices(vertices),
     indices(indices),
     mat(identity<mat4>()),
     vao(VAO(1)),
     vbo(VBO(1, vertices.data(), sizeof(Vertex) * vertices.size())),
-    ebo(1, indices.data(), sizeof(GLuint) * indices.size()) {
-
+    ebo(1, indices.data(), sizeof(GLuint) * indices.size()),
+    mode(mode) {
   vao.bind();
   vbo.bind();
   ebo.bind();
@@ -29,12 +31,12 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices)
   ebo.unbind();
 }
 
-Mesh::Mesh(std::vector<Vertex> vertices)
+Mesh::Mesh(std::vector<Vertex> vertices, GLenum mode)
   : vertices(vertices),
     mat(identity<mat4>()),
     vao(VAO(1)),
-    vbo(VBO(1, vertices.data(), sizeof(Vertex) * vertices.size())) {
-
+    vbo(VBO(1, vertices.data(), sizeof(Vertex) * vertices.size())),
+    mode(mode) {
   vao.bind();
   vbo.bind();
 
@@ -50,43 +52,23 @@ Mesh::Mesh(std::vector<Vertex> vertices)
   vbo.unbind();
 }
 
-void Mesh::add(const Texture& texture) {
+void Mesh::add(const Texture* texture) {
   if (texCount < MESH_TEXTURE_LIMIT) //
-    textures[texCount++] = &texture;
+    textures[texCount++] = texture;
   else //
-    printf("[Warning] Trying to add a texture above limit\n");
+    warning("Trying to add a texture above the limit");
 }
+
+void Mesh::scale(float s) { mat = glm::scale(mat, vec3(s)); }
+void Mesh::scale(vec2 s) { mat = glm::scale(mat, vec3(s, 1.f)); }
+void Mesh::translate(vec3 v) { mat = glm::translate(mat, v); }
 
 void Mesh::draw(const Camera& camera, const Shader& shader) const {
   vao.bind();
 
-  u8 numDiffuse = 0;
-  u8 numSpecular = 0;
-  u8 numNormal = 0;
-  u8 numDisplacement = 0;
-
   for (u8 i = 0; i < texCount; i++) {
     const Texture* tex = textures[i];
-    char uniform[256];
-    switch (tex->getType()) {
-      case TEXTURE_DIFFUSE:
-        sprintf_s(uniform, "diffuse%d", numDiffuse++);
-        break;
-      case TEXTURE_SPECULAR:
-        sprintf_s(uniform, "specular%d", numSpecular++);
-        break;
-      case TEXTURE_NORMAL:
-        sprintf_s(uniform, "normal%d", numNormal++);
-        break;
-      case TEXTURE_DISPLACEMENT:
-        sprintf_s(uniform, "displacement%d", numDisplacement++);
-        break;
-      default:
-        printf("Unknown texture type: [%d]\n", tex->getType());
-        exit(EXIT_FAILURE);
-    }
-
-    shader.setUniformTexture(uniform, tex->getUnit());
+    shader.setUniformTexture(tex->getUniformName(), tex->getUnit());
     tex->bind();
   }
 
@@ -94,10 +76,8 @@ void Mesh::draw(const Camera& camera, const Shader& shader) const {
   shader.setUniformMatrix4f("cam", camera.getMatrix());
   shader.setUniformMatrix4f("model", mat);
 
-  if (indices.size()) //
-    glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
-  else //
-    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)vertices.size());
+  if (indices.size()) glDrawElements(mode, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
+  else glDrawArrays(mode, 0, (GLsizei)vertices.size());
 
   vao.unbind();
 }

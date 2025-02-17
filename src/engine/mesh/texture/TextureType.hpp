@@ -1,6 +1,4 @@
-enum TextureType : u8 {
+enum TextureType : u16 {
   TEXTURE_DIFFUSE,
-  TEXTURE_SPECULAR,
-  TEXTURE_NORMAL,
-  TEXTURE_DISPLACEMENT,
+  TEXTURE_CUBEMAP,
 };

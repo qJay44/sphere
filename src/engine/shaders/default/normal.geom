@@ -3,13 +3,13 @@
 layout(triangles) in;
 layout(line_strip, max_vertices = 6) out;
 
-uniform mat4 cam;
-
 in DATA {
   vec3 color;
   vec2 tex;
   vec3 normal;
 } data_in[];
+
+uniform mat4 cam;
 
 const float scale = 0.1f;
 

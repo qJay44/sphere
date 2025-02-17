@@ -7,8 +7,6 @@ cmake --build Build\Release --config Release
 cd Build\Release\Run
 move /y ..\compile_commands.json ..\..
 
-echo n | copy /-y "C:\Users\q44\Documents\Libs\tiff-4.7.0\install\bin\tiff.dll" .
-
 Rem Lauch
 MyProject.exe
 cd ..\..\..

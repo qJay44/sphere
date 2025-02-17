@@ -16,10 +16,13 @@
 class Mesh {
 public:
   Mesh();
-  Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices);
-  Mesh(std::vector<Vertex> vertices);
+  Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, GLenum mode = GL_TRIANGLES);
+  Mesh(std::vector<Vertex> vertices, GLenum mode);
 
-  void add(const Texture& texture);
+  void add(const Texture* texture);
+  void scale(float s);
+  void scale(vec2 s);
+  void translate(vec3 v);
 
   void draw(const Camera& camera, const Shader& shader) const;
 
@@ -27,6 +30,7 @@ private:
   std::vector<Vertex> vertices;
   std::vector<GLuint> indices;
   mat4 mat;
+  GLenum mode;
 
   const Texture* textures[MESH_TEXTURE_LIMIT];
   u8 texCount = 0;
