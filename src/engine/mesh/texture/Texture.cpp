@@ -2,23 +2,27 @@
 
 #include <format>
 
-constexpr GLint gl_channels[4] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
+constexpr u32 GLchannels[4] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
 
 Texture::Texture() {}
 
-Texture::Texture(const image2D& img, GLenum type, std::string uniform, GLuint unit) : unit(unit), uniformName(uniform) {
+Texture::Texture(const image2D& img, GLenum type, std::string uniform, GLuint unit, u8 prefChannels)
+  : unit(unit),
+    uniformName(uniform) {
   if (type != GL_TEXTURE_2D) //
     error(std::format("Unhandled texture creation type: [{}]", type));
-  build2D(img);
+  build2D(img, prefChannels);
   unbind();
 }
 
-Texture::Texture(const fspath& path, GLenum type, std::string uniform, GLuint unit) : unit(unit), uniformName(uniform) {
+Texture::Texture(const fspath& path, GLenum type, std::string uniform, GLuint unit, u8 prefChannels)
+  : unit(unit),
+    uniformName(uniform) {
   glGenTextures(1, &id);
 
   switch (type) {
     case GL_TEXTURE_2D: {
-      build2D(image2D(path));
+      build2D(image2D(path), prefChannels);
       break;
     }
     case GL_TEXTURE_CUBE_MAP: {
@@ -45,7 +49,7 @@ Texture::Texture(const fspath& path, GLenum type, std::string uniform, GLuint un
       for (u8 i = 0; i < 6; i++) {
         constexpr char const* names[6] = {"right", "left", "top", "bottom", "back", "front"};
         img.load(fspath(names[i]) / extension);
-        const GLint& imgFormat = gl_channels[img.channels - 1];
+        const GLint& imgFormat = GLchannels[img.channels - 1];
         glTexImage2D(
           GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, imgFormat, img.width, img.height, 0, imgFormat, GL_UNSIGNED_BYTE,
           img.pixels
@@ -80,7 +84,7 @@ const GLenum& Texture::getType() const { return glType; }
 const GLuint& Texture::getUnit() const { return unit; }
 const std::string& Texture::getUniformName() const { return uniformName; }
 
-void Texture::build2D(const image2D& img) {
+void Texture::build2D(const image2D& img, u8 prefChannels) {
   glType = GL_TEXTURE_2D;
   glGenTextures(1, &id);
   glBindTexture(glType, id);
@@ -89,6 +93,9 @@ void Texture::build2D(const image2D& img) {
   glTexParameteri(glType, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(glType, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-  GLint format = gl_channels[img.channels - 1];
-  glTexImage2D(glType, 0, format, img.width, img.height, 0, format, GL_UNSIGNED_BYTE, img.pixels);
+  // NOTE: Not all image format can be internal format
+  u8 idx = prefChannels ? prefChannels - 1 : img.channels - 1;
+  u32 formatInternal = GLchannels[idx];
+  u32 formatImg = GLchannels[img.channels - 1];
+  glTexImage2D(glType, 0, formatInternal, img.width, img.height, 0, formatImg, GL_UNSIGNED_BYTE, img.pixels);
 }

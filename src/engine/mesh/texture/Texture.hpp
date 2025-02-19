@@ -5,8 +5,8 @@
 class Texture {
 public:
   Texture();
-  Texture(const image2D& img, GLenum type, std::string uniform, GLuint unit = 0);
-  Texture(const fspath& path, GLenum type, std::string uniform, GLuint unit = 0);
+  Texture(const image2D& img, GLenum type, std::string uniform, GLuint unit = 0, u8 prefChannels = 0);
+  Texture(const fspath& path, GLenum type, std::string uniform, GLuint unit = 0, u8 prefChannels = 0);
 
   void bind() const;
   void unbind() const;
@@ -24,6 +24,6 @@ private:
   GLenum glType;
 
 private:
-  void build2D(const image2D& img);
+  void build2D(const image2D& img, u8 prefChannels);
 };
 

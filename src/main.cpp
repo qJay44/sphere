@@ -50,6 +50,7 @@ int main() {
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
   glfwSetCursorPos(window, _gcfg.winWidth * 0.5f, _gcfg.winHeight * 0.5f);
   glfwSetKeyCallback(window, keyCallback);
+  glfwSwapInterval(1);
 
   // GLAD init
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -79,7 +80,7 @@ int main() {
   Light light({3.5f, 1.5f, 1.2f});
   light.scale(0.1f);
 
-  Planet planet(10, 1.f, R"(res\geo\textures\wem2560.png)");
+  Planet planet(720, 1.f, "res/geo/textures/wem21600.png");
   gui::link(&planet);
 
   Mesh plane = meshes::plane(vec3(0.f), vec2(20.f, 10.f));

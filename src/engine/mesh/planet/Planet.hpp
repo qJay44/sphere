@@ -4,10 +4,13 @@
 
 class Planet {
 public:
-  Planet(u16 resolution, float radius, const fspath& path);
+  Planet(u16 resolution, float radius, const fspath& texturePath);
 
-  const u16& getResolutino() const;
+  const u16& getResolution() const;
   const float& getRadius() const;
+  const float& getHeightmapScale() const;
+
+  void setHeightmapScale(const float& n);
 
   void rebuild(u16 resolution, float radius);
   void draw(const Camera& camera, const Shader& shader) const;
@@ -15,6 +18,7 @@ public:
 private:
   u16 resolution;
   float radius;
+  float heightmapScale = 0.105f;
   Mesh terrainFaces[6];
   Texture textures[2];
 

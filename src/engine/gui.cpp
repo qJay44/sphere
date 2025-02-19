@@ -12,15 +12,16 @@ struct RunOnce {
 
 namespace gui {
 
-Planet* planet;
-int planetResolution;
-float planetRadius;
+struct PlanetGUI {
+  Planet* ptr;
+  int res;
+  float radius;
+  float heighmapScale = 2.105f;
+};
 
-void link(Planet* p) {
-  planet = p;
-  planetResolution = p->getResolutino();
-  planetRadius = p->getRadius();
-}
+PlanetGUI planetGUI;
+
+void link(Planet* p) { planetGUI = {p, p->getResolution(), p->getRadius(), 0.105f}; }
 
 void draw() {
   static RunOnce a([]() {
@@ -31,12 +32,15 @@ void draw() {
 
   Begin("Settings");
 
-  SliderInt("Resolution", &planetResolution, 2, 1'000);
-  SliderFloat("Radius", &planetRadius, 1.f, 10.f);
+  SliderInt("Resolution", &planetGUI.res, 2, 1'000);
+  SliderFloat("Radius", &planetGUI.radius, 1.f, 10.f);
+
+  if (SliderFloat("HeighmapScale", &planetGUI.heighmapScale, 0.01f, 1.f))
+    planetGUI.ptr->setHeightmapScale(planetGUI.heighmapScale);
 
   if (Button("Apply")) {
-    if (!planet) puts("The planet is not linked to gui");
-    else planet->rebuild(static_cast<u16>(planetResolution), static_cast<float>(planetRadius));
+    if (!planetGUI.ptr) puts("The planet is not linked to gui");
+    else planetGUI.ptr->rebuild(static_cast<u16>(planetGUI.res), static_cast<float>(planetGUI.radius));
   }
 
   End();

@@ -11,11 +11,6 @@ uniform vec3 camPos;
 uniform vec3 lightPos;
 uniform vec4 lightColor;
 
-uniform sampler2D heightmap0;
-uniform sampler2D heightmap1;
-
-#define PI 3.141592265359f
-
 // vec4 pointLight() {
 //   // used in two variables so I calculate it here to not have to do it twice
 //   vec3 lightVec = lightPos - vertPos;
@@ -44,18 +39,4 @@ uniform sampler2D heightmap1;
 //   return texture(heightmap0, texCoord) * (diffuse * inten + ambient) * lightColor;
 // }
 
-void main() {
-  float lon = 0.5f - atan(normal.z, normal.x) / (2.f * PI);
-  float lat = 0.5f + asin(normal.y) / PI;
-  float idx = round(lon);
-  vec2 coord = vec2(lon, lat);
-  coord.x = (coord.x - 0.5f) * 2.f * idx + coord.x * 2.f * (1.f - idx);
-
-  vec3 hms[2] = vec3[2](                //
-    vec3(texture(heightmap0, coord).r), //
-    vec3(texture(heightmap1, coord).r)
-  );
-
-  vec3 col = vec3(hms[uint(idx)]);
-  FragColor = vec4(col, 1.f);
-}
+void main() { FragColor = vec4(color, 1.f); }

@@ -20,25 +20,28 @@ constexpr vec3 palette[6]{
   {0.996f, 0.984f, 0.169f},
 };
 
-Planet::Planet(u16 resolution, float radius, const fspath& path) //
+Planet::Planet(u16 resolution, float radius, const fspath& texturePath) //
   : resolution(resolution),
     radius(radius) {
-  image2D img(path);
+  image2D img(texturePath);
   image2D img_w2 = img;
   img_w2.width /= 2;
 
   glPixelStorei(GL_UNPACK_ROW_LENGTH, img.width);
-  textures[0] = Texture(img_w2, GL_TEXTURE_2D, "heightmap0", 0);
-  img_w2.pixels += img_w2.width;
-  textures[1] = Texture(img_w2, GL_TEXTURE_2D, "heightmap1", 1);
+  textures[0] = Texture(img_w2, GL_TEXTURE_2D, "heightmap0", 0, 1);
+  img_w2.pixels += img_w2.width * img_w2.channels;
+  textures[1] = Texture(img_w2, GL_TEXTURE_2D, "heightmap1", 1, 1);
   glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
   img_w2.pixels = nullptr;
 
   build();
 }
 
-const u16& Planet::getResolutino() const { return resolution; }
+const u16& Planet::getResolution() const { return resolution; }
 const float& Planet::getRadius() const { return radius; };
+const float& Planet::getHeightmapScale() const { return heightmapScale; }
+
+void Planet::setHeightmapScale(const float& n) { heightmapScale = n; }
 
 void Planet::rebuild(u16 resolution, float radius) {
   this->resolution = resolution;
@@ -47,6 +50,8 @@ void Planet::rebuild(u16 resolution, float radius) {
 }
 
 void Planet::draw(const Camera& camera, const Shader& shader) const {
+  static GLint heightmapScaleUniLoc = shader.getUniformLoc("heightmapScale");
+  shader.setUniform1f(heightmapScaleUniLoc, heightmapScale);
   for (u8 i = 0; i < 6; i++)
     terrainFaces[i].draw(camera, shader);
 }
@@ -66,7 +71,7 @@ void Planet::build() {
       vec3 pY = (percentY - 0.5f) * 2.f * axisB;
 
       for (u16 x = 0; x < resolution; x++) {
-        u16 idx = x + y * resolution;
+        u32 idx = x + y * resolution;
         float percentX = x * percentStep;
         vec3 pX = (percentX - 0.5f) * 2.f * axisA;
         vec3 pointOnPlane = localUp + pX + pY;
