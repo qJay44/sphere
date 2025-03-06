@@ -1,5 +1,7 @@
 #include "inputs.hpp"
 
+#include "../gui.hpp"
+
 bool guiWasFocused;
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -10,13 +12,14 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         guiWasFocused = true;
       }
       break;
+    case GLFW_KEY_I:
+      if (action == GLFW_PRESS) gui::toggle();
+      break;
     case GLFW_KEY_1:
-      if (action == GLFW_PRESS)
-        _gcfg.drawWireframe = !_gcfg.drawWireframe;
+      if (action == GLFW_PRESS) _gcfg.drawWireframe = !_gcfg.drawWireframe;
       break;
     case GLFW_KEY_2:
-      if (action == GLFW_PRESS)
-        _gcfg.drawNormals = !_gcfg.drawNormals;
+      if (action == GLFW_PRESS) _gcfg.drawNormals = !_gcfg.drawNormals;
       break;
   }
 }
@@ -37,19 +40,19 @@ void processInput(GLFWwindow* window, Camera& camera) {
     glfwGetCursorPos(window, &mouseX, &mouseY);
     glfwSetCursorPos(window, _gcfg.winWidth * 0.5f, _gcfg.winHeight * 0.5f);
 
-    camera.move(mouseX, mouseY);
-    camera.update(_gcfg.dt);
-
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) camera.moveForward();
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camera.moveLeft();
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) camera.moveBack();
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) camera.moveRight();
 
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) camera.moveUp();
-    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) camera.moveDown();
+    /* if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) camera.moveUp(); */
+    /* if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) camera.moveDown(); */
 
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) camera.setIncreasedSpeed();
     else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) camera.setNormalSpeed();
+
+    /* camera.move(mouseX, mouseY); */
+    camera.update();
   } else {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
   }

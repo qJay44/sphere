@@ -4,11 +4,9 @@
 
 class Shader {
 public:
-  Shader(const fspath& vsName, const fspath& fsName, const fspath& gsName = "");
+  Shader(const fspath& vsPath, const fspath& fsPath, const fspath& gsPath = "");
 
-  const fspath& getVertexShaderName() const;
-  const fspath& getFragmentShaderName() const;
-  const fspath& getGeometryShaderName() const;
+  static void setDirectoryLocation(const fspath& path);
 
   GLint getUniformLoc(const std::string& name) const;
 
@@ -27,8 +25,11 @@ public:
   void setUniformTexture(const std::string& name, const GLuint& unit) const;
 
 private:
+  static fspath directory;
   GLuint program;
-  const fspath& vsName;
-  const fspath& fsName;
-  const fspath& gsName;
+
+private:
+  static GLuint load(fspath path, int type);
+  static GLuint compile(const fspath& path, int type);
+  static void link(GLuint program);
 };

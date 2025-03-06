@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mesh/Mesh.hpp"
+#include "../engine/mesh/Mesh.hpp"
 
 class Light : public Mesh {
 public:

@@ -8,6 +8,9 @@ struct global_cfg {
   u8 aaSamples;
   ThreadPool tp;
 
+  float orbitRadius;
+  float orbitSpeed;
+
   bool guiFocused;
   bool drawWireframe;
   bool drawNormals;

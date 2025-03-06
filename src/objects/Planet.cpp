@@ -1,6 +1,6 @@
 #include "Planet.hpp"
 
-#include "../texture/image2D.hpp"
+#include "../engine/mesh/texture/image2D.hpp"
 
 constexpr vec3 directions[6]{
   {1.f,  0.f,  0.f }, // Right
@@ -40,8 +40,10 @@ Planet::Planet(u16 resolution, float radius, const fspath& texturePath) //
 const u16& Planet::getResolution() const { return resolution; }
 const float& Planet::getRadius() const { return radius; };
 const float& Planet::getHeightmapScale() const { return heightmapScale; }
+const float& Planet::getSeaLevel() const { return seaLevel; }
 
 void Planet::setHeightmapScale(const float& n) { heightmapScale = n; }
+void Planet::setSeaLevel(const float& n) { seaLevel = n; }
 
 void Planet::rebuild(u16 resolution, float radius) {
   this->resolution = resolution;
@@ -50,8 +52,11 @@ void Planet::rebuild(u16 resolution, float radius) {
 }
 
 void Planet::draw(const Camera& camera, const Shader& shader) const {
-  static GLint heightmapScaleUniLoc = shader.getUniformLoc("heightmapScale");
+  static const GLint heightmapScaleUniLoc = shader.getUniformLoc("heightmapScale");
+  static const GLint seaLevelUniLoc = shader.getUniformLoc("seaLevel");
   shader.setUniform1f(heightmapScaleUniLoc, heightmapScale);
+  shader.setUniform1f(seaLevelUniLoc, seaLevel);
+
   for (u8 i = 0; i < 6; i++)
     terrainFaces[i].draw(camera, shader);
 }

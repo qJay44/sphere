@@ -2,14 +2,13 @@
 #include <cstdlib>
 #include <format>
 
-#include "engine/Light.hpp"
 #include "engine/Shader.hpp"
-#include "engine/gui.hpp"
-#include "engine/mesh/meshes.hpp"
+#include "engine/inputs.hpp"
+#include "gui.hpp"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include "inputs.hpp"
+#include "objects/Light.hpp"
 
 void GLAPIENTRY MessageCallback(
   GLenum source,
@@ -50,7 +49,6 @@ int main() {
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
   glfwSetCursorPos(window, _gcfg.winWidth * 0.5f, _gcfg.winHeight * 0.5f);
   glfwSetKeyCallback(window, keyCallback);
-  glfwSwapInterval(1);
 
   // GLAD init
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -70,53 +68,58 @@ int main() {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init();
 
+  Shader::setDirectoryLocation("shaders");
   Shader planetShader("planet.vert", "planet.frag");
   Shader linesShader("lines.vert", "lines.frag", "lines.geom");
   Shader colorShader("default/color.vert", "default/color.frag");
   Shader normalsShader("default/normal.vert", "default/normal.frag", "default/normal.geom");
   Shader textureShader("default/texture.vert", "default/texture.frag");
 
-  Camera camera({-1.f, 1.f, 2.f}, {0.5f, -0.3f, -1.f}, 100.f);
+  Camera camera({0.f, 0.f, 2.f}, {0.f, 0.f, -1.f}, 100.f);
   Light light({3.5f, 1.5f, 1.2f});
   light.scale(0.1f);
+  planetShader.setUniform4f("lightColor", light.getColor());
+  planetShader.setUniform3f("lightPos", light.getPosition());
 
-  Planet planet(720, 1.f, "res/geo/textures/wem21600.png");
+  /* Planet planet(720, 1.f, "res/geo/textures/wem21600.png"); */
+  Planet planet(720, 1.f, "res/geo/textures/wem2560.png");
   gui::link(&planet);
-
-  Mesh plane = meshes::plane(vec3(0.f), vec2(20.f, 10.f));
+  gui::link(&camera);
 
   double titleTimer = glfwGetTime();
   double prevTime = titleTimer;
   double currTime = prevTime;
-  double dt;
 
   glEnable(GL_DEPTH_TEST);
-
-  planetShader.setUniform3f("lightPos", light.getPosition());
-  planetShader.setUniform4f("lightColor", light.getColor());
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_FRONT);
+  glFrontFace(GL_CW);
 
   // Render loop
   while (!glfwWindowShouldClose(window)) {
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
+    constexpr double fpsLimit = 1. / 90.;
     currTime = glfwGetTime();
-    dt = currTime - prevTime;
-    prevTime = currTime;
-    _gcfg.dt = dt;
+    _gcfg.dt = currTime - prevTime;
 
-    // Update window title every 0.3 seconds
-    if (glfwGetTime() - titleTimer >= 0.3) {
-      u16 fps = static_cast<u16>(1. / dt);
-      glfwSetWindowTitle(window, std::format("FPS: {} / {:.5f} ms", fps, dt).c_str());
-      titleTimer = currTime;
-    }
+    // FPS lock
+    if (_gcfg.dt < fpsLimit) continue;
+    else prevTime = currTime;
 
     if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
       processInput(window, camera);
     } else {
       glfwSetCursorPos(window, _gcfg.winWidth * 0.5f, _gcfg.winHeight * 0.5f);
+    }
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    // Update window title every 0.3 seconds
+    if (currTime - titleTimer >= 0.3) {
+      u16 fps = static_cast<u16>(1. / _gcfg.dt);
+      glfwSetWindowTitle(window, std::format("FPS: {} / {:.5f} ms", fps, _gcfg.dt).c_str());
+      titleTimer = currTime;
     }
 
     glClearColor(0.f, 0.f, 0.f, 1.f);
@@ -125,11 +128,10 @@ int main() {
     planet.draw(camera, planetShader);
     if (_gcfg.drawWireframe) planet.draw(camera, linesShader);
     if (_gcfg.drawNormals) planet.draw(camera, normalsShader);
-    /* plane.draw(camera, textureShader); */
-    /* if (_gcfg.drawWireframe) plane.draw(camera, linesShader); */
-    /* if (_gcfg.drawNormals) plane.draw(camera, normalsShader); */
 
+    glDisable(GL_CULL_FACE);
     light.draw(camera, colorShader);
+    glEnable(GL_CULL_FACE);
 
     gui::draw();
     ImGui::Render();

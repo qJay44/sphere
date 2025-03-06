@@ -9,6 +9,9 @@ global_cfg _gcfg = {
   .dt = 0.f,
   .aaSamples = 8,
 
+  .orbitRadius = 5.f,
+  .orbitSpeed = 1.f,
+
   .guiFocused = false,
   .drawWireframe = false,
   .drawNormals = false
