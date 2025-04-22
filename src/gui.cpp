@@ -1,7 +1,5 @@
 #include "gui.hpp"
 
-#include <cstdio>
-
 #include "imgui.h"
 
 using namespace ImGui;
@@ -24,7 +22,7 @@ struct PlanetGUI {
 
 struct CameraGUI {
   Camera* ptr;
-  vec2 lookCoordsDeg;
+  float lonDeg, latDeg;
 };
 
 PlanetGUI planetGUI;
@@ -42,7 +40,8 @@ void link(Planet* p) {
 
 void link(Camera* c) {
   cameraGUI.ptr = c;
-  cameraGUI.lookCoordsDeg = degrees(c->getLookCoords());
+  cameraGUI.lonDeg = degrees(c->getLongitude());
+  cameraGUI.latDeg = degrees(c->getLatitude());
 }
 
 void toggle() { collapsed = !collapsed; }
@@ -78,15 +77,22 @@ void draw() {
   SeparatorText("Camera");
   if (!cameraGUI.ptr) error("The camera is not linked to gui");
 
-  cameraGUI.lookCoordsDeg = degrees(cameraGUI.ptr->getLookCoords());
-  bool lonChanged = SliderFloat("Longitude", &cameraGUI.lookCoordsDeg.x, -180.f, 180.f);
-  bool latChanged = SliderFloat("Latitude", &cameraGUI.lookCoordsDeg.y, -90.f, 90.f);
+  cameraGUI.lonDeg = degrees(cameraGUI.ptr->getLongitude());
+  cameraGUI.latDeg = degrees(cameraGUI.ptr->getLatitude());
 
-  if (lonChanged || latChanged) //
-    cameraGUI.ptr->setLookCoords(radians(cameraGUI.lookCoordsDeg));
+  if (SliderFloat("Longitude", &cameraGUI.lonDeg, -180.f, 180.f))
+    cameraGUI.ptr->setLongitude(cameraGUI.lonDeg);
 
-  const vec3& pos = cameraGUI.ptr->getPosition();
-  Text("x: %.2f\ny: %.2f\nz: %.2f", pos.x, pos.y, pos.z);
+  if (SliderFloat("Latitude", &cameraGUI.latDeg, -90.f, 90.f))
+    cameraGUI.ptr->setLatitude(cameraGUI.latDeg);
+
+  const vec3& view = cameraGUI.ptr->getViewDir();
+  SeparatorText("View");
+  Text("x: %.2f\ny: %.2f\nz: %.2f", view.x, view.y, view.z);
+
+  const vec3& right = cameraGUI.ptr->getRight();
+  SeparatorText("Right");
+  Text("x: %.2f\ny: %.2f\nz: %.2f", right.x, right.y, right.z);
 
   End();
 }
