@@ -21,7 +21,7 @@ struct PlanetGUI {
 };
 
 struct CameraGUI {
-  Camera* ptr;
+  ArcballCamera* ptr;
   float lonDeg, latDeg;
 };
 
@@ -38,10 +38,8 @@ void link(Planet* p) {
   };
 }
 
-void link(Camera* c) {
+void link(ArcballCamera* c) {
   cameraGUI.ptr = c;
-  cameraGUI.lonDeg = degrees(c->getLongitude());
-  cameraGUI.latDeg = degrees(c->getLatitude());
 }
 
 void toggle() { collapsed = !collapsed; }
@@ -85,14 +83,6 @@ void draw() {
 
   if (SliderFloat("Latitude", &cameraGUI.latDeg, -90.f, 90.f))
     cameraGUI.ptr->setLatitude(cameraGUI.latDeg);
-
-  const vec3& view = cameraGUI.ptr->getViewDir();
-  SeparatorText("View");
-  Text("x: %.2f\ny: %.2f\nz: %.2f", view.x, view.y, view.z);
-
-  const vec3& right = cameraGUI.ptr->getRight();
-  SeparatorText("Right");
-  Text("x: %.2f\ny: %.2f\nz: %.2f", right.x, right.y, right.z);
 
   End();
 }

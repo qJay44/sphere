@@ -4,7 +4,7 @@
 
 class Light : public Mesh {
 public:
-  Light(vec3 position, vec4 color = {1.f, 1.f, 1.f, 1.f});
+  Light(vec3 position, float size = 1.f, vec4 color = {1.f, 1.f, 1.f, 1.f});
 
   const vec3& getPosition() const;
   const vec4& getColor() const;

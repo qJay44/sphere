@@ -1,19 +1,23 @@
 #pragma once
 
-struct global_cfg {
-  const float nearPlane, farPlane;
-  int winWidth, winHeight;
-  float gamma;
-  double dt;
-  u8 aaSamples;
-  ThreadPool tp;
+namespace global {
 
-  float orbitRadius;
-  float orbitSpeed;
+extern float nearPlane;
+extern float farPlane;
 
-  bool guiFocused;
-  bool drawWireframe;
-  bool drawNormals;
-};
+extern int winWidth;
+extern int winHeight;
 
-extern global_cfg _gcfg;
+extern float dt;
+
+extern float planetRadius;
+extern float orbitRadius;
+extern float orbitSpeed; // radians
+
+extern bool guiFocused;
+extern bool camIsArcball;
+extern bool drawWireframe;
+extern bool drawNormals;
+
+}// global
+

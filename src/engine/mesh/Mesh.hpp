@@ -20,17 +20,21 @@ public:
   Mesh(std::vector<Vertex> vertices, GLenum mode);
 
   void add(const Texture* texture);
+  void translate(vec3 v);
+  void rotate(vec3 axis, float angle);
   void scale(float s);
   void scale(vec2 s);
-  void translate(vec3 v);
 
-  void draw(const Camera& camera, const Shader& shader) const;
+  void draw(const Camera* camera, const Shader& shader) const;
 
 private:
   std::vector<Vertex> vertices;
   std::vector<GLuint> indices;
-  mat4 mat;
   GLenum mode;
+
+  mat4 translation = identity<mat4>();
+  mat4 rotation    = identity<mat4>();
+  mat4 scaleMat    = identity<mat4>();
 
   const Texture* textures[MESH_TEXTURE_LIMIT];
   u8 texCount = 0;

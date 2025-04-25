@@ -15,7 +15,7 @@ public:
   void setSeaLevel(const float& n);
 
   void rebuild(u16 resolution, float radius);
-  void draw(const Camera& camera, const Shader& shader) const;
+  void draw(const Camera* camera, const Shader& shader) const;
 
 private:
   u16 resolution;

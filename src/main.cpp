@@ -2,8 +2,11 @@
 #include <cstdlib>
 #include <format>
 
+#include "engine/Airplane.hpp"
+#include "engine/ArcballCamera.hpp"
 #include "engine/Shader.hpp"
 #include "engine/inputs.hpp"
+#include "global.hpp"
 #include "gui.hpp"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -39,7 +42,7 @@ int main() {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   // Window init
-  GLFWwindow* window = glfwCreateWindow(_gcfg.winWidth, _gcfg.winHeight, "Sphere", NULL, NULL);
+  GLFWwindow* window = glfwCreateWindow(global::winWidth, global::winHeight, "Sphere", NULL, NULL);
   if (!window) {
     printf("Failed to create GFLW window\n");
     glfwTerminate();
@@ -47,7 +50,7 @@ int main() {
   }
   glfwMakeContextCurrent(window);
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-  glfwSetCursorPos(window, _gcfg.winWidth * 0.5f, _gcfg.winHeight * 0.5f);
+  glfwSetCursorPos(window, global::winWidth * 0.5f, global::winHeight * 0.5f);
   glfwSetKeyCallback(window, keyCallback);
 
   // GLAD init
@@ -56,7 +59,7 @@ int main() {
     return EXIT_FAILURE;
   }
 
-  glViewport(0, 0, _gcfg.winWidth, _gcfg.winHeight);
+  glViewport(0, 0, global::winWidth, global::winHeight);
   glEnable(GL_DEBUG_OUTPUT);
   glDebugMessageCallback(MessageCallback, 0);
 
@@ -68,6 +71,8 @@ int main() {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init();
 
+  // ===== Shaders ============================================== //
+
   Shader::setDirectoryLocation("shaders");
   Shader planetShader("planet.vert", "planet.frag");
   Shader linesShader("lines.vert", "lines.frag", "lines.geom");
@@ -75,16 +80,33 @@ int main() {
   Shader normalsShader("default/normal.vert", "default/normal.frag", "default/normal.geom");
   Shader textureShader("default/texture.vert", "default/texture.frag");
 
-  Camera camera({0.f, 0.f, 2.f}, {0.f, 0.f, -1.f}, 100.f);
-  Light light({3.5f, 1.5f, 1.2f});
-  light.scale(0.1f);
+  // ===== Planet =============================================== //
+
+  /* Planet planet(720, global::planetRadius, "res/geo/textures/wem21600.png"); */
+  Planet planet(720, global::planetRadius, "res/geo/textures/wem2560.png");
+
+  // ===== Airplane ============================================= //
+
+  vec3 airplanePosInit(0.f);
+  float airplaneFlyHeight = 1.f;
+  airplanePosInit.z = planet.getRadius() + airplaneFlyHeight;
+  Airplane airplane(airplanePosInit, {0.f, 1.f, 0.f}, PI_6, airplaneFlyHeight, 0.1f);
+
+  // ===== Cameras ============================================== //
+
+  vec3 camPosInit(0.f);
+  camPosInit.z = global::orbitRadius;
+  Camera cameraFree(camPosInit, {0.f, 0.f, -1.f}, 100.f);
+  ArcballCamera cameraArcball(camPosInit, {0.f, 0.f, -1.f}, 100.f);
+
+  // ============================================================ //
+
+  Light light({3.5f, 1.5f, 1.2f}, 0.1f);
+
   planetShader.setUniform4f("lightColor", light.getColor());
   planetShader.setUniform3f("lightPos", light.getPosition());
-
-  /* Planet planet(720, 1.f, "res/geo/textures/wem21600.png"); */
-  Planet planet(720, 1.f, "res/geo/textures/wem2560.png");
   gui::link(&planet);
-  gui::link(&camera);
+  gui::link(&cameraArcball);
 
   double titleTimer = glfwGetTime();
   double prevTime = titleTimer;
@@ -97,18 +119,22 @@ int main() {
 
   // Render loop
   while (!glfwWindowShouldClose(window)) {
+    static Camera* camera = &cameraArcball;
+
     constexpr double fpsLimit = 1. / 90.;
     currTime = glfwGetTime();
-    _gcfg.dt = currTime - prevTime;
+    global::dt = currTime - prevTime;
 
-    // FPS lock
-    if (_gcfg.dt < fpsLimit) continue;
+    // FPS cap
+    if (global::dt < fpsLimit) continue;
     else prevTime = currTime;
+
+    camera = global::camIsArcball ? &cameraArcball : &cameraFree;
 
     if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
       processInput(window, camera);
     } else {
-      glfwSetCursorPos(window, _gcfg.winWidth * 0.5f, _gcfg.winHeight * 0.5f);
+      glfwSetCursorPos(window, global::winWidth * 0.5f, global::winHeight * 0.5f);
     }
 
     ImGui_ImplOpenGL3_NewFrame();
@@ -117,19 +143,24 @@ int main() {
 
     // Update window title every 0.3 seconds
     if (currTime - titleTimer >= 0.3) {
-      u16 fps = static_cast<u16>(1. / _gcfg.dt);
-      glfwSetWindowTitle(window, std::format("FPS: {} / {:.5f} ms", fps, _gcfg.dt).c_str());
+      u16 fps = static_cast<u16>(1. / global::dt);
+      glfwSetWindowTitle(window, std::format("FPS: {} / {:.5f} ms", fps, global::dt).c_str());
       titleTimer = currTime;
     }
+
+    airplane.update();
 
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     planet.draw(camera, planetShader);
-    if (_gcfg.drawWireframe) planet.draw(camera, linesShader);
-    if (_gcfg.drawNormals) planet.draw(camera, normalsShader);
+    if (global::drawWireframe) planet.draw(camera, linesShader);
+    if (global::drawNormals)   planet.draw(camera, normalsShader);
 
     glDisable(GL_CULL_FACE);
+    airplane.draw(camera, colorShader);
+    if (global::drawWireframe)  airplane.draw(camera, linesShader);
+    if (global::drawNormals)    airplane.draw(camera, normalsShader);
     light.draw(camera, colorShader);
     glEnable(GL_CULL_FACE);
 

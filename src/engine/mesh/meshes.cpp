@@ -41,13 +41,13 @@ Mesh plane(vec3 pos, vec2 size, vec3 color) {
 
 
   Mesh m = Mesh(vertices, indices);
-  m.scale(size);
   m.translate(pos);
+  m.scale(size);
 
   return m;
 }
 
-Mesh cube(vec3 pos, vec3 color) {
+Mesh cube(vec3 pos, float size, vec3 color) {
   //        5--------6
   //       /|       /|
   //      1--------2 |
@@ -89,6 +89,7 @@ Mesh cube(vec3 pos, vec3 color) {
 
   Mesh m = Mesh(vertices, indices);
   m.translate(pos);
+  m.scale(size);
 
   return m;
 }

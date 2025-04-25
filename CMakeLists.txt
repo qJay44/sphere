@@ -20,7 +20,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${GLAD_PATH}/include
   ${GLFW_PATH}/include
   ${GLM_PATH}/include
-  ${LIBTIFF_PATH}/include
   ${GENERAL_INCLUDES}/stb
   ${IMGUI_PATH}
 )
@@ -29,7 +28,6 @@ target_link_directories(${PROJECT_NAME} PUBLIC
   ${GLM_PATH}/bin
   ${GLFW_PATH}/lib-mingw-w64
   ${GLM_PATH}/lib
-  ${LIBTIFF_PATH}/lib
 )
 
-target_link_libraries(${PROJECT_NAME} glfw3 glm tiff)
+target_link_libraries(${PROJECT_NAME} glfw3 glm)

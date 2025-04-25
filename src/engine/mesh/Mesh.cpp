@@ -1,15 +1,14 @@
 #include "Mesh.hpp"
 
-#include <format>
-
 #include "glm/ext/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+#include "meshes.hpp"
 
 Mesh::Mesh() {}
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, GLenum mode)
   : vertices(vertices),
     indices(indices),
-    mat(identity<mat4>()),
     vao(VAO(1)),
     vbo(VBO(1, vertices.data(), sizeof(Vertex) * vertices.size())),
     ebo(1, indices.data(), sizeof(GLuint) * indices.size()),
@@ -33,7 +32,6 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, GLenum mod
 
 Mesh::Mesh(std::vector<Vertex> vertices, GLenum mode)
   : vertices(vertices),
-    mat(identity<mat4>()),
     vao(VAO(1)),
     vbo(VBO(1, vertices.data(), sizeof(Vertex) * vertices.size())),
     mode(mode) {
@@ -59,11 +57,13 @@ void Mesh::add(const Texture* texture) {
     warning("Trying to add a texture above the limit");
 }
 
-void Mesh::scale(float s) { mat = glm::scale(mat, vec3(s)); }
-void Mesh::scale(vec2 s) { mat = glm::scale(mat, vec3(s, 1.f)); }
-void Mesh::translate(vec3 v) { mat = glm::translate(mat, v); }
+void Mesh::scale(float s)    { scaleMat = glm::scale(scaleMat, vec3(s)); }
+void Mesh::scale(vec2 s)     { scaleMat = glm::scale(scaleMat, vec3(s, 1.f)); }
+void Mesh::translate(vec3 v) { translation = glm::translate(translation, v); }
 
-void Mesh::draw(const Camera& camera, const Shader& shader) const {
+void Mesh::rotate(vec3 axis, float angle) { rotation = glm::rotate(rotation, angle, axis);}
+
+void Mesh::draw(const Camera* camera, const Shader& shader) const {
   vao.bind();
 
   for (u8 i = 0; i < texCount; i++) {
@@ -72,8 +72,10 @@ void Mesh::draw(const Camera& camera, const Shader& shader) const {
     tex->bind();
   }
 
-  shader.setUniform3f("camPos", camera.getPosition());
-  shader.setUniformMatrix4f("cam", camera.getMatrix());
+  mat4 mat = translation * rotation * scaleMat;
+
+  shader.setUniform3f("camPos", camera->getPosition());
+  shader.setUniformMatrix4f("cam", camera->getMatrix());
   shader.setUniformMatrix4f("model", mat);
 
   if (indices.size()) glDrawElements(mode, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
@@ -81,3 +83,4 @@ void Mesh::draw(const Camera& camera, const Shader& shader) const {
 
   vao.unbind();
 }
+
