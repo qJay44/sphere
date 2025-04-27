@@ -26,15 +26,17 @@ public:
   void scale(vec2 s);
 
   void draw(const Camera* camera, const Shader& shader) const;
+  void drawAxis(const Camera* camera, const Shader& shader) const;
+
+protected:
+  mat4 translation = identity<mat4>();
+  mat4 rotation    = identity<mat4>();
+  mat4 scaleMat    = identity<mat4>();
 
 private:
   std::vector<Vertex> vertices;
   std::vector<GLuint> indices;
   GLenum mode;
-
-  mat4 translation = identity<mat4>();
-  mat4 rotation    = identity<mat4>();
-  mat4 scaleMat    = identity<mat4>();
 
   const Texture* textures[MESH_TEXTURE_LIMIT];
   u8 texCount = 0;

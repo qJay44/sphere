@@ -6,6 +6,8 @@
 #include "engine/ArcballCamera.hpp"
 #include "engine/Shader.hpp"
 #include "engine/inputs.hpp"
+#include "engine/mesh/meshes.hpp"
+#include "glm/gtc/quaternion.hpp"
 #include "global.hpp"
 #include "gui.hpp"
 #include "imgui.h"
@@ -107,6 +109,7 @@ int main() {
   planetShader.setUniform3f("lightPos", light.getPosition());
   gui::link(&planet);
   gui::link(&cameraArcball);
+  gui::link(&cameraFree);
 
   double titleTimer = glfwGetTime();
   double prevTime = titleTimer;
@@ -161,6 +164,7 @@ int main() {
     airplane.draw(camera, colorShader);
     if (global::drawWireframe)  airplane.draw(camera, linesShader);
     if (global::drawNormals)    airplane.draw(camera, normalsShader);
+    if (global::drawDirections) airplane.drawForward(camera, colorShader);
     light.draw(camera, colorShader);
     glEnable(GL_CULL_FACE);
 

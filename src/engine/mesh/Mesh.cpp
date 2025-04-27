@@ -84,3 +84,11 @@ void Mesh::draw(const Camera* camera, const Shader& shader) const {
   vao.unbind();
 }
 
+void Mesh::drawAxis(const Camera* camera, const Shader& shader) const {
+  static Mesh axis = meshes::axis(3.f);
+  axis.translation = translation;
+  axis.rotation = rotation;
+  axis.scaleMat = scaleMat;
+  axis.draw(camera, shader);
+}
+

@@ -12,15 +12,16 @@ Camera::Camera(vec3 pos, vec3 orientation, float sensitivity)
   calcView();
 };
 
-const vec3& Camera::getPosition()   const { return position; }
-const mat4& Camera::getMatrix()     const { return mat; }
-const vec3& Camera::getUp()         const { return up; }
+const vec3& Camera::getOrientation() const { return orientation; }
+const vec3& Camera::getPosition()    const { return position; }
+const mat4& Camera::getMatrix()      const { return mat; }
+const vec3& Camera::getUp()          const { return up; }
 
 vec3 Camera::getViewDir() const { return  transpose(view)[2]; }
 vec3 Camera::getRight()   const { return -transpose(view)[0]; }
 
-void Camera::setIncreasedSpeed()   { speed = 8.f * global::dt; }
-void Camera::setNormalSpeed()      { speed = 3.f * global::dt; }
+void Camera::setIncreasedSpeed()   { speed = 12.f * global::dt; }
+void Camera::setNormalSpeed()      { speed = 3.f  * global::dt; }
 
 void Camera::update() {
   float aspectRatio = (float)global::winWidth / global::winHeight;

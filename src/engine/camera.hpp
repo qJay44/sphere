@@ -6,9 +6,10 @@ class Camera {
 public:
   Camera(vec3 pos, vec3 orientation, float sensitivity);
 
-  const vec3& getPosition() const;
-  const mat4& getMatrix()   const;
-  const vec3& getUp()       const;
+  const vec3& getOrientation() const;
+  const vec3& getPosition()    const;
+  const mat4& getMatrix()      const;
+  const vec3& getUp()          const;
 
   vec3 getViewDir() const;
   vec3 getRight()   const;
