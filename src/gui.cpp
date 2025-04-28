@@ -21,7 +21,7 @@ struct PlanetGUI {
 };
 
 struct CameraGUI {
-  ArcballCamera* arcball;
+  AirplaneCamera* arcball;
   Camera* free;
   float lonDeg, latDeg;
 };
@@ -39,7 +39,7 @@ void link(Planet* p) {
   };
 }
 
-void link(ArcballCamera* c) { cameraGUI.arcball = c; }
+void link(AirplaneCamera* c) { cameraGUI.arcball = c; }
 void link(Camera* c) { cameraGUI.free = c; }
 
 void toggle() { collapsed = !collapsed; }
@@ -72,19 +72,13 @@ void draw() {
 
   // ================== Arball Camera ==================
 
-  SeparatorText("Camera");
+  SeparatorText("Airplane Camera");
   if (!cameraGUI.arcball) error("The arcball camera is not linked to gui");
 
-  cameraGUI.lonDeg = degrees(cameraGUI.arcball->getLongitude());
-  cameraGUI.latDeg = degrees(cameraGUI.arcball->getLatitude());
-
-  if (SliderFloat("Longitude", &cameraGUI.lonDeg, -180.f, 180.f))
-    cameraGUI.arcball->setLongitude(cameraGUI.lonDeg);
-
-  if (SliderFloat("Latitude", &cameraGUI.latDeg, -90.f, 90.f))
-    cameraGUI.arcball->setLatitude(cameraGUI.latDeg);
-
   // ================== Free Camera ====================
+
+  SeparatorText("Free Camera");
+  if (!cameraGUI.arcball) error("The arcball camera is not linked to gui");
 
   if (!cameraGUI.free) error("The free camera is not linked to gui");
   const vec3& pos = cameraGUI.free->getPosition();

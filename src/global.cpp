@@ -15,7 +15,7 @@ float orbitRadius  = planetRadius * 4.f;
 float orbitSpeed   = 1.f; // radians
 
 bool guiFocused     = false;
-bool camIsArcball   = false;
+bool camIsArcball   = true;
 bool drawWireframe  = false;
 bool drawNormals    = false;
 bool drawDirections = true;

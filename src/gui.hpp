@@ -1,12 +1,12 @@
 #pragma once
 
 #include "objects/Planet.hpp"
-#include "engine/ArcballCamera.hpp"
+#include "engine/AirplaneCamera.hpp"
 
 namespace gui {
 
 void link(Planet* p);
-void link(ArcballCamera* c);
+void link(AirplaneCamera* c);
 void link(Camera* c);
 void toggle();
 void draw();

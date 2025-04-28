@@ -3,11 +3,9 @@
 #include <format>
 
 #include "engine/Airplane.hpp"
-#include "engine/ArcballCamera.hpp"
+#include "engine/AirplaneCamera.hpp"
 #include "engine/Shader.hpp"
 #include "engine/inputs.hpp"
-#include "engine/mesh/meshes.hpp"
-#include "glm/gtc/quaternion.hpp"
 #include "global.hpp"
 #include "gui.hpp"
 #include "imgui.h"
@@ -99,7 +97,7 @@ int main() {
   vec3 camPosInit(0.f);
   camPosInit.z = global::orbitRadius;
   Camera cameraFree(camPosInit, {0.f, 0.f, -1.f}, 100.f);
-  ArcballCamera cameraArcball(camPosInit, {0.f, 0.f, -1.f}, 100.f);
+  AirplaneCamera cameraAirplane(airplane, 2.f, 200.f);
 
   // ============================================================ //
 
@@ -108,7 +106,7 @@ int main() {
   planetShader.setUniform4f("lightColor", light.getColor());
   planetShader.setUniform3f("lightPos", light.getPosition());
   gui::link(&planet);
-  gui::link(&cameraArcball);
+  gui::link(&cameraAirplane);
   gui::link(&cameraFree);
 
   double titleTimer = glfwGetTime();
@@ -122,7 +120,7 @@ int main() {
 
   // Render loop
   while (!glfwWindowShouldClose(window)) {
-    static Camera* camera = &cameraArcball;
+    static Camera* camera = &cameraAirplane;
 
     constexpr double fpsLimit = 1. / 90.;
     currTime = glfwGetTime();
@@ -132,7 +130,7 @@ int main() {
     if (global::dt < fpsLimit) continue;
     else prevTime = currTime;
 
-    camera = global::camIsArcball ? &cameraArcball : &cameraFree;
+    camera = global::camIsArcball ? &cameraAirplane : &cameraFree;
 
     if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
       processInput(window, camera);
@@ -164,7 +162,7 @@ int main() {
     airplane.draw(camera, colorShader);
     if (global::drawWireframe)  airplane.draw(camera, linesShader);
     if (global::drawNormals)    airplane.draw(camera, normalsShader);
-    if (global::drawDirections) airplane.drawForward(camera, colorShader);
+    if (global::drawDirections) airplane.draw(camera, colorShader, AIRPLANE_FLAG_DRAW_UP | AIRPLANE_FLAG_DRAW_FORWARD);
     light.draw(camera, colorShader);
     glEnable(GL_CULL_FACE);
 

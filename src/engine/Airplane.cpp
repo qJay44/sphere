@@ -1,6 +1,5 @@
 #include "Airplane.hpp"
 
-#include <glm/gtx/string_cast.hpp>
 #include "mesh/meshes.hpp"
 
 Airplane::Airplane(vec3 position, vec3 forward, float speedRad, float flyHeight, float meshSize)
@@ -10,7 +9,11 @@ Airplane::Airplane(vec3 position, vec3 forward, float speedRad, float flyHeight,
     flyHeight(flyHeight),
     Mesh(meshes::cube(position, meshSize, {1.f, 0.64f, 0.f})) {
   rotate({-1.f, 0.f, 0.f}, PI_2); // Facing +Y
+  up = {0.f, 0.f, 1.f};
 }
+
+const vec3& Airplane::getPosition() const { return position; }
+const vec3& Airplane::getUp() const { return up; }
 
 void Airplane::update() {
   float frameSpeedRad = speedRad * global::dt;
@@ -22,11 +25,17 @@ void Airplane::update() {
   rotate({-1.f, 0.f, 0.f}, frameSpeedRad);
 
   forward = {rotation[2][0], rotation[2][1], rotation[2][2]};
+  up = gravityUp;
   position = newPos;
 }
 
-void Airplane::drawForward(const Camera* camera, const Shader& shader, float size, vec3 color) {
-  if (forward.x != 0.f) color = {color.y, color.z, color.x};
-  meshes::line(position, position + forward * size, color).draw(camera, shader);
+void Airplane::draw(const Camera* camera, const Shader& shader, int flags) {
+  if (flags & AIRPLANE_FLAG_DRAW_FORWARD)
+    meshes::line(position, position + forward, {1.f, 0.f, 0.f}).draw(camera, shader);
+
+  if (flags & AIRPLANE_FLAG_DRAW_UP)
+    meshes::line(position, position + up, {0.f, 1.f, 0.f}).draw(camera, shader);
+
+  Mesh::draw(camera, shader);
 }
 

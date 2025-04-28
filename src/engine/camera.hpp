@@ -26,7 +26,7 @@ public:
   virtual void moveUp();
   virtual void moveDown();
 
-  void moveByMouse(const double& x, const double& y);
+  virtual void moveByMouse(const double& x, const double& y);
 
 protected:
   vec3 position, orientation;
@@ -39,7 +39,7 @@ protected:
   mat4 mat = identity<mat4>();
   mat4 view = identity<mat4>();
 
-private:
+protected:
   virtual void calcView();
   void calcOrientation(const float& radRotX, const float& radRotY);
 };
