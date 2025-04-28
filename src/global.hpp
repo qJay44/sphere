@@ -10,10 +10,6 @@ extern int winHeight;
 
 extern float dt;
 
-extern float planetRadius;
-extern float orbitRadius;
-extern float orbitSpeed; // radians
-
 extern bool guiFocused;
 extern bool camIsArcball;
 extern bool drawWireframe;

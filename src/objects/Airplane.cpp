@@ -1,28 +1,30 @@
 #include "Airplane.hpp"
 
-#include "mesh/meshes.hpp"
+#include "../engine/mesh/meshes.hpp"
 
-Airplane::Airplane(vec3 position, vec3 forward, float speedRad, float flyHeight, float meshSize)
-  : position(position),
-    forward(forward),
+Airplane::Airplane(const Planet& planet, vec3 position, float speedRad, float flyHeight, float meshSize)
+  : planet(planet),
+    position(position),
     speedRad(speedRad),
     flyHeight(flyHeight),
     Mesh(meshes::cube(position, meshSize, {1.f, 0.64f, 0.f})) {
   rotate({-1.f, 0.f, 0.f}, PI_2); // Facing +Y
+  forward = {0.f, 1.f, 0.f};
   up = {0.f, 0.f, 1.f};
 }
 
-const vec3& Airplane::getPosition() const { return position; }
-const vec3& Airplane::getUp() const { return up; }
+const vec3& Airplane::getPosition()    const { return position;    }
+const vec3& Airplane::getForward()     const { return forward;     }
+const vec3& Airplane::getUp()          const { return up;          }
 
 void Airplane::update() {
   float frameSpeedRad = speedRad * global::dt;
   vec3 newPos = normalize(position) + forward * frameSpeedRad;
   vec3 gravityUp = normalize(newPos);
-  newPos = gravityUp * (global::planetRadius + flyHeight);
+  newPos = gravityUp * (planet.getRadius() + flyHeight);
 
-  translate(newPos - position);
-  rotate({-1.f, 0.f, 0.f}, frameSpeedRad);
+  Mesh::translate(newPos - position);
+  Mesh::rotate({-1.f, 0.f, 0.f}, frameSpeedRad);
 
   forward = {rotation[2][0], rotation[2][1], rotation[2][2]};
   up = gravityUp;

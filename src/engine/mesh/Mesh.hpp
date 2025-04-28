@@ -19,6 +19,10 @@ public:
   Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, GLenum mode = GL_TRIANGLES);
   Mesh(std::vector<Vertex> vertices, GLenum mode);
 
+  const mat4& getTranslation() const;
+  const mat4& getRotation()    const;
+  const mat4& getScale()       const;
+
   void add(const Texture* texture);
   void translate(vec3 v);
   void rotate(vec3 axis, float angle);

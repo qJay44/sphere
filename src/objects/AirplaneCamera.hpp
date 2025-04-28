@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Camera.hpp"
+#include "../engine/Camera.hpp"
 #include "Airplane.hpp"
 
 class AirplaneCamera : public Camera {

@@ -14,10 +14,9 @@ void AirplaneCamera::moveRight()   {}
 void AirplaneCamera::moveUp()      {}
 void AirplaneCamera::moveDown()    {}
 
-// FIXME: Wrong angle lock
 void AirplaneCamera::moveByMouse(const double& x, const double& y) {
   static vec3 apPrev = airplane.getPosition();
-  vec3 apCurr = airplane.getPosition();
+  const vec3& apCurr = airplane.getPosition();
   vec3 diff = apCurr - apPrev;
 
   double rotX = sensitivity * (x - global::winWidth * 0.5f) / global::winWidth;

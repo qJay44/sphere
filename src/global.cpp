@@ -10,10 +10,6 @@ int winHeight = 720;
 
 float dt = 0.f;
 
-float planetRadius = 1.f;
-float orbitRadius  = planetRadius * 4.f;
-float orbitSpeed   = 1.f; // radians
-
 bool guiFocused     = false;
 bool camIsArcball   = true;
 bool drawWireframe  = false;

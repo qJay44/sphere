@@ -50,6 +50,10 @@ Mesh::Mesh(std::vector<Vertex> vertices, GLenum mode)
   vbo.unbind();
 }
 
+const mat4& Mesh::getTranslation() const { return translation; }
+const mat4& Mesh::getRotation()    const { return rotation;    }
+const mat4& Mesh::getScale()       const { return scaleMat;    }
+
 void Mesh::add(const Texture* texture) {
   if (texCount < MESH_TEXTURE_LIMIT) //
     textures[texCount++] = texture;

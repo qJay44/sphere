@@ -2,8 +2,6 @@
 #include <cstdlib>
 #include <format>
 
-#include "engine/Airplane.hpp"
-#include "engine/AirplaneCamera.hpp"
 #include "engine/Shader.hpp"
 #include "engine/inputs.hpp"
 #include "global.hpp"
@@ -11,6 +9,8 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "objects/Airplane.hpp"
+#include "objects/AirplaneCamera.hpp"
 #include "objects/Light.hpp"
 
 void GLAPIENTRY MessageCallback(
@@ -83,21 +83,19 @@ int main() {
   // ===== Planet =============================================== //
 
   /* Planet planet(720, global::planetRadius, "res/geo/textures/wem21600.png"); */
-  Planet planet(720, global::planetRadius, "res/geo/textures/wem2560.png");
+  Planet planet(720, 20.f, "res/geo/textures/wem2560.png");
 
   // ===== Airplane ============================================= //
 
   vec3 airplanePosInit(0.f);
   float airplaneFlyHeight = 1.f;
   airplanePosInit.z = planet.getRadius() + airplaneFlyHeight;
-  Airplane airplane(airplanePosInit, {0.f, 1.f, 0.f}, PI_6, airplaneFlyHeight, 0.1f);
+  Airplane airplane(planet, airplanePosInit, PI / 20.f, airplaneFlyHeight, 0.1f);
 
   // ===== Cameras ============================================== //
 
-  vec3 camPosInit(0.f);
-  camPosInit.z = global::orbitRadius;
-  Camera cameraFree(camPosInit, {0.f, 0.f, -1.f}, 100.f);
-  AirplaneCamera cameraAirplane(airplane, 2.f, 200.f);
+  Camera cameraFree({0.f, 0.f, planet.getRadius()}, {0.f, 0.f, -1.f}, 100.f);
+  AirplaneCamera cameraAirplane(airplane, 3.f, 200.f);
 
   // ============================================================ //
 
@@ -108,6 +106,7 @@ int main() {
   gui::link(&planet);
   gui::link(&cameraAirplane);
   gui::link(&cameraFree);
+  gui::link(&airplane);
 
   double titleTimer = glfwGetTime();
   double prevTime = titleTimer;
@@ -181,3 +180,4 @@ int main() {
 
   return 0;
 }
+

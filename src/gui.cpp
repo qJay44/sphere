@@ -1,6 +1,16 @@
 #include "gui.hpp"
 
+#include <algorithm>
+
+#include "glm/common.hpp"
 #include "imgui.h"
+
+#define IM_RED    IM_COL32(255, 0  , 0  , 255)
+#define IM_GREEN  IM_COL32(0  , 255, 0  , 255)
+#define IM_BLUE   IM_COL32(0  , 0  , 255, 255)
+#define IM_WHITE  IM_COL32(255, 255, 255, 255)
+
+#define IM_CIRCLE_RADIUS 30.f
 
 using namespace ImGui;
 
@@ -26,32 +36,58 @@ struct CameraGUI {
   float lonDeg, latDeg;
 };
 
+struct AirplaneGUI {
+  Airplane* ptr;
+};
+
 PlanetGUI planetGUI;
 CameraGUI cameraGUI;
+AirplaneGUI airplaneGUI;
 
-void link(Planet* p) {
+void link(Planet* ptr) {
   planetGUI = {
-    p, //
-    p->getResolution(),
-    p->getRadius(),
-    p->getHeightmapScale(),
-    p->getSeaLevel(),
+    ptr,
+    ptr->getResolution(),
+    ptr->getRadius(),
+    ptr->getHeightmapScale(),
+    ptr->getSeaLevel(),
   };
 }
 
-void link(AirplaneCamera* c) { cameraGUI.arcball = c; }
-void link(Camera* c) { cameraGUI.free = c; }
+void link(AirplaneCamera* ptr) { cameraGUI.arcball = ptr; }
+void link(Camera* ptr)         { cameraGUI.free    = ptr; }
+void link(Airplane* ptr)       { airplaneGUI.ptr   = ptr; }
 
 void toggle() { collapsed = !collapsed; }
 
+void drawDirection(ImDrawList* drawList, vec3 dir, const ImU32& color, float offsetX) {
+  ImVec2 pos = GetCursorScreenPos();
+  pos.x += IM_CIRCLE_RADIUS + offsetX;
+  pos.y += IM_CIRCLE_RADIUS;
+  dir.z = max(dir.z, 0.1f);
+  ImVec2 p1{pos.x, pos.y};
+  ImVec2 p2{
+    p1.x + std::clamp(dir.x / abs(dir.z), -1.f, 1.f) * IM_CIRCLE_RADIUS,
+    p1.y - std::clamp(dir.y / abs(dir.z), -1.f, 1.f) * IM_CIRCLE_RADIUS
+  };
+
+  drawList->AddCircleFilled(pos, IM_CIRCLE_RADIUS, IM_COL32(30, 30, 30, 255));
+  drawList->AddCircle(pos, IM_CIRCLE_RADIUS, IM_WHITE);
+  drawList->AddLine(p1, p2, color);
+}
+
+
 void draw() {
   static RunOnce a([]() {
-    SetNextWindowSize({400, 280});
+    SetNextWindowSize({400, 500});
     SetNextWindowPos({0, 0});
   });
-  SetNextWindowCollapsed(collapsed);
+  // SetNextWindowCollapsed(collapsed);
+  SetNextWindowCollapsed(false);
 
   Begin("Settings");
+
+  ImDrawList* drawList = GetWindowDrawList();
 
   // ================== Planet ==================
 
@@ -70,23 +106,49 @@ void draw() {
     else planetGUI.ptr->rebuild(static_cast<u16>(planetGUI.res), static_cast<float>(planetGUI.radius));
   }
 
-  // ================== Arball Camera ==================
+  // ================== Airplane Camera ================
 
   SeparatorText("Airplane Camera");
   if (!cameraGUI.arcball) error("The arcball camera is not linked to gui");
 
+  // Show directions
+  {
+    static bool check = true;
+    Checkbox("Show direcitons##2", &check);
+
+    if (check) {
+      const vec3& right = cameraGUI.arcball->getRight();
+      const vec3& up = cameraGUI.arcball->getUp();
+
+      drawDirection(drawList, right, IM_RED, 0.f);
+      drawDirection(drawList, up, IM_GREEN, (IM_CIRCLE_RADIUS + 5.f) * 2.f);
+      drawDirection(drawList, normalize(cross(right, up)), IM_BLUE, (IM_CIRCLE_RADIUS + 5.f) * 4.f);
+      Dummy(ImVec2(0.f, IM_CIRCLE_RADIUS * 2.f));
+    }
+  }
+
   // ================== Free Camera ====================
 
   SeparatorText("Free Camera");
-  if (!cameraGUI.arcball) error("The arcball camera is not linked to gui");
-
   if (!cameraGUI.free) error("The free camera is not linked to gui");
-  const vec3& pos = cameraGUI.free->getPosition();
-  Text("x: %.2f\ty: %.2f\tz: %.2f\t", pos.x, pos.y, pos.z);
 
-  const vec3& orientation = cameraGUI.free->getOrientation();
-  Text("x: %.2f\ty: %.2f\tz: %.2f\t", orientation.x, orientation.y, orientation.z);
+  // Show directions
+  {
+    static bool check = true;
+    Checkbox("Show direcitons##3", &check);
+
+    if (check) {
+      const vec3& right = cameraGUI.free->getRight();
+      const vec3& up = cameraGUI.free->getUp();
+
+      drawDirection(drawList, right, IM_RED, 0.f);
+      drawDirection(drawList, up, IM_GREEN, (IM_CIRCLE_RADIUS + 5.f) * 2.f);
+      drawDirection(drawList, normalize(cross(right, up)), IM_BLUE, (IM_CIRCLE_RADIUS + 5.f) * 4.f);
+      Dummy(ImVec2(0.f, IM_CIRCLE_RADIUS * 2.f));
+    }
+  }
 
   End();
 }
+
 } // namespace gui
