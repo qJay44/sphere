@@ -1,10 +1,13 @@
-#include "inputs.hpp"
+#include "InputsHandler.hpp"
 
 #include "../gui.hpp"
+#include <cassert>
 
 bool guiWasFocused;
 
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+AirplaneCamera* InputsHandler::airplaneCameraPtr = nullptr;
+
+void InputsHandler::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   switch (key) {
     case GLFW_KEY_G:
       if (action == GLFW_PRESS) {
@@ -30,7 +33,12 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   }
 }
 
-void processInput(GLFWwindow* window, Camera* camera) {
+void InputsHandler::scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+  assert(airplaneCameraPtr != nullptr);
+  airplaneCameraPtr->zoom(static_cast<float>(yoffset));
+}
+
+void InputsHandler::process(GLFWwindow* window, Camera* camera) {
   if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) glfwSetWindowShouldClose(window, GLFW_TRUE);
 
   if (!global::guiFocused) {
@@ -62,4 +70,5 @@ void processInput(GLFWwindow* window, Camera* camera) {
   } else {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
   }
+
 }

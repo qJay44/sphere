@@ -17,24 +17,24 @@ const vec3& Camera::getPosition()    const { return position; }
 const mat4& Camera::getMatrix()      const { return mat; }
 const vec3& Camera::getUp()          const { return up; }
 
-vec3 Camera::getViewDir() const { return  transpose(view)[2]; }
-vec3 Camera::getRight()   const { return -transpose(view)[0]; }
+vec3 Camera::getBack()  const { return  transpose(view)[2]; }
+vec3 Camera::getRight() const { return -transpose(view)[0]; }
 
 void Camera::setIncreasedSpeed()   { speed = 12.f * global::dt; }
 void Camera::setNormalSpeed()      { speed = 3.f  * global::dt; }
 
 void Camera::update() {
-  float aspectRatio = (float)global::winWidth / global::winHeight;
+  float aspectRatio = static_cast<float>(global::winWidth) / global::winHeight;
   mat4 proj = perspective(radians(fov), aspectRatio, global::nearPlane, global::farPlane);
 
   calcView();
   mat = proj * view;
 }
 
-void Camera::moveForward() {position +=  orientation * speed;}
-void Camera::moveBack()    {position += -orientation * speed;}
-void Camera::moveLeft()    {position += -normalize(cross(orientation, up)) * speed;}
-void Camera::moveRight()   {position +=  normalize(cross(orientation, up)) * speed;}
+void Camera::moveForward() { position +=  orientation * speed; }
+void Camera::moveBack()    { position += -orientation * speed; }
+void Camera::moveLeft()    { position += -normalize(cross(orientation, up)) * speed; }
+void Camera::moveRight()   { position +=  normalize(cross(orientation, up)) * speed; }
 
 void Camera::moveUp()   { position +=  up * speed; }
 void Camera::moveDown() { position += -up * speed; }

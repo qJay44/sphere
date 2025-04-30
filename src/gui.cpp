@@ -82,8 +82,7 @@ void draw() {
     SetNextWindowSize({400, 500});
     SetNextWindowPos({0, 0});
   });
-  // SetNextWindowCollapsed(collapsed);
-  SetNextWindowCollapsed(false);
+  SetNextWindowCollapsed(collapsed);
 
   Begin("Settings");
 

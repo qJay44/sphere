@@ -26,7 +26,7 @@ void Airplane::update() {
   Mesh::translate(newPos - position);
   Mesh::rotate({-1.f, 0.f, 0.f}, frameSpeedRad);
 
-  forward = {rotation[2][0], rotation[2][1], rotation[2][2]};
+  forward = rotation[2];
   up = gravityUp;
   position = newPos;
 }

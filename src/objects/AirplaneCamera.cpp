@@ -19,16 +19,13 @@ void AirplaneCamera::moveByMouse(const double& x, const double& y) {
   const vec3& apCurr = airplane.getPosition();
   vec3 diff = apCurr - apPrev;
 
-  double rotX = sensitivity * (x - global::winWidth * 0.5f) / global::winWidth;
-  double rotY = sensitivity * (y - global::winHeight * 0.5f) / global::winHeight;
-
-  float radRotX = static_cast<float>(radians(rotX));
-  float radRotY = static_cast<float>(radians(rotY));
+  float radRotX = radians(sensitivity * (x - global::winWidth * 0.5f) / global::winWidth);
+  float radRotY = radians(sensitivity * (y - global::winHeight * 0.5f) / global::winHeight);
 
   vec4 pivot(apCurr, 1.f);
   vec4 pos(position + diff, 1.f);
 
-  float cosAngle = dot(getViewDir(), up);
+  float cosAngle = dot(getBack(), up);
   if ((cosAngle * (abs(radRotY) / radRotY)) > 0.99f)
     radRotY = 0.f;
 
@@ -44,5 +41,11 @@ void AirplaneCamera::moveByMouse(const double& x, const double& y) {
 
 void AirplaneCamera::calcView() {
   view = lookAt(position, airplane.getPosition(), up);
+}
+
+void AirplaneCamera::zoom(const float& dir) {
+  distance += dir;
+  distance = std::max(distance, 1.f);
+  position += -getBack() * dir;
 }
 

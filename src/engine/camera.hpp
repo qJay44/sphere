@@ -11,8 +11,8 @@ public:
   const mat4& getMatrix()      const;
   const vec3& getUp()          const;
 
-  vec3 getViewDir() const;
-  vec3 getRight()   const;
+  vec3 getBack()  const;
+  vec3 getRight() const;
 
   void setIncreasedSpeed();
   void setNormalSpeed();
