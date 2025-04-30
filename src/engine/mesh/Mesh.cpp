@@ -76,11 +76,11 @@ void Mesh::draw(const Camera* camera, const Shader& shader) const {
     tex->bind();
   }
 
-  mat4 mat = translation * rotation * scaleMat;
+  mat4 model = translation * rotation * scaleMat;
 
   shader.setUniform3f("camPos", camera->getPosition());
   shader.setUniformMatrix4f("cam", camera->getMatrix());
-  shader.setUniformMatrix4f("model", mat);
+  shader.setUniformMatrix4f("model", model);
 
   if (indices.size()) glDrawElements(mode, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
   else glDrawArrays(mode, 0, (GLsizei)vertices.size());

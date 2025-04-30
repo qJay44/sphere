@@ -1,6 +1,7 @@
 #include "AirplaneCamera.hpp"
 
 #include "Airplane.hpp"
+#include "glm/ext/matrix_transform.hpp"
 
 AirplaneCamera::AirplaneCamera(const Airplane& airplane, float distance, float sensitivity)
   : Camera(airplane.getPosition() + airplane.getUp() * distance, vec3(0.f, 0.f, -1.f), sensitivity),
@@ -19,8 +20,8 @@ void AirplaneCamera::moveByMouse(const double& x, const double& y) {
   const vec3& apCurr = airplane.getPosition();
   vec3 diff = apCurr - apPrev;
 
-  float radRotX = radians(sensitivity * (x - global::winWidth * 0.5f) / global::winWidth);
-  float radRotY = radians(sensitivity * (y - global::winHeight * 0.5f) / global::winHeight);
+  float radRotX = glm::radians(sensitivity * (x - global::winWidth * 0.5f) / global::winWidth);
+  float radRotY = glm::radians(sensitivity * (y - global::winHeight * 0.5f) / global::winHeight);
 
   vec4 pivot(apCurr, 1.f);
   vec4 pos(position + diff, 1.f);
@@ -30,22 +31,24 @@ void AirplaneCamera::moveByMouse(const double& x, const double& y) {
     radRotY = 0.f;
 
   mat4 matRotX(1.f);
-  matRotX = rotate(matRotX, radRotX, up);
+  matRotX = glm::rotate(matRotX, radRotX, up);
   pos = (matRotX * (pos - pivot)) + pivot;
 
   mat4 matRotY(1.f);
-  matRotY = rotate(matRotY, radRotY, getRight());
+  matRotY = glm::rotate(matRotY, radRotY, getLeft());
   position = (matRotY * (pos - pivot)) + pivot;
   apPrev = apCurr;
 }
 
 void AirplaneCamera::calcView() {
-  view = lookAt(position, airplane.getPosition(), up);
+  view = glm::lookAt(position, airplane.getPosition(), up);
 }
 
 void AirplaneCamera::zoom(const float& dir) {
-  distance += dir;
-  distance = std::max(distance, 1.f);
-  position += -getBack() * dir;
+  distance -= dir;
+  if (distance < 1.f)
+    distance = 1.f;
+  else
+    position += getForward() * dir;
 }
 

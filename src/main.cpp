@@ -5,8 +5,6 @@
 #include "GLFW/glfw3.h"
 #include "engine/Shader.hpp"
 #include "engine/InputsHandler.hpp"
-#include "engine/mesh/meshes.hpp"
-#include "glm/gtc/quaternion.hpp"
 #include "global.hpp"
 #include "gui.hpp"
 #include "imgui.h"
@@ -116,29 +114,17 @@ int main() {
   gui::link(&cameraFree);
   gui::link(&airplane);
 
-  double titleTimer = glfwGetTime();
-  double prevTime = titleTimer;
-  double currTime = prevTime;
-
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_FRONT);
   glFrontFace(GL_CW);
 
-  const float radius = 1.f;
-  vec3 prevV(0.f), currV(0.f);
-
-  vec3 p1(0.f);
-  vec3 p2{0.5f, 0.5f, 0.f};
-  p2 *= 10.f;
-
-  Mesh axis = meshes::axis(10.f);
-  Mesh line1 = meshes::line(p1, p2, {1.f, 1.f, 1.f});
-  Mesh line2 = meshes::line(p1, p2, {1.f, 0.69f, 0.f});
-
   // Render loop
   while (!glfwWindowShouldClose(window)) {
     static Camera* camera = &cameraAirplane;
+    static double titleTimer = glfwGetTime();
+    static double prevTime = titleTimer;
+    static double currTime = prevTime;
 
     constexpr double fpsLimit = 1. / 90.;
     currTime = glfwGetTime();
@@ -149,29 +135,6 @@ int main() {
     else prevTime = currTime;
 
     camera = global::camIsArcball ? &cameraAirplane : &cameraFree;
-
-    double vx, vy;
-    glfwGetCursorPos(window, &vx, &vy);
-    currV.x = (vx - global::winWidth * 0.5f) / (global::winWidth * 0.5f) * radius;
-    currV.y = (global::winHeight * 0.5f - vy) / (global::winHeight * 0.5f) * radius;
-    currV.z = glm::length(currV) <= radius ? sqrtf(radius * radius - currV.x * currV.x - currV.y * currV.y) : 0.f;
-
-    if (glm::length(prevV)) {
-      vec3 prevVUnit = normalize(prevV);
-
-      if (glm::length(currV)) {
-        vec3 currVUnit = normalize(currV);
-        vec3 rotVec = glm::cross(prevVUnit, currVUnit);
-
-        if (glm::length(rotVec)) {
-          vec3 rotAxis = normalize(rotVec);
-          float theta = acos(std::min(dot(prevVUnit, currVUnit), 1.f));
-          quat rot = glm::angleAxis(theta * global::dt, vec3{1.f, 0.f, 0.f});
-          line2 = meshes::line(p1, p2, {1.f, 0.69f, 0.f});
-          p2 = rot * p2;
-        }
-      }
-    }
 
     if (glfwGetWindowAttrib(window, GLFW_FOCUSED))
       InputsHandler::process(window, camera);
@@ -189,31 +152,28 @@ int main() {
       titleTimer = currTime;
     }
 
-    // airplane.update();
+    airplane.update();
 
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // planet.draw(camera, planetShader);
-    // if (global::drawWireframe) planet.draw(camera, linesShader);
-    // if (global::drawNormals)   planet.draw(camera, normalsShader);
+    planet.draw(camera, planetShader);
+    if (global::drawWireframe) planet.draw(camera, linesShader);
+    if (global::drawNormals)   planet.draw(camera, normalsShader);
 
     glDisable(GL_CULL_FACE);
-    axis.draw(camera, colorShader);
-    line1.draw(camera, colorShader);
-    line2.draw(camera, colorShader);
-    // airplane.draw(camera, colorShader);
-    // if (global::drawWireframe)  airplane.draw(camera, linesShader);
-    // if (global::drawNormals)    airplane.draw(camera, normalsShader);
-    // if (global::drawDirections) airplane.draw(camera, colorShader, AIRPLANE_FLAG_DRAW_UP | AIRPLANE_FLAG_DRAW_FORWARD);
-    // light.draw(camera, colorShader);
+    camera->draw(cameraAirplane, colorShader);
+    airplane.draw(camera, colorShader);
+    if (global::drawWireframe)  airplane.draw(camera, linesShader);
+    if (global::drawNormals)    airplane.draw(camera, normalsShader);
+    if (global::drawDirections) airplane.draw(camera, colorShader, AIRPLANE_FLAG_DRAW_UP | AIRPLANE_FLAG_DRAW_FORWARD);
+    light.draw(camera, colorShader);
     glEnable(GL_CULL_FACE);
 
     gui::draw();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    prevV = currV;
     glfwSwapBuffers(window);
     glfwPollEvents();
   }

@@ -1,23 +1,28 @@
 #pragma once
 
-#include "glm/ext/matrix_transform.hpp"
+#include "Shader.hpp"
 
 class Camera {
 public:
   Camera(vec3 pos, vec3 orientation, float sensitivity);
 
+  const float& getFov()        const;
   const vec3& getOrientation() const;
   const vec3& getPosition()    const;
-  const mat4& getMatrix()      const;
   const vec3& getUp()          const;
+  const mat4& getMatrix()      const;
 
-  vec3 getBack()  const;
-  vec3 getRight() const;
+  vec3 getBack()    const;
+  vec3 getLeft()    const;
+  vec3 getRight()   const;
+  vec3 getForward() const;
+  vec3 getBottom()  const;
 
   void setIncreasedSpeed();
   void setNormalSpeed();
 
   void update();
+  void draw(Camera& camToDraw, const Shader& shader) const;
 
   virtual void moveForward();
   virtual void moveBack();
@@ -36,8 +41,8 @@ protected:
   float speed = 3.f;
   float fov = 45.f;
 
-  mat4 mat = identity<mat4>();
-  mat4 view = identity<mat4>();
+  mat4 mat  = mat4(1.f);
+  mat4 view = mat4(1.f);
 
 protected:
   virtual void calcView();

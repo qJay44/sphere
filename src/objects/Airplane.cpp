@@ -8,7 +8,8 @@ Airplane::Airplane(const Planet& planet, vec3 position, float speedRad, float fl
     speedRad(speedRad),
     flyHeight(flyHeight),
     Mesh(meshes::cube(position, meshSize, {1.f, 0.64f, 0.f})) {
-  rotate({-1.f, 0.f, 0.f}, PI_2); // Facing +Y
+
+  Mesh::rotate({-1.f, 0.f, 0.f}, PI_2); // Facing +Y
   forward = {0.f, 1.f, 0.f};
   up = {0.f, 0.f, 1.f};
 }

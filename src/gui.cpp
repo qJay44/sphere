@@ -2,7 +2,6 @@
 
 #include <algorithm>
 
-#include "glm/common.hpp"
 #include "imgui.h"
 
 #define IM_RED    IM_COL32(255, 0  , 0  , 255)
@@ -64,7 +63,7 @@ void drawDirection(ImDrawList* drawList, vec3 dir, const ImU32& color, float off
   ImVec2 pos = GetCursorScreenPos();
   pos.x += IM_CIRCLE_RADIUS + offsetX;
   pos.y += IM_CIRCLE_RADIUS;
-  dir.z = max(dir.z, 0.1f);
+  dir.z = std::max(dir.z, 0.1f);
   ImVec2 p1{pos.x, pos.y};
   ImVec2 p2{
     p1.x + std::clamp(dir.x / abs(dir.z), -1.f, 1.f) * IM_CIRCLE_RADIUS,

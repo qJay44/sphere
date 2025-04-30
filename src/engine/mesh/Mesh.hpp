@@ -33,9 +33,9 @@ public:
   void drawAxis(const Camera* camera, const Shader& shader) const;
 
 protected:
-  mat4 translation = identity<mat4>();
-  mat4 rotation    = identity<mat4>();
-  mat4 scaleMat    = identity<mat4>();
+  mat4 translation = mat4(1.f);
+  mat4 rotation    = mat4(1.f);
+  mat4 scaleMat    = mat4(1.f);
 
 private:
   std::vector<Vertex> vertices;
