@@ -2,11 +2,10 @@
 
 namespace global {
 
+extern GLFWwindow* window;
+
 extern float nearPlane;
 extern float farPlane;
-
-extern int winWidth;
-extern int winHeight;
 
 extern float dt;
 

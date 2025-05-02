@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "glm/gtc/quaternion.hpp"
+
 #include "../Camera.hpp"
 #include "../Shader.hpp"
 #include "EBO.hpp"
@@ -24,10 +26,12 @@ public:
   const mat4& getScale()       const;
 
   void add(const Texture* texture);
-  void translate(vec3 v);
-  void rotate(vec3 axis, float angle);
-  void scale(float s);
-  void scale(vec2 s);
+
+  void translate(const vec3& v);
+  void rotate(const float& angle, const vec3& axis);
+  void rotate(const glm::quat& q);
+  void scale(const float& s);
+  void scale(const vec2& s);
 
   void draw(const Camera* camera, const Shader& shader) const;
   void drawAxis(const Camera* camera, const Shader& shader) const;

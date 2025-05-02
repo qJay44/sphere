@@ -2,9 +2,15 @@
 
 #include "Shader.hpp"
 
+#define CAMERA_FLAG_DRAW_FORWARD  1
+#define CAMERA_FLAG_DRAW_UP       1 << 1
+#define CAMERA_FLAG_DRAW_RIGHT    1 << 2
+#define CAMERA_FLAG_DRAW_MESH     1 << 3
+#define CAMERA_FLAG_DRAW_FRUSTUM  1 << 4
+
 class Camera {
 public:
-  Camera(vec3 pos, vec3 orientation, float sensitivity);
+  Camera(vec3 pos, vec3 orientation, double sensitivity);
 
   const float& getFov()        const;
   const vec3& getOrientation() const;
@@ -16,13 +22,13 @@ public:
   vec3 getLeft()    const;
   vec3 getRight()   const;
   vec3 getForward() const;
-  vec3 getBottom()  const;
+  vec3 getDown()  const;
 
   void setIncreasedSpeed();
   void setNormalSpeed();
 
-  void update();
-  void draw(Camera& camToDraw, const Shader& shader) const;
+  void update(bool ignoreMousePos = false);
+  void draw(Camera& camToDraw, const Shader& shader, u32 flags = 0) const;
 
   virtual void moveForward();
   virtual void moveBack();
@@ -31,11 +37,9 @@ public:
   virtual void moveUp();
   virtual void moveDown();
 
-  virtual void moveByMouse(const double& x, const double& y);
-
 protected:
   vec3 position, orientation;
-  float sensitivity;
+  double sensitivity;
 
   vec3 up{0.f, 1.f, 0.f};
   float speed = 3.f;
@@ -45,7 +49,9 @@ protected:
   mat4 view = mat4(1.f);
 
 protected:
+  virtual void moveByMouse(const dvec2& mousePos);
   virtual void calcView();
+
   void calcOrientation(const float& radRotX, const float& radRotY);
 };
 

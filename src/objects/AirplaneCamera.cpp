@@ -15,29 +15,26 @@ void AirplaneCamera::moveRight()   {}
 void AirplaneCamera::moveUp()      {}
 void AirplaneCamera::moveDown()    {}
 
-void AirplaneCamera::moveByMouse(const double& x, const double& y) {
-  static vec3 apPrev = airplane.getPosition();
-  const vec3& apCurr = airplane.getPosition();
-  vec3 diff = apCurr - apPrev;
+void AirplaneCamera::moveByMouse(const dvec2& mousePos) {
+  ivec2 winSize;
+  glfwGetWindowSize(global::window, &winSize.x, &winSize.y);
+  dvec2 winCenter = winSize / 2;
 
-  float radRotX = glm::radians(sensitivity * (x - global::winWidth * 0.5f) / global::winWidth);
-  float radRotY = glm::radians(sensitivity * (y - global::winHeight * 0.5f) / global::winHeight);
-
-  vec4 pivot(apCurr, 1.f);
-  vec4 pos(position + diff, 1.f);
+  vec2 radRot = glm::radians(sensitivity * (mousePos - winCenter) / winCenter);
+  vec4 pivot(airplane.getPosition(), 1.f);
+  vec4 pos(airplane.getPosition() + getBack() * distance, 1.f);
 
   float cosAngle = dot(getBack(), up);
-  if ((cosAngle * (abs(radRotY) / radRotY)) > 0.99f)
-    radRotY = 0.f;
+  if ((cosAngle * (abs(radRot.y) / radRot.y)) > 0.99f)
+    radRot.y = 0.f;
 
   mat4 matRotX(1.f);
-  matRotX = glm::rotate(matRotX, radRotX, up);
+  matRotX = glm::rotate(matRotX, radRot.x, up);
   pos = (matRotX * (pos - pivot)) + pivot;
 
   mat4 matRotY(1.f);
-  matRotY = glm::rotate(matRotY, radRotY, getLeft());
+  matRotY = glm::rotate(matRotY, radRot.y, getLeft());
   position = (matRotY * (pos - pivot)) + pivot;
-  apPrev = apCurr;
 }
 
 void AirplaneCamera::calcView() {

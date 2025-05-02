@@ -3,6 +3,8 @@
 #include "../gui.hpp"
 #include <cassert>
 
+using global::window;
+
 bool guiWasFocused;
 
 AirplaneCamera* InputsHandler::airplaneCameraPtr = nullptr;
@@ -38,21 +40,20 @@ void InputsHandler::scrollCallback(GLFWwindow* window, double xoffset, double yo
   airplaneCameraPtr->zoom(static_cast<float>(yoffset));
 }
 
-void InputsHandler::process(GLFWwindow* window, Camera* camera) {
+void InputsHandler::process(Camera* camera) {
   if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) glfwSetWindowShouldClose(window, GLFW_TRUE);
 
-  if (!global::guiFocused) {
-    static double mouseX, mouseY;
+  glm::ivec2 winSize;
+  glfwGetWindowSize(window, &winSize.x, &winSize.y);
+  glm::dvec2 winCenter = winSize / 2;
 
+  if (!global::guiFocused) {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
     if (guiWasFocused) {
-      glfwSetCursorPos(window, global::winWidth * 0.5f, global::winHeight * 0.5f);
+      glfwSetCursorPos(window, winCenter.x, winCenter.y);
       guiWasFocused = false;
     }
-
-    glfwGetCursorPos(window, &mouseX, &mouseY);
-    glfwSetCursorPos(window, global::winWidth * 0.5f, global::winHeight * 0.5f);
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) camera->moveForward();
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camera->moveLeft();
@@ -65,8 +66,9 @@ void InputsHandler::process(GLFWwindow* window, Camera* camera) {
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) camera->setIncreasedSpeed();
     else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) camera->setNormalSpeed();
 
-    camera->moveByMouse(mouseX, mouseY);
     camera->update();
+
+    glfwSetCursorPos(window, winCenter.x, winCenter.y);
   } else {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
   }

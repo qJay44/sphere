@@ -1,7 +1,5 @@
 #include "gui.hpp"
 
-#include <algorithm>
-
 #include "imgui.h"
 
 #define IM_RED    IM_COL32(255, 0  , 0  , 255)
@@ -59,16 +57,12 @@ void link(Airplane* ptr)       { airplaneGUI.ptr   = ptr; }
 
 void toggle() { collapsed = !collapsed; }
 
-void drawDirection(ImDrawList* drawList, vec3 dir, const ImU32& color, float offsetX) {
+void drawDirection(ImDrawList* drawList, const vec2& dir, const ImU32& color, float offsetX) {
   ImVec2 pos = GetCursorScreenPos();
   pos.x += IM_CIRCLE_RADIUS + offsetX;
   pos.y += IM_CIRCLE_RADIUS;
-  dir.z = std::max(dir.z, 0.1f);
   ImVec2 p1{pos.x, pos.y};
-  ImVec2 p2{
-    p1.x + std::clamp(dir.x / abs(dir.z), -1.f, 1.f) * IM_CIRCLE_RADIUS,
-    p1.y - std::clamp(dir.y / abs(dir.z), -1.f, 1.f) * IM_CIRCLE_RADIUS
-  };
+  ImVec2 p2{pos.x + dir.x * IM_CIRCLE_RADIUS, pos.y + dir.y * IM_CIRCLE_RADIUS};
 
   drawList->AddCircleFilled(pos, IM_CIRCLE_RADIUS, IM_COL32(30, 30, 30, 255));
   drawList->AddCircle(pos, IM_CIRCLE_RADIUS, IM_WHITE);
@@ -109,42 +103,10 @@ void draw() {
   SeparatorText("Airplane Camera");
   if (!cameraGUI.arcball) error("The arcball camera is not linked to gui");
 
-  // Show directions
-  {
-    static bool check = true;
-    Checkbox("Show direcitons##2", &check);
-
-    if (check) {
-      const vec3& right = cameraGUI.arcball->getRight();
-      const vec3& up = cameraGUI.arcball->getUp();
-
-      drawDirection(drawList, right, IM_RED, 0.f);
-      drawDirection(drawList, up, IM_GREEN, (IM_CIRCLE_RADIUS + 5.f) * 2.f);
-      drawDirection(drawList, normalize(cross(right, up)), IM_BLUE, (IM_CIRCLE_RADIUS + 5.f) * 4.f);
-      Dummy(ImVec2(0.f, IM_CIRCLE_RADIUS * 2.f));
-    }
-  }
-
   // ================== Free Camera ====================
 
   SeparatorText("Free Camera");
   if (!cameraGUI.free) error("The free camera is not linked to gui");
-
-  // Show directions
-  {
-    static bool check = true;
-    Checkbox("Show direcitons##3", &check);
-
-    if (check) {
-      const vec3& right = cameraGUI.free->getRight();
-      const vec3& up = cameraGUI.free->getUp();
-
-      drawDirection(drawList, right, IM_RED, 0.f);
-      drawDirection(drawList, up, IM_GREEN, (IM_CIRCLE_RADIUS + 5.f) * 2.f);
-      drawDirection(drawList, normalize(cross(right, up)), IM_BLUE, (IM_CIRCLE_RADIUS + 5.f) * 4.f);
-      Dummy(ImVec2(0.f, IM_CIRCLE_RADIUS * 2.f));
-    }
-  }
 
   End();
 }

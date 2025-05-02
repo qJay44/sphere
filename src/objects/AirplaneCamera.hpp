@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../engine/Camera.hpp"
+
 #include "Airplane.hpp"
 
 class AirplaneCamera : public Camera {
@@ -14,17 +15,17 @@ public:
   void moveUp()      override;
   void moveDown()    override;
 
-  void moveByMouse(const double& x, const double& y) override;
-
   void zoom(const float& dir);
 
 private:
   const Airplane& airplane;
   float distance;
 
-  mat4 rot;
+  vec3 rotAxisHorizontal;
+  vec3 rotAxisVertical;
 
 private:
+  void moveByMouse(const dvec2& mousePos) override;
   void calcView() override;
 };
 

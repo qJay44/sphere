@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <format>
 
+#include "engine/Camera.hpp"
 #include "GLFW/glfw3.h"
 #include "engine/Shader.hpp"
 #include "engine/InputsHandler.hpp"
@@ -13,6 +14,8 @@
 #include "objects/Airplane.hpp"
 #include "objects/AirplaneCamera.hpp"
 #include "objects/Light.hpp"
+
+using global::window;
 
 void GLAPIENTRY MessageCallback(
   GLenum source,
@@ -43,7 +46,11 @@ int main() {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   // Window init
-  GLFWwindow* window = glfwCreateWindow(global::winWidth, global::winHeight, "Sphere", NULL, NULL);
+  window = glfwCreateWindow(1200, 720, "Sphere", NULL, NULL);
+  ivec2 winSize;
+  glfwGetWindowSize(window, &winSize.x, &winSize.y);
+  dvec2 winCenter = winSize / 2;
+
   if (!window) {
     printf("Failed to create GFLW window\n");
     glfwTerminate();
@@ -51,7 +58,7 @@ int main() {
   }
   glfwMakeContextCurrent(window);
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-  glfwSetCursorPos(window, global::winWidth * 0.5f, global::winHeight * 0.5f);
+  glfwSetCursorPos(window, winCenter.x, winSize.y * 0.5f);
 
   // GLAD init
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -59,7 +66,7 @@ int main() {
     return EXIT_FAILURE;
   }
 
-  glViewport(0, 0, global::winWidth, global::winHeight);
+  glViewport(0, 0, winSize.x, winSize.y);
   glEnable(GL_DEBUG_OUTPUT);
   glDebugMessageCallback(MessageCallback, 0);
 
@@ -71,6 +78,8 @@ int main() {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init();
 
+  Light light({3.5f, 1.5f, 1.2f}, 0.1f);
+
   // ===== Shaders ============================================== //
 
   Shader::setDirectoryLocation("shaders");
@@ -79,6 +88,9 @@ int main() {
   Shader colorShader("default/color.vert", "default/color.frag");
   Shader normalsShader("default/normal.vert", "default/normal.frag", "default/normal.geom");
   Shader textureShader("default/texture.vert", "default/texture.frag");
+
+  planetShader.setUniform4f("lightColor", light.getColor());
+  planetShader.setUniform3f("lightPos", light.getPosition());
 
   // ===== Planet =============================================== //
 
@@ -90,7 +102,7 @@ int main() {
   vec3 airplanePosInit(0.f);
   float airplaneFlyHeight = 1.f;
   airplanePosInit.z = planet.getRadius() + airplaneFlyHeight;
-  Airplane airplane(planet, airplanePosInit, PI / 20.f, airplaneFlyHeight, 0.1f);
+  Airplane airplane(planet, airplanePosInit, PI / 200.f, airplaneFlyHeight, 0.1f);
 
   // ===== Cameras ============================================== //
 
@@ -105,10 +117,6 @@ int main() {
 
   // ============================================================ //
 
-  Light light({3.5f, 1.5f, 1.2f}, 0.1f);
-
-  planetShader.setUniform4f("lightColor", light.getColor());
-  planetShader.setUniform3f("lightPos", light.getPosition());
   gui::link(&planet);
   gui::link(&cameraAirplane);
   gui::link(&cameraFree);
@@ -137,9 +145,9 @@ int main() {
     camera = global::camIsArcball ? &cameraAirplane : &cameraFree;
 
     if (glfwGetWindowAttrib(window, GLFW_FOCUSED))
-      InputsHandler::process(window, camera);
+      InputsHandler::process(camera);
     else
-      glfwSetCursorPos(window, global::winWidth * 0.5f, global::winHeight * 0.5f);
+      glfwSetCursorPos(window, winCenter.x, winCenter.y);
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -147,7 +155,7 @@ int main() {
 
     // Update window title every 0.3 seconds
     if (currTime - titleTimer >= 0.3) {
-      u16 fps = static_cast<u16>(1. / global::dt);
+      u16 fps = static_cast<u16>(1.f / global::dt);
       glfwSetWindowTitle(window, std::format("FPS: {} / {:.5f} ms", fps, global::dt).c_str());
       titleTimer = currTime;
     }
@@ -162,11 +170,11 @@ int main() {
     if (global::drawNormals)   planet.draw(camera, normalsShader);
 
     glDisable(GL_CULL_FACE);
-    camera->draw(cameraAirplane, colorShader);
+    camera->draw(cameraAirplane, colorShader, CAMERA_FLAG_DRAW_FORWARD | CAMERA_FLAG_DRAW_UP | CAMERA_FLAG_DRAW_RIGHT);
     airplane.draw(camera, colorShader);
     if (global::drawWireframe)  airplane.draw(camera, linesShader);
     if (global::drawNormals)    airplane.draw(camera, normalsShader);
-    if (global::drawDirections) airplane.draw(camera, colorShader, AIRPLANE_FLAG_DRAW_UP | AIRPLANE_FLAG_DRAW_FORWARD);
+    if (global::drawDirections) airplane.draw(camera, colorShader, AIRPLANE_FLAG_DRAW_FORWARD | AIRPLANE_FLAG_DRAW_UP | AIRPLANE_FLAG_DRAW_RIGHT);
     light.draw(camera, colorShader);
     glEnable(GL_CULL_FACE);
 

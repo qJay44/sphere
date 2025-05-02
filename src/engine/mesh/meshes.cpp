@@ -98,28 +98,21 @@ Mesh cube(vec3 pos, float size, vec3 color) {
 
 Mesh frustum(const Camera& cam, vec3 color) {
   float fovRad = glm::radians(cam.getFov());
+  vec2 fovPoint{cos(fovRad), sin(fovRad)};
 
-  float nearWidth = cos(fovRad) * global::nearPlane;
-  float nearHeight = sin(fovRad) * global::nearPlane;
-  float nearWidth2 = nearWidth * 0.5f;
-  float nearHeight2 = nearHeight * 0.5f;
-
+  vec2 nearSize = fovPoint * global::nearPlane * 0.5f;
   vec3 nearPos = cam.getPosition() + cam.getForward() * global::nearPlane;
-  vec3 nearTL = nearPos + cam.getLeft()  * nearWidth2 + cam.getUp() * nearHeight2;
-  vec3 nearTR = nearPos + cam.getRight() * nearWidth2 + cam.getUp() * nearHeight2;
-  vec3 nearBR = nearPos + cam.getRight() * nearWidth2 + cam.getBottom() * nearHeight2;
-  vec3 nearBL = nearPos + cam.getLeft()  * nearWidth2 + cam.getBottom() * nearHeight2;
+  vec3 nearTL = nearPos + cam.getLeft()  * nearSize.x + cam.getUp() * nearSize.y;
+  vec3 nearTR = nearPos + cam.getRight() * nearSize.x + cam.getUp() * nearSize.y;
+  vec3 nearBR = nearPos + cam.getRight() * nearSize.x + cam.getDown() * nearSize.y;
+  vec3 nearBL = nearPos + cam.getLeft()  * nearSize.x + cam.getDown() * nearSize.y;
 
-  float farWidth = cos(fovRad) * global::farPlane;
-  float farHeight = sin(fovRad) * global::farPlane;
-  float farWidth2 = farWidth * 0.5f;
-  float farHeight2 = farHeight * 0.5f;
-
+  vec2 farSize = fovPoint * global::farPlane * 0.5f;
   vec3 farPos = cam.getPosition()  + cam.getForward() * global::farPlane;
-  vec3 farTL = farPos + cam.getLeft()  * farWidth2 + cam.getUp() * farHeight2;
-  vec3 farTR = farPos + cam.getRight() * farWidth2 + cam.getUp() * farHeight2;
-  vec3 farBR = farPos + cam.getRight() * farWidth2 + cam.getBottom() * farHeight2;
-  vec3 farBL = farPos + cam.getLeft()  * farWidth2 + cam.getBottom() * farHeight2;
+  vec3 farTL = farPos + cam.getLeft()  * farSize.x + cam.getUp() * farSize.y;
+  vec3 farTR = farPos + cam.getRight() * farSize.x + cam.getUp() * farSize.y;
+  vec3 farBR = farPos + cam.getRight() * farSize.x + cam.getDown() * farSize.y;
+  vec3 farBL = farPos + cam.getLeft()  * farSize.x + cam.getDown() * farSize.y;
 
   std::vector<Vertex> vertices {
     // Near plane
