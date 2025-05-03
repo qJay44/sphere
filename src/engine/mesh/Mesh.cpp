@@ -1,7 +1,103 @@
 #include "Mesh.hpp"
 
+#include <format>
+
 #include "glm/ext/matrix_transform.hpp"
 #include "meshes.hpp"
+
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
+
+Mesh Mesh::loadObj(const fspath& file, bool printInfo) {
+  tinyobj::ObjReaderConfig readerConfig;
+  tinyobj::ObjReader reader;
+
+  if (!reader.ParseFromFile(file.string(), readerConfig)) {
+    std::string msg = "ParseFromFile error";
+    if (!reader.Error().empty())
+      msg = "TinyObjReader: " + reader.Error();
+
+    error(msg);
+  }
+
+  if (!reader.Warning().empty())
+    warning(std::format("TinyObjReader: {}", reader.Warning()));
+
+  const tinyobj::attrib_t& attrib = reader.GetAttrib();
+  const std::vector<tinyobj::shape_t>& shapes = reader.GetShapes();
+  const std::vector<tinyobj::material_t>& materials = reader.GetMaterials();
+
+  std::vector<Vertex> vertices(attrib.vertices.size() / 3);
+  std::vector<GLuint> indices;
+
+  // Loop over shapes
+  for (size_t s = 0; s < shapes.size(); s++) {
+    // Loop over faces(polygon)
+    size_t index_offset = 0;
+    for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
+      size_t fv = size_t(shapes[s].mesh.num_face_vertices[f]);
+
+      // Loop over vertices in the face.
+      for (size_t v = 0; v < fv; v++) {
+        // access to vertex
+        tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
+        size_t idxVert = 3 * size_t(idx.vertex_index);
+        Vertex& vertex = vertices[idx.vertex_index];
+        indices.push_back(idx.vertex_index);
+
+        vertex.position.x = attrib.vertices[idxVert + 0];
+        vertex.position.y = attrib.vertices[idxVert + 1];
+        vertex.position.z = attrib.vertices[idxVert + 2];
+
+        // Check if `normal_index` is zero or positive. negative = no normal data
+        if (idx.normal_index >= 0) {
+          vertex.normal.x = attrib.normals[3*size_t(idx.normal_index)+0];
+          vertex.normal.y = attrib.normals[3*size_t(idx.normal_index)+1];
+          vertex.normal.z = attrib.normals[3*size_t(idx.normal_index)+2];
+        }
+
+        // Check if `texcoord_index` is zero or positive. negative = no texcoord data
+        if (idx.texcoord_index >= 0) {
+          vertex.texture.x = attrib.texcoords[2*size_t(idx.texcoord_index)+0];
+          vertex.texture.y = attrib.texcoords[2*size_t(idx.texcoord_index)+1];
+        }
+
+        // Optional: vertex colors
+        vertex.color.x = attrib.colors[3*size_t(idx.vertex_index)+0];
+        vertex.color.y = attrib.colors[3*size_t(idx.vertex_index)+1];
+        vertex.color.z = attrib.colors[3*size_t(idx.vertex_index)+2];
+      }
+      index_offset += fv;
+
+      // per-face material
+      // shapes[s].mesh.material_ids[f];
+    }
+  }
+
+  // ============ Print info ============ //
+
+  if (printInfo) {
+    clrp::clrp_t cfmt{
+      .attr = clrp::ATTRIBUTE::BOLD,
+      .fg = clrp::FG::CYAN
+    };
+    std::string cname = clrp::format(std::format("[{}]", file.string()), cfmt);
+    std::string infoLoad = std::format("[load]\nvertices: {}\ncolors:   {}\ntextures: {}\nnormals:  {}", attrib.vertices.size() / 3, attrib.colors.size() / 3, attrib.texcoords.size() / 2, attrib.normals.size() / 3);
+    std::string infoFinal = std::format("[final]\nvertices: {}\nindices:  {}", vertices.size(), indices.size());
+    printf("\n==================== %s ====================\n\n%s\n\n%s\n\n", cname.c_str(), infoLoad.c_str(), infoFinal.c_str());
+
+    std::string end = "============================================";
+    for (u32 i = 0; i < file.string().size(); i++)
+      end += "=";
+    end += "\n";
+
+    puts(end.c_str());
+  }
+
+  // ==================================== //
+
+  return Mesh(vertices, indices);
+}
 
 Mesh::Mesh() {}
 
@@ -52,6 +148,8 @@ Mesh::Mesh(std::vector<Vertex> vertices, GLenum mode)
 const mat4& Mesh::getTranslation() const { return translation; }
 const mat4& Mesh::getRotation()    const { return rotation;    }
 const mat4& Mesh::getScale()       const { return scaleMat;    }
+
+void Mesh::setScale(const mat4& sca) { scaleMat = sca; }
 
 void Mesh::add(const Texture* texture) {
   if (texCount < MESH_TEXTURE_LIMIT) //

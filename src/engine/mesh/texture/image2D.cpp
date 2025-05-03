@@ -1,7 +1,7 @@
 #include "image2D.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "stb/stb_image.h"
 
 image2D::image2D() {}
 

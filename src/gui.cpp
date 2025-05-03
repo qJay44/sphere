@@ -35,6 +35,7 @@ struct CameraGUI {
 
 struct AirplaneGUI {
   Airplane* ptr;
+  float scale = 1.f;
 };
 
 PlanetGUI planetGUI;
@@ -87,7 +88,7 @@ void draw() {
   SliderInt("Resolution", &planetGUI.res, 2, 1'000);
   SliderFloat("Radius", &planetGUI.radius, 1.f, 10.f);
 
-  if (SliderFloat("Heighmap scale", &planetGUI.heighmapScale, 0.01f, 1.f))
+  if (SliderFloat("Heightmap scale", &planetGUI.heighmapScale, 0.01f, 10.f))
     planetGUI.ptr->setHeightmapScale(planetGUI.heighmapScale);
 
   if (SliderFloat("Sea level", &planetGUI.seaLevel, -10.f, 10.f)) //
@@ -97,6 +98,13 @@ void draw() {
     if (!planetGUI.ptr) error("The planet is not linked to gui");
     else planetGUI.ptr->rebuild(static_cast<u16>(planetGUI.res), static_cast<float>(planetGUI.radius));
   }
+
+  // ================== Airplane =======================
+
+  SeparatorText("Airplane");
+  if (!airplaneGUI.ptr) error("The airplane is not linked to gui");
+  if (SliderFloat("Scale", &airplaneGUI.scale, 0.01f, 10.f))
+    airplaneGUI.ptr->setScale(glm::scale(mat4(1.f), vec3(airplaneGUI.scale)));
 
   // ================== Airplane Camera ================
 

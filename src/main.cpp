@@ -170,11 +170,11 @@ int main() {
     if (global::drawNormals)   planet.draw(camera, normalsShader);
 
     glDisable(GL_CULL_FACE);
-    camera->draw(cameraAirplane, colorShader, CAMERA_FLAG_DRAW_FORWARD | CAMERA_FLAG_DRAW_UP | CAMERA_FLAG_DRAW_RIGHT);
+    camera->draw(cameraAirplane, colorShader, CAMERA_FLAG_DRAW_DIRECTIONS);
     airplane.draw(camera, colorShader);
     if (global::drawWireframe)  airplane.draw(camera, linesShader);
     if (global::drawNormals)    airplane.draw(camera, normalsShader);
-    if (global::drawDirections) airplane.draw(camera, colorShader, AIRPLANE_FLAG_DRAW_FORWARD | AIRPLANE_FLAG_DRAW_UP | AIRPLANE_FLAG_DRAW_RIGHT);
+    if (global::drawDirections) airplane.draw(camera, colorShader, AIRPLANE_FLAG_DRAW_DIRECTIONS);
     light.draw(camera, colorShader);
     glEnable(GL_CULL_FACE);
 

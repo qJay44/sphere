@@ -20,7 +20,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${GLAD_PATH}/include
   ${GLFW_PATH}/include
   ${GLM_PATH}/include
-  ${GENERAL_INCLUDES}/stb
+  ${GENERAL_INCLUDES}
   ${IMGUI_PATH}
 )
 

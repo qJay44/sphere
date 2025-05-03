@@ -61,14 +61,14 @@ void Camera::draw(Camera& camToDraw, const Shader& shader, u32 flags) const {
     Mesh camMesh = meshes::cube(camToDrawPos, 0.1f, {1.f, 0.f, 1.f});
     Mesh frustum = meshes::frustum(camToDraw);
 
-    if (flags & CAMERA_FLAG_DRAW_FORWARD)
-      meshes::line(camToDrawPos, camToDrawPos + camToDraw.getForward(), {1.f, 0.f, 0.f}).draw(this, shader);
+    if (flags & CAMERA_FLAG_DRAW_RIGHT)
+      meshes::line(camToDrawPos, camToDrawPos + camToDraw.getRight(), {1.f, 0.f, 0.f}).draw(this, shader);
 
     if (flags & CAMERA_FLAG_DRAW_UP)
       meshes::line(camToDrawPos, camToDrawPos + camToDraw.up, {0.f, 1.f, 0.f}).draw(this, shader);
 
-    if (flags & CAMERA_FLAG_DRAW_RIGHT)
-      meshes::line(camToDrawPos, camToDrawPos + camToDraw.getRight(), {0.f, 0.f, 1.f}).draw(this, shader);
+    if (flags & CAMERA_FLAG_DRAW_FORWARD)
+      meshes::line(camToDrawPos, camToDrawPos + camToDraw.getForward(), {0.f, 0.f, 1.f}).draw(this, shader);
 
     if (flags & CAMERA_FLAG_DRAW_MESH)
       camMesh.draw(this, shader);

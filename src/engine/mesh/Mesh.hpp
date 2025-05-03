@@ -17,6 +17,8 @@
 
 class Mesh {
 public:
+  static Mesh loadObj(const fspath& file, bool printInfo = false);
+
   Mesh();
   Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, GLenum mode = GL_TRIANGLES);
   Mesh(std::vector<Vertex> vertices, GLenum mode);
@@ -24,6 +26,8 @@ public:
   const mat4& getTranslation() const;
   const mat4& getRotation()    const;
   const mat4& getScale()       const;
+
+  void setScale(const mat4& sca);
 
   void add(const Texture* texture);
 

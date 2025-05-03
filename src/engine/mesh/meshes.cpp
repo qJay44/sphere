@@ -75,7 +75,7 @@ Mesh cube(vec3 pos, float size, vec3 color) {
   };
 
   std::vector<GLuint> indices{
-    0, 1, 2, //  Font face
+    0, 1, 2, //  Front face
     2, 3, 0, //
     4, 5, 6, //  Rear face
     6, 7, 4, //
