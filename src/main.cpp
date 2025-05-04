@@ -6,7 +6,6 @@
 #include "GLFW/glfw3.h"
 #include "engine/Shader.hpp"
 #include "engine/InputsHandler.hpp"
-#include "engine/mesh/meshes.hpp"
 #include "global.hpp"
 #include "gui.hpp"
 #include "imgui.h"
@@ -89,9 +88,12 @@ int main() {
   Shader colorShader("default/color.vert", "default/color.frag");
   Shader normalsShader("default/normal.vert", "default/normal.frag", "default/normal.geom");
   Shader textureShader("default/texture.vert", "default/texture.frag");
+  Shader airplaneShader("airplane.vert", "airplane.frag");
 
-  planetShader.setUniform4f("lightColor", light.getColor());
   planetShader.setUniform3f("lightPos", light.getPosition());
+  planetShader.setUniform4f("lightColor", light.getColor());
+  airplaneShader.setUniform3f("lightPos", light.getPosition());
+  airplaneShader.setUniform4f("lightColor", light.getColor());
 
   // ===== Planet =============================================== //
 
@@ -174,10 +176,12 @@ int main() {
 
     glDisable(GL_CULL_FACE);
     camera->draw(cameraAirplane, colorShader, CAMERA_FLAG_DRAW_DIRECTIONS);
-    airplane.draw(camera, textureShader);
+
+    airplane.draw(camera, airplaneShader);
     if (global::drawWireframe)  airplane.draw(camera, linesShader);
     if (global::drawNormals)    airplane.draw(camera, normalsShader);
     if (global::drawDirections) airplane.draw(camera, colorShader, AIRPLANE_FLAG_DRAW_DIRECTIONS);
+
     light.draw(camera, colorShader);
     glEnable(GL_CULL_FACE);
 

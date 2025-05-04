@@ -93,6 +93,7 @@ void gui::draw() {
   }
 
   SliderFloat("Speed (radians)", &airplaneGUI.ptr->speedRad, 0.01f, 10.f);
+  SliderFloat("Fly height", &airplaneGUI.ptr->flyHeight, 1.f, 10.f);
 
   // ================== Airplane Camera ================
 
