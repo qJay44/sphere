@@ -55,5 +55,8 @@ protected:
   virtual void calcView();
 
   void calcOrientation(const float& radRotX, const float& radRotY);
+
+private:
+  friend struct gui;
 };
 

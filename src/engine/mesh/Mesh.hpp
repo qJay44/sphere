@@ -27,8 +27,6 @@ public:
   const mat4& getRotation()    const;
   const mat4& getScale()       const;
 
-  void setScale(const mat4& sca);
-
   void add(const Texture* texture);
 
   void translate(const vec3& v);

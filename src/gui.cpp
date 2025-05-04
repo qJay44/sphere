@@ -15,16 +15,10 @@ struct RunOnce {
   template<typename T> RunOnce(T&& f) { f(); }
 };
 
-namespace gui {
-
 static bool collapsed = true;
 
 struct PlanetGUI {
   Planet* ptr;
-  int res;
-  float radius;
-  float heighmapScale;
-  float seaLevel;
 };
 
 struct CameraGUI {
@@ -42,22 +36,6 @@ PlanetGUI planetGUI;
 CameraGUI cameraGUI;
 AirplaneGUI airplaneGUI;
 
-void link(Planet* ptr) {
-  planetGUI = {
-    ptr,
-    ptr->getResolution(),
-    ptr->getRadius(),
-    ptr->getHeightmapScale(),
-    ptr->getSeaLevel(),
-  };
-}
-
-void link(AirplaneCamera* ptr) { cameraGUI.arcball = ptr; }
-void link(Camera* ptr)         { cameraGUI.free    = ptr; }
-void link(Airplane* ptr)       { airplaneGUI.ptr   = ptr; }
-
-void toggle() { collapsed = !collapsed; }
-
 void drawDirection(ImDrawList* drawList, const vec2& dir, const ImU32& color, float offsetX) {
   ImVec2 pos = GetCursorScreenPos();
   pos.x += IM_CIRCLE_RADIUS + offsetX;
@@ -70,8 +48,14 @@ void drawDirection(ImDrawList* drawList, const vec2& dir, const ImU32& color, fl
   drawList->AddLine(p1, p2, color);
 }
 
+void gui::link(Planet* ptr)         { planetGUI.ptr     = ptr; }
+void gui::link(AirplaneCamera* ptr) { cameraGUI.arcball = ptr; }
+void gui::link(Camera* ptr)         { cameraGUI.free    = ptr; }
+void gui::link(Airplane* ptr)       { airplaneGUI.ptr   = ptr; }
 
-void draw() {
+void gui::toggle() { collapsed = !collapsed; }
+
+void gui::draw() {
   static RunOnce a([]() {
     SetNextWindowSize({400, 500});
     SetNextWindowPos({0, 0});
@@ -85,36 +69,37 @@ void draw() {
   // ================== Planet ==================
 
   SeparatorText("Planet");
-  SliderInt("Resolution", &planetGUI.res, 2, 1'000);
-  SliderFloat("Radius", &planetGUI.radius, 1.f, 10.f);
 
-  if (SliderFloat("Heightmap scale", &planetGUI.heighmapScale, 0.01f, 10.f))
-    planetGUI.ptr->setHeightmapScale(planetGUI.heighmapScale);
+  if (!planetGUI.ptr) error("The planet is not linked to gui");
 
-  if (SliderFloat("Sea level", &planetGUI.seaLevel, -10.f, 10.f)) //
-    planetGUI.ptr->setSeaLevel(planetGUI.seaLevel);
+  SliderInt("Resolution", &planetGUI.ptr->resolution, 2, 1000);
+  SliderFloat("Radius", &planetGUI.ptr->radius, 1.f, 100.f);
+  SliderFloat("Heightmap scale", &planetGUI.ptr->heightmapScale, 0.01f, 10.f);
+  SliderFloat("Sea level", &planetGUI.ptr->seaLevel, -10.f, 10.f);
 
-  if (Button("Apply")) {
-    if (!planetGUI.ptr) error("The planet is not linked to gui");
-    else planetGUI.ptr->rebuild(static_cast<u16>(planetGUI.res), static_cast<float>(planetGUI.radius));
-  }
+  if (Button("Rebuild"))
+    planetGUI.ptr->rebuild();
 
   // ================== Airplane =======================
 
   SeparatorText("Airplane");
   if (!airplaneGUI.ptr) error("The airplane is not linked to gui");
 
-  if (SliderFloat("Scale", &airplaneGUI.scale, 0.01f, 10.f))
-    airplaneGUI.ptr->setScale(glm::scale(mat4(1.f), vec3(airplaneGUI.scale)));
+  static float prevScale = airplaneGUI.scale;
+  if (SliderFloat("Scale", &airplaneGUI.scale, 0.01f, 10.f)) {
+    float scaleFactor = airplaneGUI.scale / prevScale;
+    airplaneGUI.ptr->scale(scaleFactor);
+    prevScale = airplaneGUI.scale;
+  }
+
+  SliderFloat("Speed (radians)", &airplaneGUI.ptr->speedRad, 0.01f, 10.f);
 
   // ================== Airplane Camera ================
 
   SeparatorText("Airplane Camera");
   if (!cameraGUI.arcball) error("The arcball camera is not linked to gui");
 
-  cameraGUI.arcballDistance = cameraGUI.arcball->getDistance();
-  if (SliderFloat("Distance", &cameraGUI.arcballDistance, 1.f, 10.f))
-    cameraGUI.arcball->setDistance(cameraGUI.arcballDistance);
+  SliderFloat("Distance", &cameraGUI.arcball->distance, 1.f, 10.f);
 
   // ================== Free Camera ====================
 
@@ -124,4 +109,3 @@ void draw() {
   End();
 }
 
-} // namespace gui

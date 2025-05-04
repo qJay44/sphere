@@ -28,6 +28,8 @@ public:
   void draw(const Camera* camera, const Shader& shader, u32 flags = 0);
 
 private:
+  friend struct gui;
+
   const Planet& planet;
 
   vec3 position;

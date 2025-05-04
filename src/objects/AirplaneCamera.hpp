@@ -22,6 +22,8 @@ public:
   void zoom(const float& dir);
 
 private:
+  friend struct gui;
+
   const Airplane& airplane;
   float distance;
 

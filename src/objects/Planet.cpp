@@ -20,7 +20,7 @@ constexpr vec3 palette[6]{
   {0.996f, 0.984f, 0.169f},
 };
 
-Planet::Planet(u16 resolution, float radius, const fspath& texturePath) //
+Planet::Planet(int resolution, float radius, const fspath& texturePath) //
   : resolution(resolution),
     radius(radius) {
   image2D img(texturePath);
@@ -37,7 +37,7 @@ Planet::Planet(u16 resolution, float radius, const fspath& texturePath) //
   build();
 }
 
-const u16& Planet::getResolution() const { return resolution; }
+const int& Planet::getResolution() const { return resolution; }
 const float& Planet::getRadius() const { return radius; };
 const float& Planet::getHeightmapScale() const { return heightmapScale; }
 const float& Planet::getSeaLevel() const { return seaLevel; }
@@ -45,7 +45,11 @@ const float& Planet::getSeaLevel() const { return seaLevel; }
 void Planet::setHeightmapScale(const float& n) { heightmapScale = n; }
 void Planet::setSeaLevel(const float& n) { seaLevel = n; }
 
-void Planet::rebuild(u16 resolution, float radius) {
+void Planet::rebuild() {
+  rebuild(resolution, radius);
+};
+
+void Planet::rebuild(int resolution, float radius) {
   this->resolution = resolution;
   this->radius = radius;
   build();
@@ -54,7 +58,7 @@ void Planet::rebuild(u16 resolution, float radius) {
 void Planet::draw(const Camera* camera, const Shader& shader) const {
   static const GLint heightmapScaleUniLoc = shader.getUniformLoc("heightmapScale");
   static const GLint seaLevelUniLoc = shader.getUniformLoc("seaLevel");
-  shader.setUniform1f(heightmapScaleUniLoc, heightmapScale);
+  shader.setUniform1f(heightmapScaleUniLoc, heightmapScale * radius);
   shader.setUniform1f(seaLevelUniLoc, seaLevel);
 
   for (u8 i = 0; i < 6; i++)
@@ -71,11 +75,11 @@ void Planet::build() {
     u32 triIndex = 0;
     float percentStep = 1.f / (resolution - 1);
 
-    for (u16 y = 0; y < resolution; y++) {
+    for (int y = 0; y < resolution; y++) {
       float percentY = y * percentStep;
       vec3 pY = (percentY - 0.5f) * 2.f * axisB;
 
-      for (u16 x = 0; x < resolution; x++) {
+      for (int x = 0; x < resolution; x++) {
         u32 idx = x + y * resolution;
         float percentX = x * percentStep;
         vec3 pX = (percentX - 0.5f) * 2.f * axisA;

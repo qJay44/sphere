@@ -149,8 +149,6 @@ const mat4& Mesh::getTranslation() const { return translation; }
 const mat4& Mesh::getRotation()    const { return rotation;    }
 const mat4& Mesh::getScale()       const { return scaleMat;    }
 
-void Mesh::setScale(const mat4& sca) { scaleMat = sca; }
-
 void Mesh::add(const Texture* texture) {
   if (texCount < MESH_TEXTURE_LIMIT) //
     textures[texCount++] = texture;

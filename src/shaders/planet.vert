@@ -26,8 +26,8 @@ float heightmapValue() {
   vec2 coord = vec2(lon, lat);
   coord.x = (coord.x - 0.5f) * 2.f * idx + coord.x * 2.f * (1.f - idx);
 
-  float hms[2] = float[2](        //
-    texture(heightmap0, coord).r, //
+  float hms[2] = float[2](
+    texture(heightmap0, coord).r,
     texture(heightmap1, coord).r
   );
 
@@ -44,3 +44,4 @@ void main() {
   normal = in_normal;
   gl_Position = cam * vec4(vertPos, 1.f);
 }
+
