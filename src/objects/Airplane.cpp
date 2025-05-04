@@ -23,7 +23,7 @@ Airplane::Airplane(
 
   forward = {0.f, 1.f, 0.f};
   up      = {0.f, 0.f, 1.f};
-  right   = {1.f, 0.f, 0.f};
+  right   = {-1.f, 0.f, 0.f};
 }
 
 const vec3&  Airplane::getPosition() const { return position; }
@@ -42,13 +42,13 @@ void Airplane::update() {
   vec3 gravityUp = normalize(newPos);
   newPos = gravityUp * (planet.getRadius() + flyHeight);
 
-  glm::quat quat = glm::angleAxis(frameSpeedRad, rotAxis);
+  quat = glm::angleAxis(frameSpeedRad, rotAxis);
   Mesh::translate(newPos - position);
   Mesh::rotate(quat);
 
   forward = rotation[2];
   up = gravityUp;
-  right = rotation[0];
+  right = -rotation[0];
   position = newPos;
 }
 

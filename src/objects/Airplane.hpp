@@ -38,5 +38,7 @@ private:
 
   float speedRad;
   float flyHeight;
+
+  glm::quat quat;
 };
 

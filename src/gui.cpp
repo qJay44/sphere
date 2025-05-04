@@ -2,10 +2,10 @@
 
 #include "imgui.h"
 
-#define IM_RED    IM_COL32(255, 0  , 0  , 255)
-#define IM_GREEN  IM_COL32(0  , 255, 0  , 255)
-#define IM_BLUE   IM_COL32(0  , 0  , 255, 255)
-#define IM_WHITE  IM_COL32(255, 255, 255, 255)
+#define IM_RED   IM_COL32(255, 0  , 0  , 255)
+#define IM_GREEN IM_COL32(0  , 255, 0  , 255)
+#define IM_BLUE  IM_COL32(0  , 0  , 255, 255)
+#define IM_WHITE IM_COL32(255, 255, 255, 255)
 
 #define IM_CIRCLE_RADIUS 30.f
 
@@ -30,7 +30,7 @@ struct PlanetGUI {
 struct CameraGUI {
   AirplaneCamera* arcball;
   Camera* free;
-  float lonDeg, latDeg;
+  float arcballDistance;
 };
 
 struct AirplaneGUI {
@@ -103,6 +103,7 @@ void draw() {
 
   SeparatorText("Airplane");
   if (!airplaneGUI.ptr) error("The airplane is not linked to gui");
+
   if (SliderFloat("Scale", &airplaneGUI.scale, 0.01f, 10.f))
     airplaneGUI.ptr->setScale(glm::scale(mat4(1.f), vec3(airplaneGUI.scale)));
 
@@ -110,6 +111,10 @@ void draw() {
 
   SeparatorText("Airplane Camera");
   if (!cameraGUI.arcball) error("The arcball camera is not linked to gui");
+
+  cameraGUI.arcballDistance = cameraGUI.arcball->getDistance();
+  if (SliderFloat("Distance", &cameraGUI.arcballDistance, 1.f, 10.f))
+    cameraGUI.arcball->setDistance(cameraGUI.arcballDistance);
 
   // ================== Free Camera ====================
 

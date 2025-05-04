@@ -70,6 +70,7 @@ void InputsHandler::process(Camera* camera) {
 
     glfwSetCursorPos(window, winCenter.x, winCenter.y);
   } else {
+    camera->update(true);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
   }
 

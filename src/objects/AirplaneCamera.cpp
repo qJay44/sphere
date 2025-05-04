@@ -6,7 +6,16 @@
 AirplaneCamera::AirplaneCamera(const Airplane& airplane, float distance, float sensitivity)
   : Camera(airplane.getPosition() + airplane.getUp() * distance, vec3(0.f, 0.f, -1.f), sensitivity),
     airplane(airplane),
-    distance(distance) {}
+    distance(distance) {
+  // Adjust view direction so it is not exactly above the airplane
+  glm::quat quat = glm::angleAxis(PI / 10.f, getRight());
+  position = quat * (position - airplane.getPosition()) + airplane.getPosition();
+  calcView();
+}
+
+const float& AirplaneCamera::getDistance() const { return distance; }
+
+void AirplaneCamera::setDistance(const float& d) { distance = d; }
 
 void AirplaneCamera::moveForward() {}
 void AirplaneCamera::moveBack()    {}
@@ -16,29 +25,32 @@ void AirplaneCamera::moveUp()      {}
 void AirplaneCamera::moveDown()    {}
 
 void AirplaneCamera::moveByMouse(const dvec2& mousePos) {
+  // Window size and center
   ivec2 winSize;
   glfwGetWindowSize(global::window, &winSize.x, &winSize.y);
   dvec2 winCenter = winSize / 2;
 
+  const vec3& pivot = airplane.getPosition();
   vec2 radRot = glm::radians(sensitivity * (mousePos - winCenter) / winCenter);
-  vec4 pivot(airplane.getPosition(), 1.f);
-  vec4 pos(airplane.getPosition() + getBack() * distance, 1.f);
+  vec3 pos(airplane.getPosition() + getBack() * distance);
 
-  float cosAngle = dot(getBack(), up);
-  if ((cosAngle * (abs(radRot.y) / radRot.y)) > 0.99f)
+  // Prevent view direction to be exactly above the airplane
+  float cosAngle = dot(up, getForward());
+  if (cosAngle * glm::sign(radRot.y) > 0.99f)
     radRot.y = 0.f;
 
-  mat4 matRotX(1.f);
-  matRotX = glm::rotate(matRotX, radRot.x, up);
-  pos = (matRotX * (pos - pivot)) + pivot;
+  // Rotate horizontally
+  glm::quat quat = glm::angleAxis(radRot.x, up);
+  pos = quat * (pos - pivot) + pivot;
 
-  mat4 matRotY(1.f);
-  matRotY = glm::rotate(matRotY, radRot.y, getLeft());
-  position = (matRotY * (pos - pivot)) + pivot;
+  // Rotate vertically
+  quat = glm::angleAxis(radRot.y, getRight());
+  position = quat * (pos - pivot) + pivot;
 }
 
 void AirplaneCamera::calcView() {
   view = glm::lookAt(position, airplane.getPosition(), up);
+  up = airplane.getUp();
 }
 
 void AirplaneCamera::zoom(const float& dir) {

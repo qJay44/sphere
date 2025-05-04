@@ -27,8 +27,7 @@ Mesh Mesh::loadObj(const fspath& file, bool printInfo) {
   const std::vector<tinyobj::shape_t>& shapes = reader.GetShapes();
   const std::vector<tinyobj::material_t>& materials = reader.GetMaterials();
 
-  std::vector<Vertex> vertices(attrib.vertices.size() / 3);
-  std::vector<GLuint> indices;
+  std::vector<Vertex> vertices;
 
   // Loop over shapes
   for (size_t s = 0; s < shapes.size(); s++) {
@@ -42,8 +41,7 @@ Mesh Mesh::loadObj(const fspath& file, bool printInfo) {
         // access to vertex
         tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
         size_t idxVert = 3 * size_t(idx.vertex_index);
-        Vertex& vertex = vertices[idx.vertex_index];
-        indices.push_back(idx.vertex_index);
+        Vertex vertex;
 
         vertex.position.x = attrib.vertices[idxVert + 0];
         vertex.position.y = attrib.vertices[idxVert + 1];
@@ -66,6 +64,8 @@ Mesh Mesh::loadObj(const fspath& file, bool printInfo) {
         vertex.color.x = attrib.colors[3*size_t(idx.vertex_index)+0];
         vertex.color.y = attrib.colors[3*size_t(idx.vertex_index)+1];
         vertex.color.z = attrib.colors[3*size_t(idx.vertex_index)+2];
+
+        vertices.push_back(vertex);
       }
       index_offset += fv;
 
@@ -83,7 +83,7 @@ Mesh Mesh::loadObj(const fspath& file, bool printInfo) {
     };
     std::string cname = clrp::format(std::format("[{}]", file.string()), cfmt);
     std::string infoLoad = std::format("[load]\nvertices: {}\ncolors:   {}\ntextures: {}\nnormals:  {}", attrib.vertices.size() / 3, attrib.colors.size() / 3, attrib.texcoords.size() / 2, attrib.normals.size() / 3);
-    std::string infoFinal = std::format("[final]\nvertices: {}\nindices:  {}", vertices.size(), indices.size());
+    std::string infoFinal = std::format("[final]\nvertices: {}\n", vertices.size());
     printf("\n==================== %s ====================\n\n%s\n\n%s\n\n", cname.c_str(), infoLoad.c_str(), infoFinal.c_str());
 
     std::string end = "============================================";
@@ -96,7 +96,7 @@ Mesh Mesh::loadObj(const fspath& file, bool printInfo) {
 
   // ==================================== //
 
-  return Mesh(vertices, indices);
+  return Mesh(vertices, GL_TRIANGLES);
 }
 
 Mesh::Mesh() {}

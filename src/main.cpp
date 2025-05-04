@@ -6,6 +6,7 @@
 #include "GLFW/glfw3.h"
 #include "engine/Shader.hpp"
 #include "engine/InputsHandler.hpp"
+#include "engine/mesh/meshes.hpp"
 #include "global.hpp"
 #include "gui.hpp"
 #include "imgui.h"
@@ -103,6 +104,8 @@ int main() {
   float airplaneFlyHeight = 1.f;
   airplanePosInit.z = planet.getRadius() + airplaneFlyHeight;
   Airplane airplane(planet, airplanePosInit, PI / 200.f, airplaneFlyHeight, 0.1f);
+  Texture airplaneTexture("res/tex/Aircraft_Texture.png", GL_TEXTURE_2D, "diffuse0");
+  airplane.add(&airplaneTexture);
 
   // ===== Cameras ============================================== //
 
@@ -171,7 +174,7 @@ int main() {
 
     glDisable(GL_CULL_FACE);
     camera->draw(cameraAirplane, colorShader, CAMERA_FLAG_DRAW_DIRECTIONS);
-    airplane.draw(camera, colorShader);
+    airplane.draw(camera, textureShader);
     if (global::drawWireframe)  airplane.draw(camera, linesShader);
     if (global::drawNormals)    airplane.draw(camera, normalsShader);
     if (global::drawDirections) airplane.draw(camera, colorShader, AIRPLANE_FLAG_DRAW_DIRECTIONS);

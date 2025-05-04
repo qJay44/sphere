@@ -8,6 +8,10 @@ class AirplaneCamera : public Camera {
 public:
   AirplaneCamera(const Airplane& airplane, float distance, float sensitivity);
 
+  const float& getDistance() const;
+
+  void setDistance(const float& d);
+
   void moveForward() override;
   void moveBack()    override;
   void moveLeft()    override;
@@ -20,9 +24,6 @@ public:
 private:
   const Airplane& airplane;
   float distance;
-
-  vec3 rotAxisHorizontal;
-  vec3 rotAxisVertical;
 
 private:
   void moveByMouse(const dvec2& mousePos) override;
