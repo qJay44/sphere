@@ -69,6 +69,8 @@ void Planet::rebuild(int resolution, float radius) {
 }
 
 void Planet::draw(const Camera* camera, const Shader& shader) const {
+  assert(Planet::apCamera != nullptr);
+
   static const GLint heightmapScaleUniLoc = shader.getUniformLoc("heightmapScale");
   static const GLint seaLevelUniLoc = shader.getUniformLoc("seaLevel");
   shader.setUniform1f(heightmapScaleUniLoc, heightmapScale * radius);

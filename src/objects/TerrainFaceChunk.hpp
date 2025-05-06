@@ -59,12 +59,12 @@ struct TerrainFaceChunk : public Mesh {
       }
     }
 
-    return TerrainFaceChunk(vertices, indices);
+    return TerrainFaceChunk(vertices, indices, resolutionX);
   }
 
   TerrainFaceChunk() {}
 
-  TerrainFaceChunk(std::vector<Vertex> vertices, std::vector<GLuint> indices) : Mesh(vertices, indices) {
+  TerrainFaceChunk(std::vector<Vertex> vertices, std::vector<GLuint> indices, u32 resolutionX) : Mesh(vertices, indices) {
     clearable = false;
     this->firstVertex = vertices.front().position;
     this->lastVertex = vertices.back().position;

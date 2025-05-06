@@ -9,6 +9,9 @@
 
 #include "mesh/Mesh.hpp"
 #include "mesh/meshes.hpp"
+#include "CameraStorage.hpp"
+
+Camera* CameraStorage::cameraFreePtr = nullptr;
 
 Camera::Camera(vec3 pos, vec3 orientation, double sensitivity)
   : position(pos),

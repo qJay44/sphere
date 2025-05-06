@@ -5,6 +5,7 @@
 
 #include "engine/Camera.hpp"
 #include "GLFW/glfw3.h"
+#include "engine/CameraStorage.hpp"
 #include "engine/Shader.hpp"
 #include "engine/InputsHandler.hpp"
 #include "global.hpp"
@@ -113,10 +114,11 @@ int main() {
 
   Camera cameraFree({0.f, 0.f, planet.getRadius()}, {0.f, 0.f, -1.f}, 100.f);
   AirplaneCamera cameraAirplane(airplane, 8.f, 200.f);
+  CameraStorage::cameraFreePtr = &cameraFree;
+  CameraStorage::cameraAirplanePtr= &cameraAirplane;
 
   // ===== Inputs Handler ======================================= //
 
-  InputsHandler::airplaneCameraPtr = &cameraAirplane;
   glfwSetScrollCallback(window, InputsHandler::scrollCallback);
   glfwSetKeyCallback(window, InputsHandler::keyCallback);
 
@@ -165,7 +167,7 @@ int main() {
       titleTimer = currTime;
     }
 
-    // airplane.update();
+    airplane.update();
 
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -174,14 +176,15 @@ int main() {
     if (global::drawWireframe) planet.draw(camera, linesShader);
     if (global::drawNormals)   planet.draw(camera, normalsShader);
 
-    glDisable(GL_CULL_FACE);
     airplane.draw(camera, airplaneShader);
     if (global::drawWireframe)  airplane.draw(camera, linesShader);
     if (global::drawNormals)    airplane.draw(camera, normalsShader);
     if (global::drawDirections) airplane.draw(camera, colorShader, AIRPLANE_FLAG_DRAW_DIRECTIONS);
 
+    glDisable(GL_CULL_FACE);
+
     light.draw(camera, colorShader);
-    camera->draw(cameraAirplane, colorShader, CAMERA_FLAG_DRAW_DIRECTIONS | CAMERA_FLAG_DRAW_FRUSTUM);
+    camera->draw(cameraAirplane, colorShader, CAMERA_FLAG_DRAW_FRUSTUM);
 
     glEnable(GL_CULL_FACE);
 

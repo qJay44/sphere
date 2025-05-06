@@ -8,7 +8,7 @@ float dt = 0.f;
 
 bool guiFocused     = false;
 bool camIsArcball   = false;
-bool drawWireframe  = true;
+bool drawWireframe  = false;
 bool drawNormals    = false;
 bool drawDirections = true;
 

@@ -7,6 +7,8 @@
 #include "TerrainFaceChunk.hpp"
 #include "../engine/frustum/Frustum.hpp"
 #include "../engine/frustum/volumes/Sphere.hpp"
+#include "../engine/CameraStorage.hpp"
+#include "../engine/mesh/meshes.hpp"
 
 struct TerrainFace {
   std::list<TerrainFaceChunk> chunks;
@@ -48,12 +50,14 @@ struct TerrainFace {
   }
 
   void draw(const Camera* camera, const Shader& shader) const {
-    frustum::Frustum tfFrustum(*camera);
+    frustum::Frustum tfFrustum(*CameraStorage::cameraAirplanePtr);
 
     for (const TerrainFaceChunk& chunk : chunks) {
-      // frustum::Sphere frustumSphere(chunk.lastVertex - chunk.firstVertex, 100.f);
+      vec3 center = (chunk.lastVertex + chunk.firstVertex) * 0.5f;
+      float radius = glm::length(chunk.lastVertex - chunk.firstVertex) * frustum::Sphere::radiusMultiplier;
+      frustum::Sphere frustumSphere(center, radius);
 
-      // if (frustumSphere.isOnFrustum(tfFrustum, chunk))
+      if (frustumSphere.isOnFrustum(tfFrustum, chunk))
         chunk.draw(camera, shader);
     }
   }

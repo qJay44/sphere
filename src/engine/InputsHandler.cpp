@@ -1,14 +1,14 @@
 #include "InputsHandler.hpp"
 
-#include "../gui.hpp"
 #include <cassert>
+
+#include "../gui.hpp"
+#include "CameraStorage.hpp"
 
 using global::window;
 
 static bool guiWasFocused;
 static bool isHoldingShift = false;
-
-AirplaneCamera* InputsHandler::airplaneCameraPtr = nullptr;
 
 void InputsHandler::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   switch (key) {
@@ -37,8 +37,8 @@ void InputsHandler::keyCallback(GLFWwindow* window, int key, int scancode, int a
 }
 
 void InputsHandler::scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-  assert(airplaneCameraPtr != nullptr);
-  airplaneCameraPtr->zoom(static_cast<float>(yoffset));
+  assert(CameraStorage::cameraAirplanePtr != nullptr);
+  CameraStorage::cameraAirplanePtr->zoom(static_cast<float>(yoffset));
 }
 
 void InputsHandler::process(Camera* camera) {

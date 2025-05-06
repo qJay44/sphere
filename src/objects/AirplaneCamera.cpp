@@ -2,6 +2,9 @@
 
 #include "Airplane.hpp"
 #include "glm/ext/matrix_transform.hpp"
+#include "../engine/CameraStorage.hpp"
+
+AirplaneCamera* CameraStorage::cameraAirplanePtr = nullptr;
 
 AirplaneCamera::AirplaneCamera(const Airplane& airplane, float distance, float sensitivity)
   : Camera(airplane.getPosition() + airplane.getUp() * distance, vec3(0.f, 0.f, -1.f), sensitivity),

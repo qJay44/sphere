@@ -28,22 +28,18 @@ struct Frustum {
     float halfHSide = halfVSide * aspectRatio;
     vec3 frontMultFar = camFar * cam.getForward();
 
-    vec3 planeRight = normalize(cross(frontMultFar + cam.getRight() * halfHSide, camCrossUp));
-    vec3 planeLeft = normalize(cross(camCrossUp, frontMultFar + cam.getLeft() * halfHSide));
-    vec3 planeUp = normalize(cross(frontMultFar + camCrossUp * halfVSide, cam.getLeft()));
-    vec3 planeDown = normalize(cross(frontMultFar + camCrossUp * halfVSide, cam.getRight()));
-
+    // TODO: Normals should point to the inside?
     vec3 right = normalize(cross(frontMultFar + cam.getRight() * halfHSide,  camCrossUp    ));
     vec3 up    = normalize(cross(frontMultFar + camCrossUp     * halfVSide,  cam.getLeft() ));
     vec3 left  = normalize(cross(frontMultFar + cam.getLeft()  * halfHSide, -camCrossUp    ));
     vec3 down  = normalize(cross(frontMultFar - camCrossUp     * halfVSide,  cam.getRight()));
 
-    nearFace   = {cam.getForward(), dot(camPos + camNear * cam.getForward(), cam.getForward())};
-    farFace    = {cam.getBack(), dot(camPos + frontMultFar, cam.getBack())};
-    rightFace  = {right, dot(camPos, right)};
-    leftFace   = {left , dot(camPos, left)};
-    topFace    = {up   , dot(camPos, up)};
-    bottomFace = {down , dot(camPos, down)};
+    nearFace   = {cam.getForward(), dot(cam.getForward(), camPos + camNear * cam.getForward())};
+    farFace    = {cam.getBack(), dot(cam.getBack(), camPos + frontMultFar)};
+    rightFace  = {right, dot(right, camPos)};
+    leftFace   = {left , dot(left, camPos)};
+    topFace    = {up   , dot(up, camPos)};
+    bottomFace = {down , dot(down, camPos)};
   }
 };
 

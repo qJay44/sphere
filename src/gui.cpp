@@ -1,5 +1,6 @@
 #include "gui.hpp"
 
+#include "engine/frustum/volumes/Sphere.hpp"
 #include "imgui.h"
 
 #define IM_RED   IM_COL32(255u, 0u  , 0u  , 255u)
@@ -60,7 +61,6 @@ void gui::toggle() { collapsed = !collapsed; }
 
 void gui::draw() {
   static RunOnce a([]() {
-    SetNextWindowSize({400, 500});
     SetNextWindowPos({0, 0});
   });
   SetNextWindowCollapsed(collapsed);
@@ -75,16 +75,32 @@ void gui::draw() {
 
   if (!planetGUI.ptr) error("The planet is not linked to gui");
 
-  DragScalar("Resolution", ImGuiDataType_U32, &planetGUI.ptr->resolution, planetGUI.ptr->resolution, &IM_U32_2, &IM_U32_1024);
-  DragScalar("Chunks", ImGuiDataType_U32, &planetGUI.ptr->chunks, planetGUI.ptr->chunks, &IM_U32_2, &IM_U32_1024);
+  Text("Resolution");
+  static int rbResolution = planetGUI.ptr->resolution;
+  for (u32 i = 0; i < 9; i++) {
+    int num = 4 << i;
+    RadioButton(std::to_string(num).c_str(), &rbResolution, num);
+    if (i != 8) SameLine();
+  }
+  planetGUI.ptr->resolution = rbResolution;
+
+  Text("Chunks");
+  static int rbChunks = planetGUI.ptr->chunks;
+  for (u32 i = 0; i < 9; i++) {
+    int num = 4 << i;
+    RadioButton((std::to_string(num) + "##2").c_str(), &rbChunks, num);
+    if (i != 8) SameLine();
+  }
+  planetGUI.ptr->chunks = rbChunks;
+
   SliderFloat("Radius", &planetGUI.ptr->radius, 1.f, 100.f);
   SliderFloat("Heightmap scale", &planetGUI.ptr->heightmapScale, 0.01f, 10.f);
   SliderFloat("Sea level", &planetGUI.ptr->seaLevel, -10.f, 10.f);
 
-  static int e = planetGUI.ptr->colorChunksInsteadOfFaces;
-  RadioButton("Color only faces", &e, 0); SameLine();
-  RadioButton("Color only chunks per face", &e, 1);
-  planetGUI.ptr->colorChunksInsteadOfFaces = e;
+  static int rbChunksColoring = planetGUI.ptr->colorChunksInsteadOfFaces;
+  RadioButton("Color only faces", &rbChunksColoring, 0); SameLine();
+  RadioButton("Color only chunks per face", &rbChunksColoring, 1);
+  planetGUI.ptr->colorChunksInsteadOfFaces = rbChunksColoring;
 
   if (Button("Rebuild"))
     planetGUI.ptr->rebuild();
@@ -103,6 +119,11 @@ void gui::draw() {
 
   SliderFloat("Speed (radians)", &airplaneGUI.ptr->speedRad, 0.01f, 10.f);
   SliderFloat("Fly height", &airplaneGUI.ptr->flyHeight, 1.f, 10.f);
+
+  // ================== Frustum culling ================
+
+  SeparatorText("Frustum culling");
+  SliderFloat("Sphere culling radius multiplier", &frustum::Sphere::radiusMultiplier, 1.f, 100.f);
 
   // ================== Airplane Camera ================
 

@@ -12,6 +12,9 @@
 
 class Camera {
 public:
+  Camera() = delete;
+  Camera(Camera&) = delete;
+  Camera(Camera&&) = delete;
   Camera(vec3 pos, vec3 orientation, double sensitivity);
 
   const float& getNearPlane()   const;
@@ -63,5 +66,6 @@ protected:
 
 private:
   friend struct gui;
+  friend struct CameraManager;
 };
 
