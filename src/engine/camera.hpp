@@ -14,11 +14,14 @@ class Camera {
 public:
   Camera(vec3 pos, vec3 orientation, double sensitivity);
 
-  const float& getFov()        const;
-  const vec3& getOrientation() const;
-  const vec3& getPosition()    const;
-  const vec3& getUp()          const;
-  const mat4& getMatrix()      const;
+  const float& getNearPlane()   const;
+  const float& getFarPlane()    const;
+  const float& getSpeed()       const;
+  const float& getFov()         const;
+  const vec3&  getOrientation() const;
+  const vec3&  getPosition()    const;
+  const vec3&  getUp()          const;
+  const mat4&  getMatrix()      const;
 
   vec3 getBack()    const;
   vec3 getLeft()    const;
@@ -26,8 +29,7 @@ public:
   vec3 getForward() const;
   vec3 getDown()  const;
 
-  void setIncreasedSpeed();
-  void setNormalSpeed();
+  void setSpeed(const float& s);
 
   void update(bool ignoreMousePos = false);
   void draw(Camera& camToDraw, const Shader& shader, u32 flags = 0) const;
@@ -43,9 +45,12 @@ protected:
   vec3 position, orientation;
   double sensitivity;
 
-  vec3 up{0.f, 1.f, 0.f};
-  float speed = 3.f;
+  float nearPlane = 0.1f;
+  float farPlane = 100.f;
   float fov = 45.f;
+
+  vec3 up{0.f, 1.f, 0.f};
+  float speed = 5.f;
 
   mat4 mat  = mat4(1.f);
   mat4 view = mat4(1.f);

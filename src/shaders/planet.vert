@@ -34,12 +34,20 @@ float heightmapValue() {
   return hms[uint(idx)];
 }
 
+#define _COLOR_TERRAIN_CHUNKS
+
 void main() {
   float hmVal = heightmapValue();
   vec3 vertPos = vec3(model * vec4(in_pos, 1.f));
 
-  vertPos += in_normal * hmVal * heightmapScale;
-  color = vec3(hmVal);
+
+  #ifdef _COLOR_TERRAIN_CHUNKS
+    color = in_col;
+  #else
+    vertPos += in_normal * hmVal * heightmapScale;
+    color = vec3(hmVal);
+  #endif
+
   texCoord = in_tex;
   normal = in_normal;
   gl_Position = cam * vec4(vertPos, 1.f);

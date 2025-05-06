@@ -96,7 +96,10 @@ Mesh Mesh::loadObj(const fspath& file, bool printInfo) {
 
   // ==================================== //
 
-  return Mesh(vertices, GL_TRIANGLES);
+  Mesh mesh = Mesh(vertices, GL_TRIANGLES);
+  mesh.clearable = false;
+
+  return mesh;
 }
 
 Mesh::Mesh() {}
@@ -145,9 +148,18 @@ Mesh::Mesh(std::vector<Vertex> vertices, GLenum mode)
   vbo.unbind();
 }
 
+Mesh::~Mesh() {
+  if (clearable)
+    clear();
+}
+
 const mat4& Mesh::getTranslation() const { return translation; }
 const mat4& Mesh::getRotation()    const { return rotation;    }
 const mat4& Mesh::getScale()       const { return scaleMat;    }
+
+mat4 Mesh::getModel() const {
+  return translation * rotation * scaleMat;
+}
 
 void Mesh::add(const Texture* texture) {
   if (texCount < MESH_TEXTURE_LIMIT) //
@@ -156,12 +168,19 @@ void Mesh::add(const Texture* texture) {
     warning("Trying to add a texture above the limit");
 }
 
-void Mesh::scale(const float& s)    { scaleMat = glm::scale(scaleMat, vec3(s)); }
-void Mesh::scale(const vec2& s)     { scaleMat = glm::scale(scaleMat, vec3(s, 1.f)); }
+void Mesh::clear() {
+  if (vao.size) vao.clear();
+  if (vbo.size) vbo.clear();
+  if (ebo.size) ebo.clear();
+}
+
 void Mesh::translate(const vec3& v) { translation = glm::translate(translation, v); }
 
 void Mesh::rotate(const float& angle, const vec3& axis) { rotation = glm::rotate(rotation, angle, axis);}
 void Mesh::rotate(const glm::quat& q) { rotation *= glm::mat4_cast(q); };
+
+void Mesh::scale(const float& s)    { scaleMat = glm::scale(scaleMat, vec3(s)); }
+void Mesh::scale(const vec2& s)     { scaleMat = glm::scale(scaleMat, vec3(s, 1.f)); }
 
 void Mesh::draw(const Camera* camera, const Shader& shader) const {
   vao.bind();

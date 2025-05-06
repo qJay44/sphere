@@ -1,6 +1,7 @@
 #include "Texture.hpp"
 
 #include <format>
+#include <windows.h>
 
 constexpr u32 GLchannels[4] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
 

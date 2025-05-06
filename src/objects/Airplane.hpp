@@ -13,6 +13,7 @@
 class Airplane : public Mesh {
 public:
   Airplane(const Planet& planet, vec3 position, float speedRad, float flyHeight, float meshScale = 1.f);
+  ~Airplane();
 
   const vec3&  getPosition() const;
   const vec3&  getForward()  const;

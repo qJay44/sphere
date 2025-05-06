@@ -5,7 +5,8 @@
 
 using global::window;
 
-bool guiWasFocused;
+static bool guiWasFocused;
+static bool isHoldingShift = false;
 
 AirplaneCamera* InputsHandler::airplaneCameraPtr = nullptr;
 
@@ -63,15 +64,29 @@ void InputsHandler::process(Camera* camera) {
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) camera->moveUp();
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) camera->moveDown();
 
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) camera->setIncreasedSpeed();
-    else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) camera->setNormalSpeed();
+    static float camNormalSpeed = camera->getSpeed();
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+      if (!isHoldingShift)
+        camNormalSpeed = camera->getSpeed();
+
+      camera->setSpeed(camNormalSpeed * 5.f);
+      isHoldingShift = true;
+    }
+    else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) {
+      if (isHoldingShift)
+        camera->setSpeed(camNormalSpeed);
+
+      camNormalSpeed = camera->getSpeed();
+      isHoldingShift = false;
+    }
 
     camera->update();
 
     glfwSetCursorPos(window, winCenter.x, winCenter.y);
+
   } else {
     camera->update(true);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
   }
-
 }
+

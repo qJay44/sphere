@@ -2,6 +2,8 @@
 
 #include "../engine/mesh/texture/image2D.hpp"
 
+#include "TerrainFace.hpp"
+
 constexpr vec3 directions[6]{
   {1.f,  0.f,  0.f }, // Right
   {-1.f, 0.f,  0.f }, // Left
@@ -20,9 +22,13 @@ constexpr vec3 palette[6]{
   {0.996f, 0.984f, 0.169f},
 };
 
-Planet::Planet(int resolution, float radius, const fspath& texturePath) //
+Planet::Planet(u32 resolution, u32 chunksPerFace, float radius, const fspath& texturePath)
   : resolution(resolution),
     radius(radius) {
+
+  chunks = chunksPerFace;
+  terrainFaces = new TerrainFace[6];
+
   image2D img(texturePath);
   image2D img_w2 = img;
   img_w2.width /= 2;
@@ -37,10 +43,17 @@ Planet::Planet(int resolution, float radius, const fspath& texturePath) //
   build();
 }
 
-const int& Planet::getResolution() const { return resolution; }
-const float& Planet::getRadius() const { return radius; };
+Planet::~Planet() {
+  if (terrainFaces) {
+    delete[] terrainFaces;
+    terrainFaces = nullptr;
+  }
+}
+
+const u32&   Planet::getResolution()     const { return resolution;     }
+const float& Planet::getRadius()         const { return radius;         }
 const float& Planet::getHeightmapScale() const { return heightmapScale; }
-const float& Planet::getSeaLevel() const { return seaLevel; }
+const float& Planet::getSeaLevel()       const { return seaLevel;       }
 
 void Planet::setHeightmapScale(const float& n) { heightmapScale = n; }
 void Planet::setSeaLevel(const float& n) { seaLevel = n; }
@@ -66,48 +79,17 @@ void Planet::draw(const Camera* camera, const Shader& shader) const {
 }
 
 void Planet::build() {
-  for (u8 i = 0; i < 6; i++) {
-    std::vector<Vertex> vertices(resolution * resolution);
-    std::vector<GLuint> indices((resolution - 1) * (resolution) * 2 * 3);
-    vec3 localUp = directions[i];
-    vec3 axisA = vec3(localUp.y, localUp.z, localUp.x);
-    vec3 axisB = cross(localUp, axisA);
-    u32 triIndex = 0;
-    float percentStep = 1.f / (resolution - 1);
+  const vec3 noColors[6] = {};
+  const vec3* colors = colorChunksInsteadOfFaces ? noColors : palette;
 
-    for (int y = 0; y < resolution; y++) {
-      float percentY = y * percentStep;
-      vec3 pY = (percentY - 0.5f) * 2.f * axisB;
-
-      for (int x = 0; x < resolution; x++) {
-        u32 idx = x + y * resolution;
-        float percentX = x * percentStep;
-        vec3 pX = (percentX - 0.5f) * 2.f * axisA;
-        vec3 pointOnPlane = localUp + pX + pY;
-        Vertex& vertex = vertices[idx];
-
-        vertex = {pointOnSphereFancy(pointOnPlane), palette[i]};
-        vertex.normal = vertex.position;
-        vertex.texture = {percentX, percentY};
-        vertex.position *= radius;
-
-        if (x != resolution - 1 && y != resolution - 1) {
-          indices[triIndex + 0] = idx;
-          indices[triIndex + 1] = idx + resolution + 1;
-          indices[triIndex + 2] = idx + resolution;
-
-          indices[triIndex + 3] = idx;
-          indices[triIndex + 4] = idx + 1;
-          indices[triIndex + 5] = idx + resolution + 1;
-
-          triIndex += 6;
-        }
-      }
-    }
-    terrainFaces[i] = Mesh(vertices, indices);
-    terrainFaces[i].add(&textures[0]);
-    terrainFaces[i].add(&textures[1]);
-  }
+  delete[] terrainFaces; terrainFaces = new TerrainFace[6] (
+    TerrainFace(directions[0], this, colors[0]),
+    TerrainFace(directions[1], this, colors[1]),
+    TerrainFace(directions[2], this, colors[2]),
+    TerrainFace(directions[3], this, colors[3]),
+    TerrainFace(directions[4], this, colors[4]),
+    TerrainFace(directions[5], this, colors[5])
+  );
 }
 
 vec3 Planet::pointOnSphereDefault(const vec3& v) const { return v / length(v); }

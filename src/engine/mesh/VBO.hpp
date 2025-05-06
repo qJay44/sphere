@@ -1,17 +1,20 @@
 #pragma once
 
 // Vertex Buffer Object
-class VBO {
-public:
-  VBO();
-  VBO(GLsizei size, const void* data, GLsizeiptr dataSize);
-
-  void bind() const;
-  void clear() const;
-  void unbind() const;
-
-private:
+struct VBO {
   GLuint id;
-  GLsizei size;
+  GLsizei size = 0;
+
+  VBO() {}
+
+  VBO(GLsizei size, const void* data, GLsizeiptr dataSize) : size(size) {
+    glGenBuffers(size, &id);
+    bind();
+    glBufferData(GL_ARRAY_BUFFER, dataSize, data, GL_STATIC_DRAW);
+  }
+
+  void bind()   const { glBindBuffer(GL_ARRAY_BUFFER, id); }
+  void unbind() const { glBindBuffer(GL_ARRAY_BUFFER, 0); }
+  void clear()        { glDeleteBuffers(size, &id); size = 0; }
 };
 

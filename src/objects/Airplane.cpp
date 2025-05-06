@@ -26,6 +26,10 @@ Airplane::Airplane(
   right   = {-1.f, 0.f, 0.f};
 }
 
+Airplane::~Airplane() {
+  Mesh::clear();
+}
+
 const vec3&  Airplane::getPosition() const { return position; }
 const vec3&  Airplane::getForward()  const { return forward;  }
 const vec3&  Airplane::getUp()       const { return up;       }
@@ -61,7 +65,6 @@ void Airplane::draw(const Camera* camera, const Shader& shader, u32 flags) {
 
   if (flags & AIRPLANE_FLAG_DRAW_FORWARD)
     meshes::line(position, position + forward, {0.f, 0.f, 1.f}).draw(camera, shader);
-
 
   Mesh::draw(camera, shader);
 }

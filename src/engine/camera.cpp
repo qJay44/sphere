@@ -17,11 +17,14 @@ Camera::Camera(vec3 pos, vec3 orientation, double sensitivity)
   calcView();
 };
 
-const float& Camera::getFov()        const { return fov;         }
-const vec3& Camera::getOrientation() const { return orientation; }
-const vec3& Camera::getPosition()    const { return position;    }
-const vec3& Camera::getUp()          const { return up;          }
-const mat4& Camera::getMatrix()      const { return mat;         }
+const float& Camera::getNearPlane()   const { return nearPlane;   }
+const float& Camera::getFarPlane()    const { return farPlane;    }
+const float& Camera::getSpeed()       const { return speed;       }
+const float& Camera::getFov()         const { return fov;         }
+const vec3&  Camera::getOrientation() const { return orientation; }
+const vec3&  Camera::getPosition()    const { return position;    }
+const vec3&  Camera::getUp()          const { return up;          }
+const mat4&  Camera::getMatrix()      const { return mat;         }
 
 vec3 Camera::getBack()    const { return  transpose(view)[2]; }
 vec3 Camera::getLeft()    const { return -transpose(view)[0]; }
@@ -29,13 +32,11 @@ vec3 Camera::getRight()   const { return -getLeft(); }
 vec3 Camera::getForward() const { return -getBack(); }
 vec3 Camera::getDown()    const { return -getUp(); }
 
-void Camera::setIncreasedSpeed()   { speed = 12.f * global::dt; }
-void Camera::setNormalSpeed()      { speed = 3.f  * global::dt; }
+void Camera::setSpeed(const float& s) { speed = s; }
 
 void Camera::update(bool ignoreMousePos) {
-  ivec2 winSize;
-  glfwGetWindowSize(global::window, &winSize.x, &winSize.y);
-  dvec2 winCenter = winSize / 2;
+  dvec2 winSize = getWinSize();
+  dvec2 winCenter = winSize / 2.;
 
   dvec2 mousePos;
   glfwGetCursorPos(global::window, &mousePos.x, &mousePos.y);
@@ -48,7 +49,7 @@ void Camera::update(bool ignoreMousePos) {
   calcView();
 
   float aspectRatio = static_cast<float>(winSize.x) / winSize.y;
-  mat4 proj = glm::perspective(glm::radians(fov), aspectRatio, global::nearPlane, global::farPlane);
+  mat4 proj = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
 
   mat = proj * view;
 }
@@ -59,7 +60,7 @@ void Camera::draw(Camera& camToDraw, const Shader& shader, u32 flags) const {
     const vec3& camToDrawPos = camToDraw.position;
 
     Mesh camMesh = meshes::cube(camToDrawPos, 0.1f, {1.f, 0.f, 1.f});
-    Mesh frustum = meshes::frustum(camToDraw);
+    Mesh frustumMesh = meshes::frustum(camToDraw);
 
     if (flags & CAMERA_FLAG_DRAW_RIGHT)
       meshes::line(camToDrawPos, camToDrawPos + camToDraw.getRight(), {1.f, 0.f, 0.f}).draw(this, shader);
@@ -74,26 +75,25 @@ void Camera::draw(Camera& camToDraw, const Shader& shader, u32 flags) const {
       camMesh.draw(this, shader);
 
     if (flags & CAMERA_FLAG_DRAW_FRUSTUM)
-      frustum.draw(this, shader);
+      frustumMesh.draw(this, shader);
   }
 }
 
-void Camera::moveForward() { position +=  orientation * speed; }
-void Camera::moveBack()    { position += -orientation * speed; }
-void Camera::moveLeft()    { position += -normalize(cross(orientation, up)) * speed; }
-void Camera::moveRight()   { position +=  normalize(cross(orientation, up)) * speed; }
+void Camera::moveForward() { position +=  orientation * speed * global::dt; }
+void Camera::moveBack()    { position += -orientation * speed * global::dt; }
+void Camera::moveLeft()    { position += -normalize(cross(orientation, up)) * speed * global::dt; }
+void Camera::moveRight()   { position +=  normalize(cross(orientation, up)) * speed * global::dt; }
 
-void Camera::moveUp()   { position +=  up * speed; }
-void Camera::moveDown() { position += -up * speed; }
+void Camera::moveUp()   { position +=  up * speed * global::dt; }
+void Camera::moveDown() { position += -up * speed * global::dt; }
 
 void Camera::moveByMouse(const dvec2& mousePos) {
-  ivec2 winSize;
-  glfwGetWindowSize(global::window, &winSize.x, &winSize.y);
-  dvec2 winCenter = winSize / 2;
+  dvec2 winSize = getWinSize();
+  dvec2 winCenter = winSize / 2.;
 
   // Normalizes and shifts the coordinates of the cursor such that they begin in the middle of the screen
   // and then "transforms" them into degrees
-  dvec2 rot = sensitivity * (mousePos - winCenter) / dvec2(winSize);
+  dvec2 rot = sensitivity * (mousePos - winCenter) / winSize;
   dvec2 radRot = glm::radians(-rot);
 
   calcOrientation(radRot.y, radRot.x);

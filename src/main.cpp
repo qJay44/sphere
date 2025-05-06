@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <format>
+#include <windows.h>
 
 #include "engine/Camera.hpp"
 #include "GLFW/glfw3.h"
@@ -47,8 +48,7 @@ int main() {
 
   // Window init
   window = glfwCreateWindow(1200, 720, "Sphere", NULL, NULL);
-  ivec2 winSize;
-  glfwGetWindowSize(window, &winSize.x, &winSize.y);
+  ivec2 winSize = getWinSize();
   dvec2 winCenter = winSize / 2;
 
   if (!window) {
@@ -98,7 +98,7 @@ int main() {
   // ===== Planet =============================================== //
 
   /* Planet planet(720, global::planetRadius, "res/geo/textures/wem21600.png"); */
-  Planet planet(720, 20.f, "res/geo/textures/wem2560.png");
+  Planet planet(128u, 256u, 20.f, "res/geo/textures/wem2560.png");
 
   // ===== Airplane ============================================= //
 
@@ -165,7 +165,7 @@ int main() {
       titleTimer = currTime;
     }
 
-    airplane.update();
+    // airplane.update();
 
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -175,14 +175,14 @@ int main() {
     if (global::drawNormals)   planet.draw(camera, normalsShader);
 
     glDisable(GL_CULL_FACE);
-    camera->draw(cameraAirplane, colorShader, CAMERA_FLAG_DRAW_DIRECTIONS);
-
     airplane.draw(camera, airplaneShader);
     if (global::drawWireframe)  airplane.draw(camera, linesShader);
     if (global::drawNormals)    airplane.draw(camera, normalsShader);
     if (global::drawDirections) airplane.draw(camera, colorShader, AIRPLANE_FLAG_DRAW_DIRECTIONS);
 
     light.draw(camera, colorShader);
+    camera->draw(cameraAirplane, colorShader, CAMERA_FLAG_DRAW_DIRECTIONS | CAMERA_FLAG_DRAW_FRUSTUM);
+
     glEnable(GL_CULL_FACE);
 
     gui::draw();

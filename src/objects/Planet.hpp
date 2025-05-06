@@ -1,15 +1,17 @@
 #pragma once
 
-#include "../engine/mesh/Mesh.hpp"
+#include "../engine/Camera.hpp"
+#include "../engine/mesh/texture/Texture.hpp"
 
 class Planet {
 public:
-  Planet(int resolution, float radius, const fspath& texturePath);
+  Planet(u32 resolution, u32 chunksPerFace, float radius, const fspath& texturePath);
+  ~Planet();
 
-  const int& getResolution() const;
-  const float& getRadius() const;
+  const u32&   getResolution()     const;
+  const float& getRadius()         const;
   const float& getHeightmapScale() const;
-  const float& getSeaLevel() const;
+  const float& getSeaLevel()       const;
 
   void setHeightmapScale(const float& n);
   void setSeaLevel(const float& n);
@@ -20,13 +22,17 @@ public:
 
 private:
   friend struct gui;
+  friend struct TerrainFace;
 
-  int resolution;
+  u32 resolution;
+  u32 chunks;
   float radius;
   float heightmapScale = 0.225f;
   float seaLevel = 0.f;
-  Mesh terrainFaces[6];
+  struct TerrainFace* terrainFaces = nullptr;
   Texture textures[2];
+
+  bool colorChunksInsteadOfFaces = true;
 
 private:
   void build();

@@ -97,22 +97,34 @@ Mesh cube(vec3 pos, float size, vec3 color) {
 }
 
 Mesh frustum(const Camera& cam, vec3 color) {
+  vec2 winSize = getWinSize();
+  float aspect = winSize.x / winSize.y;
+
+  vec3 camCrossUp = normalize(cross(cam.getForward(), cam.getLeft()));
   float fovRad = glm::radians(cam.getFov());
-  vec2 fovPoint{cos(fovRad), sin(fovRad)};
+  float fovSize = 0.f;
+  if (fovRad >= PI_2) {
+    fovSize = 57.28f;
+    fovRad -= PI_2;
+  }
+  fovSize += tan(fovRad);
 
-  vec2 nearSize = fovPoint * global::nearPlane * 0.5f;
-  vec3 nearPos = cam.getPosition() + cam.getForward() * global::nearPlane;
-  vec3 nearTL = nearPos + cam.getLeft()  * nearSize.x + cam.getUp() * nearSize.y;
-  vec3 nearTR = nearPos + cam.getRight() * nearSize.x + cam.getUp() * nearSize.y;
-  vec3 nearBR = nearPos + cam.getRight() * nearSize.x + cam.getDown() * nearSize.y;
-  vec3 nearBL = nearPos + cam.getLeft()  * nearSize.x + cam.getDown() * nearSize.y;
+  float farVSideHalf = cam.getFarPlane() * fovSize * 0.5f;
+  float farHSideHalf = farVSideHalf * aspect;
+  vec3 frontMultFar = cam.getForward() * cam.getFarPlane();
+  vec3 farPos = cam.getPosition() + frontMultFar;
+  vec3 farTL = farPos + cam.getLeft()  * farHSideHalf +  camCrossUp * farVSideHalf;
+  vec3 farTR = farPos + cam.getRight() * farHSideHalf +  camCrossUp * farVSideHalf;
+  vec3 farBR = farPos + cam.getRight() * farHSideHalf + -camCrossUp * farVSideHalf;
+  vec3 farBL = farPos + cam.getLeft()  * farHSideHalf + -camCrossUp * farVSideHalf;
 
-  vec2 farSize = fovPoint * global::farPlane * 0.5f;
-  vec3 farPos = cam.getPosition()  + cam.getForward() * global::farPlane;
-  vec3 farTL = farPos + cam.getLeft()  * farSize.x + cam.getUp() * farSize.y;
-  vec3 farTR = farPos + cam.getRight() * farSize.x + cam.getUp() * farSize.y;
-  vec3 farBR = farPos + cam.getRight() * farSize.x + cam.getDown() * farSize.y;
-  vec3 farBL = farPos + cam.getLeft()  * farSize.x + cam.getDown() * farSize.y;
+  float nearVSideHalf = cam.getNearPlane() * fovSize * 0.5f;
+  float nearHSideHalf = nearVSideHalf * aspect;
+  vec3 nearPos = cam.getPosition() + cam.getForward() * cam.getNearPlane();
+  vec3 nearTL = nearPos + cam.getLeft()  * nearHSideHalf +  camCrossUp * nearVSideHalf;
+  vec3 nearTR = nearPos + cam.getRight() * nearHSideHalf +  camCrossUp * nearVSideHalf;
+  vec3 nearBR = nearPos + cam.getRight() * nearHSideHalf + -camCrossUp * nearVSideHalf;
+  vec3 nearBL = nearPos + cam.getLeft()  * nearHSideHalf + -camCrossUp * nearVSideHalf;
 
   std::vector<Vertex> vertices {
     // Near plane
@@ -147,41 +159,5 @@ Mesh frustum(const Camera& cam, vec3 color) {
   return Mesh(vertices, GL_LINES);
 }
 
-// FIXME: Lacking one segment
-Mesh sphere(float radius, u16 resolution, vec3 color) {
-  std::vector<Vertex> vertices(resolution * resolution);
-  std::vector<GLuint> indices((resolution - 1) * (resolution - 1) * 2 * 3);
-
-  float stepLon = (2.f * PI) / resolution; // From -PI to PI, total length = 2PI
-  float stepLat = PI / resolution;         // From -PI_2 to PI_2, total length = 2PI_2 -> PI
-  u32 triIndex = 0;
-
-  for (u32 i = 0; i < resolution; i++) {
-    float lon = i * stepLon;
-    for (u32 j = 0; j < resolution; j++) {
-      float lat = j * stepLat;
-      u32 idx = i + j * resolution;
-      vec3 point{
-        radius * sinf(lat) * cosf(lon),
-        radius * sinf(lat) * sinf(lon),
-        radius * cosf(lat),
-      };
-
-      vertices[idx] = {point, color, {}, point / radius};
-
-      if (i != resolution - 1 && j != resolution - 1) {
-        indices[triIndex + 0] = idx;
-        indices[triIndex + 1] = idx + resolution + 1;
-        indices[triIndex + 2] = idx + resolution;
-
-        indices[triIndex + 3] = idx;
-        indices[triIndex + 4] = idx + 1;
-        indices[triIndex + 5] = idx + resolution + 1;
-        triIndex += 6;
-      }
-    }
-  }
-
-  return Mesh(vertices, indices);
-}
 } // namespace meshes
+

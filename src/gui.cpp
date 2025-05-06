@@ -2,12 +2,15 @@
 
 #include "imgui.h"
 
-#define IM_RED   IM_COL32(255, 0  , 0  , 255)
-#define IM_GREEN IM_COL32(0  , 255, 0  , 255)
-#define IM_BLUE  IM_COL32(0  , 0  , 255, 255)
-#define IM_WHITE IM_COL32(255, 255, 255, 255)
+#define IM_RED   IM_COL32(255u, 0u  , 0u  , 255u)
+#define IM_GREEN IM_COL32(0u ,  255u, 0u  , 255u)
+#define IM_BLUE  IM_COL32(0u ,  0u  , 255u, 255u)
+#define IM_WHITE IM_COL32(255u, 255u, 255u, 255u)
 
 #define IM_CIRCLE_RADIUS 30.f
+
+constexpr ImU32 IM_U32_2 = 2;
+constexpr ImU32 IM_U32_1024 = 2 << 9;
 
 using namespace ImGui;
 
@@ -66,16 +69,22 @@ void gui::draw() {
 
   ImDrawList* drawList = GetWindowDrawList();
 
-  // ================== Planet ==================
+  // ================== Planet =========================
 
   SeparatorText("Planet");
 
   if (!planetGUI.ptr) error("The planet is not linked to gui");
 
-  SliderInt("Resolution", &planetGUI.ptr->resolution, 2, 1000);
+  DragScalar("Resolution", ImGuiDataType_U32, &planetGUI.ptr->resolution, planetGUI.ptr->resolution, &IM_U32_2, &IM_U32_1024);
+  DragScalar("Chunks", ImGuiDataType_U32, &planetGUI.ptr->chunks, planetGUI.ptr->chunks, &IM_U32_2, &IM_U32_1024);
   SliderFloat("Radius", &planetGUI.ptr->radius, 1.f, 100.f);
   SliderFloat("Heightmap scale", &planetGUI.ptr->heightmapScale, 0.01f, 10.f);
   SliderFloat("Sea level", &planetGUI.ptr->seaLevel, -10.f, 10.f);
+
+  static int e = planetGUI.ptr->colorChunksInsteadOfFaces;
+  RadioButton("Color only faces", &e, 0); SameLine();
+  RadioButton("Color only chunks per face", &e, 1);
+  planetGUI.ptr->colorChunksInsteadOfFaces = e;
 
   if (Button("Rebuild"))
     planetGUI.ptr->rebuild();
@@ -100,12 +109,20 @@ void gui::draw() {
   SeparatorText("Airplane Camera");
   if (!cameraGUI.arcball) error("The arcball camera is not linked to gui");
 
-  SliderFloat("Distance", &cameraGUI.arcball->distance, 1.f, 10.f);
+  SliderFloat("Near",     &cameraGUI.arcball->nearPlane, 0.01f, 1.f);
+  SliderFloat("Far",      &cameraGUI.arcball->farPlane,  10.f , 100.f);
+  SliderFloat("Distance", &cameraGUI.arcball->distance,  1.f  , 10.f);
+  SliderFloat("FOV",      &cameraGUI.arcball->fov,       45.f , 179.f);
 
   // ================== Free Camera ====================
 
   SeparatorText("Free Camera");
   if (!cameraGUI.free) error("The free camera is not linked to gui");
+
+  SliderFloat("Near##2",  &cameraGUI.free->nearPlane, 0.01f, 1.f);
+  SliderFloat("Far##2",   &cameraGUI.free->farPlane,  10.f , 100.f);
+  SliderFloat("Speed##2", &cameraGUI.free->speed,     1.f  , 50.f);
+  SliderFloat("FOV##2",   &cameraGUI.free->fov,       45.f , 179.f);
 
   End();
 }
