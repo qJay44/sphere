@@ -3,19 +3,20 @@
 #include <vector>
 
 #include "../Camera.hpp"
+#include "../frustum/Frustum.hpp"
 
 namespace meshes {
 
-Mesh line(vec3 p1, vec3 p2, vec3 color) {
+Mesh line(vec3 p1, vec3 p2, vec3 color, bool clearable) {
   std::vector<Vertex> vertices{
     {p1, color},
     {p2, color}
   };
 
-  return Mesh(vertices, GL_LINES);
+  return Mesh(vertices, GL_LINES, clearable);
 }
 
-Mesh axis(float size) {
+Mesh axis(float size, bool clearable) {
   std::vector<Vertex> vertices{
     {{0.f, 0.f, 0.f}, {1.f, 0.f, 0.f}},
     {{size, 0.f, 0.f}, {1.f, 0.f, 0.f}},
@@ -25,10 +26,10 @@ Mesh axis(float size) {
     {{0.f, 0.f, size}, {0.f, 0.f, 1.f}},
   };
 
-  return Mesh(vertices, GL_LINES);
+  return Mesh(vertices, GL_LINES, clearable);
 }
 
-Mesh plane(vec3 pos, vec2 size, vec3 color) {
+Mesh plane(vec3 pos, vec2 size, vec3 color, bool clearable) {
   std::vector<Vertex> vertices{
     {{-0.1f, -0.1f, pos.z}, color, {0.f, 0.f}},
     {{-0.1f,  0.1f, pos.z}, color, {0.f, 1.f}},
@@ -42,14 +43,14 @@ Mesh plane(vec3 pos, vec2 size, vec3 color) {
   };
 
 
-  Mesh m = Mesh(vertices, indices);
+  Mesh m = Mesh(vertices, indices, GL_TRIANGLES, clearable);
   m.translate(pos);
   m.scale(size);
 
   return m;
 }
 
-Mesh cube(vec3 pos, float size, vec3 color) {
+Mesh cube(vec3 pos, float size, vec3 color, bool clearable) {
   //        5--------6
   //       /|       /|
   //      1--------2 |
@@ -89,14 +90,16 @@ Mesh cube(vec3 pos, float size, vec3 color) {
     7, 3, 0, //
   };
 
-  Mesh m = Mesh(vertices, indices);
+  Mesh m = Mesh(vertices, indices, GL_TRIANGLES, clearable);
   m.translate(pos);
   m.scale(size);
 
   return m;
 }
 
-Mesh frustum(const Camera& cam, vec3 color) {
+Mesh frustum(const Camera& cam, vec3 color, bool clearable) {
+  frustum::Frustum frustum(cam);
+
   vec2 winSize = getWinSize();
   float aspect = winSize.x / winSize.y;
 
@@ -109,54 +112,87 @@ Mesh frustum(const Camera& cam, vec3 color) {
   }
   fovSize += tan(fovRad);
 
+  // NOTE: Frustum's forward is pointing towards +z
+
   float farVSideHalf = cam.getFarPlane() * fovSize * 0.5f;
   float farHSideHalf = farVSideHalf * aspect;
   vec3 frontMultFar = cam.getForward() * cam.getFarPlane();
   vec3 farPos = cam.getPosition() + frontMultFar;
-  vec3 farTL = farPos + cam.getLeft()  * farHSideHalf +  camCrossUp * farVSideHalf;
-  vec3 farTR = farPos + cam.getRight() * farHSideHalf +  camCrossUp * farVSideHalf;
-  vec3 farBR = farPos + cam.getRight() * farHSideHalf + -camCrossUp * farVSideHalf;
-  vec3 farBL = farPos + cam.getLeft()  * farHSideHalf + -camCrossUp * farVSideHalf;
+  vec3 farTR = farPos + cam.getLeft()  * farHSideHalf +  camCrossUp * farVSideHalf;
+  vec3 farTL = farPos + cam.getRight() * farHSideHalf +  camCrossUp * farVSideHalf;
+  vec3 farBL = farPos + cam.getRight() * farHSideHalf + -camCrossUp * farVSideHalf;
+  vec3 farBR = farPos + cam.getLeft()  * farHSideHalf + -camCrossUp * farVSideHalf;
 
   float nearVSideHalf = cam.getNearPlane() * fovSize * 0.5f;
   float nearHSideHalf = nearVSideHalf * aspect;
   vec3 nearPos = cam.getPosition() + cam.getForward() * cam.getNearPlane();
-  vec3 nearTL = nearPos + cam.getLeft()  * nearHSideHalf +  camCrossUp * nearVSideHalf;
-  vec3 nearTR = nearPos + cam.getRight() * nearHSideHalf +  camCrossUp * nearVSideHalf;
-  vec3 nearBR = nearPos + cam.getRight() * nearHSideHalf + -camCrossUp * nearVSideHalf;
-  vec3 nearBL = nearPos + cam.getLeft()  * nearHSideHalf + -camCrossUp * nearVSideHalf;
+  vec3 nearTR = nearPos + cam.getLeft()  * nearHSideHalf +  camCrossUp * nearVSideHalf;
+  vec3 nearTL = nearPos + cam.getRight() * nearHSideHalf +  camCrossUp * nearVSideHalf;
+  vec3 nearBL = nearPos + cam.getRight() * nearHSideHalf + -camCrossUp * nearVSideHalf;
+  vec3 nearBR = nearPos + cam.getLeft()  * nearHSideHalf + -camCrossUp * nearVSideHalf;
+
+  vec3 centerTR = (farTR + nearTR) * 0.5f;
+  vec3 centerTL = (farTL + nearTL) * 0.5f;
+  vec3 centerBR = (farBR + nearBR) * 0.5f;
+  vec3 centerBL = (farBL + nearBL) * 0.5f;
+
+  vec3 centerTop    = (centerTR + centerTL) * 0.5f;
+  vec3 centerBottom = (centerBR + centerBL) * 0.5f;
+  vec3 centerRight  = (centerTR + centerBR) * 0.5f;
+  vec3 centerLeft   = (centerTL + centerBL) * 0.5f;
 
   std::vector<Vertex> vertices {
     // Near plane
-    {nearTL, color},
     {nearTR, color},
-    {nearTR, color},
-    {nearBR, color},
-    {nearBR, color},
-    {nearBL, color},
-    {nearBL, color},
     {nearTL, color},
+    {nearBL, color},
+    {nearBR, color},
     // Far plane
-    {farTL, color},
     {farTR, color},
-    {farTR, color},
-    {farBR, color},
-    {farBR, color},
-    {farBL, color},
-    {farBL, color},
     {farTL, color},
-    // Connect planes corners
-    {nearTL, color},
-    {farTL, color},
-    {nearTR, color},
-    {farTR, color},
-    {nearBR, color},
-    {farBR, color},
-    {nearBL, color},
     {farBL, color},
+    {farBR, color},
+    // Normals
+    {centerTop, global::green},
+    {centerTop + frustum.topFace.normal, global::green},
+    {centerBottom, global::green},
+    {centerBottom + frustum.bottomFace.normal, global::green},
+    {centerRight, global::red},
+    {centerRight + frustum.rightFace.normal, global::red},
+    {centerLeft, global::red},
+    {centerLeft + frustum.leftFace.normal, global::red},
+    {nearPos, global::blue},
+    {nearPos + frustum.nearFace.normal, global::blue},
+    {farPos, global::blue},
+    {farPos + frustum.farFace.normal, global::blue},
   };
 
-  return Mesh(vertices, GL_LINES);
+  std::vector<GLuint> indices {
+    // Near plane
+    0, 1,
+    1, 2,
+    2, 3,
+    3, 0,
+    // Far plane
+    4, 5,
+    5, 6,
+    6, 7,
+    7, 4,
+    // Connect corners
+    0, 4,
+    1, 5,
+    2, 6,
+    3, 7,
+    // Normals
+    8, 9,
+    10, 11,
+    12, 13,
+    14, 15,
+    16, 17,
+    18, 19
+  };
+
+  return Mesh(vertices, indices, GL_LINES, clearable);
 }
 
 } // namespace meshes

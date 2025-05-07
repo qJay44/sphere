@@ -8,7 +8,7 @@ out vec4 FragColor;
 
 uniform vec3 camPos;
 uniform vec3 lightPos;
-uniform vec4 lightColor;
+uniform vec3 lightColor;
 uniform sampler2D diffuse0;
 
 vec4 directionalLight() {
@@ -23,7 +23,7 @@ vec4 directionalLight() {
   float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.f), 16);
   float specular = specAmount * specularLight;
 
-  return (diffuse + ambient) * lightColor;
+  return (diffuse + ambient) * vec4(lightColor, 1.f);
 }
 
 void main() {

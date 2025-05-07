@@ -2,11 +2,9 @@
 
 namespace frustum {
 
-float Sphere::radiusMultiplier = 20.f;
-
 Sphere::Sphere(const vec3& inCenter, const float& inRadius) : Volume{}, center(inCenter), radius(inRadius) {}
 
-bool Sphere::isOnOrForwardPlane(const Plane& plane) {
+bool Sphere::isOnOrForwardPlane(const Plane& plane) const {
   return plane.getSignedDistanceToPlane(center) > -radius;
 }
 

@@ -20,8 +20,8 @@ public:
   static Mesh loadObj(const fspath& file, bool printInfo = false);
 
   Mesh();
-  Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, GLenum mode = GL_TRIANGLES);
-  Mesh(std::vector<Vertex> vertices, GLenum mode);
+  Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, GLenum mode = GL_TRIANGLES, bool clearable = true);
+  Mesh(std::vector<Vertex> vertices, GLenum mode, bool clearable = true);
 
   ~Mesh();
 
@@ -47,7 +47,7 @@ protected:
   mat4 rotation    = mat4(1.f);
   mat4 scaleMat    = mat4(1.f);
 
-  bool clearable = true;
+  bool clearable;
 
 private:
   std::vector<Vertex> vertices;

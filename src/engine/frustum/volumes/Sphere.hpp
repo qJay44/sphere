@@ -12,7 +12,7 @@ struct Sphere : public Volume {
 
   Sphere(const vec3& inCenter, const float& inRadius);
 
-  bool isOnOrForwardPlane(const Plane& plane);
+  bool isOnOrForwardPlane(const Plane& plane) const final;
   bool isOnFrustum(const Frustum& frustum, const Mesh& mesh) const final;
 };
 

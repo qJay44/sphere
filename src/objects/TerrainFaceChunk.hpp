@@ -64,8 +64,7 @@ struct TerrainFaceChunk : public Mesh {
 
   TerrainFaceChunk() {}
 
-  TerrainFaceChunk(std::vector<Vertex> vertices, std::vector<GLuint> indices, u32 resolutionX) : Mesh(vertices, indices) {
-    clearable = false;
+  TerrainFaceChunk(std::vector<Vertex> vertices, std::vector<GLuint> indices, u32 resolutionX) : Mesh(vertices, indices, GL_TRIANGLES, false) {
     this->firstVertex = vertices.front().position;
     this->lastVertex = vertices.back().position;
   }

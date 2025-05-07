@@ -8,7 +8,6 @@
 #include "../engine/frustum/Frustum.hpp"
 #include "../engine/frustum/volumes/Sphere.hpp"
 #include "../engine/CameraStorage.hpp"
-#include "../engine/mesh/meshes.hpp"
 
 struct TerrainFace {
   std::list<TerrainFaceChunk> chunks;
@@ -21,6 +20,7 @@ struct TerrainFace {
 
     u32 chunksAmountSq = sqrt(chunksAmount);
     u32 chunkResolution = planet->resolution / chunksAmountSq;
+    bool randomColor = glm::length(color) == 0.f;
 
     for (u32 y = 0; y < chunksAmountSq; y++) {
       u32 ystart = y * chunkResolution;
@@ -28,8 +28,8 @@ struct TerrainFace {
         u32 xstart = x * chunkResolution;
         vec3 col = color;
 
-        if (glm::length(color) == 0.f) {
-          col= {
+        if (randomColor) {
+          col = {
             (rand() % 256) / 255.f,
             (rand() % 256) / 255.f,
             (rand() % 256) / 255.f
@@ -54,7 +54,7 @@ struct TerrainFace {
 
     for (const TerrainFaceChunk& chunk : chunks) {
       vec3 center = (chunk.lastVertex + chunk.firstVertex) * 0.5f;
-      float radius = glm::length(chunk.lastVertex - chunk.firstVertex) * frustum::Sphere::radiusMultiplier;
+      float radius = glm::length(chunk.lastVertex - chunk.firstVertex);
       frustum::Sphere frustumSphere(center, radius);
 
       if (frustumSphere.isOnFrustum(tfFrustum, chunk))
@@ -62,3 +62,4 @@ struct TerrainFace {
     }
   }
 };
+

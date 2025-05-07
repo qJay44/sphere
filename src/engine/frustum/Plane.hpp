@@ -5,7 +5,7 @@ struct Plane {
   float distance = 0.f;
 
   float getSignedDistanceToPlane(const vec3& point) const {
-    return dot(normal, point) - distance;
+    return glm::dot(normal, point) - distance;
   }
 };
 

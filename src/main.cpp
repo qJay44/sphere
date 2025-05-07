@@ -79,7 +79,7 @@ int main() {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init();
 
-  Light light({3.5f, 1.5f, 1.2f}, 0.1f);
+  Light light({16.3f, 24.f, 26.6f}, 0.5f);
 
   // ===== Shaders ============================================== //
 
@@ -91,10 +91,10 @@ int main() {
   Shader textureShader("default/texture.vert", "default/texture.frag");
   Shader airplaneShader("airplane.vert", "airplane.frag");
 
-  planetShader.setUniform3f("lightPos", light.getPosition());
-  planetShader.setUniform4f("lightColor", light.getColor());
-  airplaneShader.setUniform3f("lightPos", light.getPosition());
-  airplaneShader.setUniform4f("lightColor", light.getColor());
+  const GLint planetShaderLightPosLoc = planetShader.getUniformLoc("lightPos");
+  const GLint planetShaderLightColorLoc = planetShader.getUniformLoc("lightColor");
+  const GLint airplaneShaderLightPosLoc = airplaneShader.getUniformLoc("lightPos");
+  const GLint airplaneShaderLightColorLoc = airplaneShader.getUniformLoc("lightColor");
 
   // ===== Planet =============================================== //
 
@@ -128,6 +128,7 @@ int main() {
   gui::link(&cameraAirplane);
   gui::link(&cameraFree);
   gui::link(&airplane);
+  gui::link(&light);
 
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
@@ -166,6 +167,11 @@ int main() {
       glfwSetWindowTitle(window, std::format("FPS: {} / {:.5f} ms", fps, global::dt).c_str());
       titleTimer = currTime;
     }
+
+    planetShader.setUniform3f(planetShaderLightPosLoc, light.getPosition());
+    planetShader.setUniform3f(planetShaderLightColorLoc, light.getColor());
+    airplaneShader.setUniform3f(airplaneShaderLightPosLoc, light.getPosition());
+    airplaneShader.setUniform3f(airplaneShaderLightColorLoc, light.getColor());
 
     airplane.update();
 

@@ -96,21 +96,19 @@ Mesh Mesh::loadObj(const fspath& file, bool printInfo) {
 
   // ==================================== //
 
-  Mesh mesh = Mesh(vertices, GL_TRIANGLES);
-  mesh.clearable = false;
-
-  return mesh;
+  return Mesh(vertices, GL_TRIANGLES, false);
 }
 
-Mesh::Mesh() {}
+Mesh::Mesh() : clearable(false) {}
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, GLenum mode)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, GLenum mode, bool clearable)
   : vertices(vertices),
     indices(indices),
     vao(VAO(1)),
     vbo(VBO(1, vertices.data(), sizeof(Vertex) * vertices.size())),
     ebo(1, indices.data(), sizeof(GLuint) * indices.size()),
-    mode(mode) {
+    mode(mode),
+    clearable(clearable) {
   vao.bind();
   vbo.bind();
   ebo.bind();
@@ -128,11 +126,12 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, GLenum mod
   ebo.unbind();
 }
 
-Mesh::Mesh(std::vector<Vertex> vertices, GLenum mode)
+Mesh::Mesh(std::vector<Vertex> vertices, GLenum mode, bool clearable)
   : vertices(vertices),
     vao(VAO(1)),
     vbo(VBO(1, vertices.data(), sizeof(Vertex) * vertices.size())),
-    mode(mode) {
+    mode(mode),
+    clearable(clearable) {
   vao.bind();
   vbo.bind();
 
