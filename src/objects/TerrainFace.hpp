@@ -12,11 +12,13 @@
 struct TerrainFace {
   std::list<TerrainFaceChunk> chunks;
   u32 chunksAmount;
+  float heightmapScaleInv;
 
   TerrainFace() {}
 
   TerrainFace(const vec3& localUp, const Planet* planet, const vec3& color = vec3(0.f)) {
     chunksAmount = planet->chunks;
+    heightmapScaleInv = 1.f / planet->heightmapScale;
 
     u32 chunksAmountSq = sqrt(chunksAmount);
     u32 chunkResolution = planet->resolution / chunksAmountSq;
@@ -54,7 +56,7 @@ struct TerrainFace {
 
     for (const TerrainFaceChunk& chunk : chunks) {
       vec3 center = (chunk.lastVertex + chunk.firstVertex) * 0.5f;
-      float radius = glm::length(chunk.lastVertex - chunk.firstVertex);
+      float radius = glm::length(chunk.lastVertex - chunk.firstVertex) * heightmapScaleInv;
       frustum::Sphere frustumSphere(center, radius);
 
       if (frustumSphere.isOnFrustum(tfFrustum, chunk))

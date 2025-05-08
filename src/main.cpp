@@ -79,8 +79,6 @@ int main() {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init();
 
-  Light light({16.3f, 24.f, 26.6f}, 0.5f);
-
   // ===== Shaders ============================================== //
 
   Shader::setDirectoryLocation("shaders");
@@ -98,13 +96,17 @@ int main() {
 
   // ===== Planet =============================================== //
 
-  /* Planet planet(720, global::planetRadius, "res/geo/textures/wem21600.png"); */
-  Planet planet(128u, 256u, 20.f, "res/geo/textures/wem2560.png");
+  Planet planet(1024u, 256u, 45.f, "res/geo/textures/wem21600.png");
+  // Planet planet(128u, 256u, 20.f, "res/geo/textures/wem2560.png");
+
+  // ===== Light ================================================ //
+
+  Light light(planet.getRadius() + vec3{16.3f, 24.f, 26.6f}, 0.5f);
 
   // ===== Airplane ============================================= //
 
   vec3 airplanePosInit(0.f);
-  float airplaneFlyHeight = 3.f;
+  float airplaneFlyHeight = 10.f;
   airplanePosInit.z = planet.getRadius() + airplaneFlyHeight;
   Airplane airplane(planet, airplanePosInit, PI / 100.f, airplaneFlyHeight, PI / 10.f, 0.1f);
   Texture airplaneTexture("res/tex/Aircraft_Texture.png", GL_TEXTURE_2D, "diffuse0");

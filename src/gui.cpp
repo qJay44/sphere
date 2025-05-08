@@ -103,7 +103,7 @@ void gui::draw() {
     // ++++++++++++++++++++++++++++++++++++++++++ //
 
     SliderFloat("Radius", &planetGUI.ptr->radius, 1.f, 100.f);
-    SliderFloat("Heightmap scale", &planetGUI.ptr->heightmapScale, 0.01f, 10.f);
+    SliderFloat("Heightmap scale", &planetGUI.ptr->heightmapScale, 0.01f, 1.f);
     SliderFloat("Sea level", &planetGUI.ptr->seaLevel, -10.f, 10.f);
 
     static int rbChunksColoring = planetGUI.ptr->colorChunksInsteadOfFaces;

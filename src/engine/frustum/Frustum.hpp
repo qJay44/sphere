@@ -35,7 +35,7 @@ struct Frustum {
     vec3 down  = normalize(cross(frontMultFar - camCrossUp     * halfVSide,  cam.getLeft()));
 
     farFace    = {cam.getBack(), dot(cam.getBack(), camPos + frontMultFar)};
-    nearFace   = {cam.getForward(), dot(cam.getForward(), camPos + camNear * cam.getBack())};
+    nearFace   = {cam.getForward(), dot(cam.getForward(), camPos + camNear * cam.getForward())};
     rightFace  = {right, dot(right, camPos)};
     leftFace   = {left , dot(left, camPos)};
     topFace    = {up   , dot(up, camPos)};
