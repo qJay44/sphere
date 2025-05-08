@@ -7,12 +7,14 @@ Airplane::Airplane(
   vec3 position,
   float speedRad,
   float flyHeight,
+  float turnSpeedRad,
   float meshScale
 ) :
   planet(planet),
   position(position),
   speedRad(speedRad),
   flyHeight(flyHeight),
+  turnSpeedRad(turnSpeedRad),
   Mesh(Mesh::loadObj("res/obj/AirShip.obj")) {
 
   // Facing +Y
@@ -40,20 +42,44 @@ vec3 Airplane::getBack() const { return -forward; }
 vec3 Airplane::getDown() const { return -up;      }
 vec3 Airplane::getLeft() const { return -right;   }
 
+void Airplane::turn(float dir) {
+  turnVelocityRad += turnSpeedRad * dir * global::dt;
+  if (abs(tiltRecoverVelocityRad) < PI_3)
+    tiltVelocityRad += turnVelocityRad;
+}
+
 void Airplane::update() {
+  // Turn
+  glm::quat q = glm::angleAxis(turnVelocityRad, up);
+  Mesh::rotate(q);
+  right = q * right;
+  forward = rotation[2];
+
+  // Tilt
+  Mesh::rotate(glm::angleAxis(tiltVelocityRad, -forward));
+  tiltRecoverVelocityRad += tiltVelocityRad;
+
+  // Move forward
   float frameSpeedRad = speedRad * global::dt;
   vec3 newPos = normalize(position) + forward * frameSpeedRad;
   vec3 gravityUp = normalize(newPos);
   newPos = gravityUp * (planet.getRadius() + flyHeight);
 
-  quat = glm::angleAxis(frameSpeedRad, rotAxis);
   Mesh::translate(newPos - position);
-  Mesh::rotate(quat);
+  // Finding left since local left (-right) can be tilted up or down
+  Mesh::rotate(glm::angleAxis(frameSpeedRad, normalize(cross(up, forward))));
 
-  forward = rotation[2];
+  // Recovering from tilt
+  float tiltRecover = tiltRecoverVelocityRad * tiltRecoverVelocityDecreaseFactor;
+  Mesh::rotate(glm::angleAxis(tiltRecover, forward));
+  tiltRecoverVelocityRad -= tiltRecover;
+
   up = gravityUp;
   right = -rotation[0];
+  forward = normalize(cross(up, right));
   position = newPos;
+  turnVelocityRad *= turnVelocityDecreaseFactor;
+  tiltVelocityRad *= tiltVelocityDecreaseFactor;
 }
 
 void Airplane::draw(const Camera* camera, const Shader& shader, u32 flags) {

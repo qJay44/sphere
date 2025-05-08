@@ -42,10 +42,12 @@ void InputsHandler::scrollCallback(GLFWwindow* window, double xoffset, double yo
 }
 
 void InputsHandler::process(Camera* camera) {
-  if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) glfwSetWindowShouldClose(window, GLFW_TRUE);
+  if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+    glfwSetWindowShouldClose(window, GLFW_TRUE);
 
-  glm::ivec2 winSize;
-  glfwGetWindowSize(window, &winSize.x, &winSize.y);
+  AirplaneCamera*& cameraAirplane = CameraStorage::cameraAirplanePtr;
+
+  glm::ivec2 winSize = getWinSize();
   glm::dvec2 winCenter = winSize / 2;
 
   if (!global::guiFocused) {
@@ -64,6 +66,8 @@ void InputsHandler::process(Camera* camera) {
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) camera->moveUp();
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) camera->moveDown();
 
+    // =============== Holding shift =============== //
+
     static float camNormalSpeed = camera->getSpeed();
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
       if (!isHoldingShift)
@@ -79,6 +83,8 @@ void InputsHandler::process(Camera* camera) {
       camNormalSpeed = camera->getSpeed();
       isHoldingShift = false;
     }
+
+    // ============================================= //
 
     camera->update();
 

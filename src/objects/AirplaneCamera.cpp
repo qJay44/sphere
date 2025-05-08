@@ -6,7 +6,7 @@
 
 AirplaneCamera* CameraStorage::cameraAirplanePtr = nullptr;
 
-AirplaneCamera::AirplaneCamera(const Airplane& airplane, float distance, float sensitivity)
+AirplaneCamera::AirplaneCamera(Airplane& airplane, float distance, float sensitivity)
   : Camera(airplane.getPosition() + airplane.getUp() * distance, vec3(0.f, 0.f, -1.f), sensitivity),
     airplane(airplane),
     distance(distance) {
@@ -24,8 +24,8 @@ void AirplaneCamera::setDistance(const float& d) { distance = d; }
 
 void AirplaneCamera::moveForward() {}
 void AirplaneCamera::moveBack()    {}
-void AirplaneCamera::moveLeft()    {}
-void AirplaneCamera::moveRight()   {}
+void AirplaneCamera::moveLeft()    {airplane.turn( 1.f);}
+void AirplaneCamera::moveRight()   {airplane.turn(-1.f);}
 void AirplaneCamera::moveUp()      {}
 void AirplaneCamera::moveDown()    {}
 

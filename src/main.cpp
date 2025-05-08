@@ -106,7 +106,7 @@ int main() {
   vec3 airplanePosInit(0.f);
   float airplaneFlyHeight = 3.f;
   airplanePosInit.z = planet.getRadius() + airplaneFlyHeight;
-  Airplane airplane(planet, airplanePosInit, PI / 200.f, airplaneFlyHeight, 0.1f);
+  Airplane airplane(planet, airplanePosInit, PI / 100.f, airplaneFlyHeight, PI / 10.f, 0.1f);
   Texture airplaneTexture("res/tex/Aircraft_Texture.png", GL_TEXTURE_2D, "diffuse0");
   airplane.add(&airplaneTexture);
 

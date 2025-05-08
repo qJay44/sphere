@@ -176,7 +176,7 @@ void Mesh::clear() {
 void Mesh::translate(const vec3& v) { translation = glm::translate(translation, v); }
 
 void Mesh::rotate(const float& angle, const vec3& axis) { rotation = glm::rotate(rotation, angle, axis);}
-void Mesh::rotate(const glm::quat& q) { rotation *= glm::mat4_cast(q); };
+void Mesh::rotate(const glm::quat& q) { rotation = glm::mat4_cast(q) * rotation; };
 
 void Mesh::scale(const float& s)    { scaleMat = glm::scale(scaleMat, vec3(s)); }
 void Mesh::scale(const vec2& s)     { scaleMat = glm::scale(scaleMat, vec3(s, 1.f)); }

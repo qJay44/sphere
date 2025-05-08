@@ -6,7 +6,7 @@
 
 class AirplaneCamera : public Camera {
 public:
-  AirplaneCamera(const Airplane& airplane, float distance, float sensitivity);
+  AirplaneCamera(Airplane& airplane, float distance, float sensitivity);
 
   const float& getDistance() const;
 
@@ -24,7 +24,7 @@ public:
 private:
   friend struct gui;
 
-  const Airplane& airplane;
+  Airplane& airplane;
   float distance;
 
 private:
