@@ -39,15 +39,15 @@ private:
   vec3 up;
   vec3 right;
 
-  float turnVelocityDecreaseFactor = 0.91f;
-  float tiltVelocityDecreaseFactor = 0.91f;
-  float tiltRecoverVelocityDecreaseFactor = 0.11f;
+  float turnMomentumDecreaseFactor = 0.45f;
+  float tiltMomentumDecreaseFactor = 0.91f;
+  float tiltRecoverMomentumDecreaseFactor = 0.11f;
 
   float speedRad;
   float flyHeight;
   float turnSpeedRad;
-  float turnVelocityRad = 0.f;
-  float tiltVelocityRad = 0.f;
-  float tiltRecoverVelocityRad = 0.f;
+  float turnMomentumRad = 0.f;
+  float tiltMomentumRad = 0.f;
+  float tiltRecoverMomentumRad = 0.f;
 };
 

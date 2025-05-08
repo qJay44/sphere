@@ -91,10 +91,10 @@ int main() {
   Shader textureShader("default/texture.vert", "default/texture.frag");
   Shader airplaneShader("airplane.vert", "airplane.frag");
 
-  const GLint planetShaderLightPosLoc = planetShader.getUniformLoc("lightPos");
-  const GLint planetShaderLightColorLoc = planetShader.getUniformLoc("lightColor");
-  const GLint airplaneShaderLightPosLoc = airplaneShader.getUniformLoc("lightPos");
-  const GLint airplaneShaderLightColorLoc = airplaneShader.getUniformLoc("lightColor");
+  GLint planetShaderLightPosLoc = planetShader.getUniformLoc("lightPos");
+  GLint planetShaderLightColorLoc = planetShader.getUniformLoc("lightColor");
+  GLint airplaneShaderLightPosLoc = airplaneShader.getUniformLoc("lightPos");
+  GLint airplaneShaderLightColorLoc = airplaneShader.getUniformLoc("lightColor");
 
   // ===== Planet =============================================== //
 

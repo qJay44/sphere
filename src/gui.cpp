@@ -1,6 +1,7 @@
 #include "gui.hpp"
 
 #include "imgui.h"
+#include <algorithm>
 
 #define IM_RED   IM_COL32(255u, 0u  , 0u  , 255u)
 #define IM_GREEN IM_COL32(0u ,  255u, 0u  , 255u)
@@ -76,27 +77,30 @@ void gui::draw() {
 
   // ================== Planet =========================
 
-  SeparatorText("Planet");
-
   if (!planetGUI.ptr) error("The planet is not linked to gui");
-  {
-    Text("Resolution");
-    static int rbResolution = planetGUI.ptr->resolution;
-    for (u32 i = 0; i < 9; i++) {
-      int num = 4 << i;
-      RadioButton(std::to_string(num).c_str(), &rbResolution, num);
-      if (i != 8) SameLine();
-    }
-    planetGUI.ptr->resolution = rbResolution;
+  if (TreeNode("Planet")) {
 
-    Text("Chunks");
-    static int rbChunks = planetGUI.ptr->chunks;
-    for (u32 i = 0; i < 9; i++) {
-      int num = 4 << i;
-      RadioButton((std::to_string(num) + "##2").c_str(), &rbChunks, num);
-      if (i != 8) SameLine();
-    }
-    planetGUI.ptr->chunks = rbChunks;
+    // +++++++++++++++ Resolution +++++++++++++++ //
+    //
+    Text("Resolution"); SameLine();
+
+    if (ArrowButton("##left", ImGuiDir_Left))   planetGUI.ptr->resolution >>= 1;  SameLine();
+    if (ArrowButton("##right", ImGuiDir_Right)) planetGUI.ptr->resolution <<= 1;  SameLine();
+
+    planetGUI.ptr->resolution = std::clamp(planetGUI.ptr->resolution, 2u, 1024u); SameLine();
+    Text("%d", planetGUI.ptr->resolution);
+
+    // +++++++++++++++ Chunks +++++++++++++++++++ //
+
+    Text("Chunks    "); SameLine();
+
+    if (ArrowButton("##left##2", ImGuiDir_Left))   planetGUI.ptr->chunks >>= 1; SameLine();
+    if (ArrowButton("##right##2", ImGuiDir_Right)) planetGUI.ptr->chunks <<= 1; SameLine();
+
+    planetGUI.ptr->chunks = std::clamp(planetGUI.ptr->chunks, 2u, 1024u);    SameLine();
+    Text("%d", planetGUI.ptr->chunks);
+
+    // ++++++++++++++++++++++++++++++++++++++++++ //
 
     SliderFloat("Radius", &planetGUI.ptr->radius, 1.f, 100.f);
     SliderFloat("Heightmap scale", &planetGUI.ptr->heightmapScale, 0.01f, 10.f);
@@ -109,13 +113,14 @@ void gui::draw() {
 
     if (Button("Rebuild"))
       planetGUI.ptr->rebuild();
+
+    TreePop();
   }
 
   // ================== Airplane =======================
 
-  SeparatorText("Airplane");
   if (!airplaneGUI.ptr) error("The airplane is not linked to gui");
-  {
+  if (TreeNode("Airplane")) {
     static float prevScale = airplaneGUI.scale;
     if (SliderFloat("Scale", &airplaneGUI.scale, 0.01f, 10.f)) {
       float scaleFactor = airplaneGUI.scale / prevScale;
@@ -123,38 +128,51 @@ void gui::draw() {
       prevScale = airplaneGUI.scale;
     }
 
-    SliderFloat("Speed (radians)", &airplaneGUI.ptr->speedRad, 0.f, 10.f);
+    SliderFloat("Speed", &airplaneGUI.ptr->speedRad, 0.f, 10.f);
+    SetItemTooltip("Radians");
+
     SliderFloat("Fly height", &airplaneGUI.ptr->flyHeight, 1.f, 10.f);
-    SliderFloat("Turn speed (radians)", &airplaneGUI.ptr->turnSpeedRad, 0.f, 10.f);
+    SliderFloat("Turn speed", &airplaneGUI.ptr->turnSpeedRad, 0.f, 10.f);
+    SetItemTooltip("Radians");
+
+    SliderFloat("Turn momementum decrease factor", &airplaneGUI.ptr->turnMomentumDecreaseFactor, 0.1f, 0.99f);
+    SetItemTooltip("How long the momementum is decreasing");
+    SliderFloat("Tilt momementum decrease factor", &airplaneGUI.ptr->tiltMomentumDecreaseFactor, 0.1f, 0.99f);
+    SetItemTooltip("How long the momementum is decreasing");
+    SliderFloat("Tilt recover momementum decrease factor", &airplaneGUI.ptr->tiltRecoverMomentumDecreaseFactor, 0.1f, 0.99f);
+    SetItemTooltip("How long the momementum is decreasing");
+
+    TreePop();
   }
 
   // ================== Airplane Camera ================
 
-  SeparatorText("Airplane Camera");
   if (!cameraGUI.arcball) error("The arcball camera is not linked to gui");
-  {
+  if (TreeNode("Airplane Camera")) {
     SliderFloat("Near",     &cameraGUI.arcball->nearPlane, 0.01f, 1.f);
     SliderFloat("Far",      &cameraGUI.arcball->farPlane,  10.f , 100.f);
     SliderFloat("Distance", &cameraGUI.arcball->distance,  1.f  , 10.f);
     SliderFloat("FOV",      &cameraGUI.arcball->fov,       45.f , 179.f);
+
+    TreePop();
   }
 
   // ================== Free Camera ====================
 
-  SeparatorText("Free Camera");
   if (!cameraGUI.free) error("The free camera is not linked to gui");
-  {
+  if (TreeNode("Free camera")) {
     SliderFloat("Near##2",  &cameraGUI.free->nearPlane, 0.01f, 1.f);
     SliderFloat("Far##2",   &cameraGUI.free->farPlane,  10.f , 100.f);
     SliderFloat("Speed##2", &cameraGUI.free->speed,     1.f  , 50.f);
     SliderFloat("FOV##2",   &cameraGUI.free->fov,       45.f , 179.f);
+
+    TreePop();
   }
 
   // ================== Light ==========================
 
-  SeparatorText("Light");
   if (!lightGUI.ptr) error("The light is not linked to gui");
-  {
+  if (TreeNode("Light")) {
     const vec3& pos = lightGUI.ptr->position;
     static vec3 posGui = pos;
 
@@ -166,6 +184,8 @@ void gui::draw() {
     lightGUI.ptr->position = posGui;
 
     ColorEdit3("Color", (float*)&lightGUI.ptr->color);
+
+    TreePop();
   };
 
   End();
