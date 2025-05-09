@@ -3,6 +3,7 @@
 #include "../engine/mesh/texture/image2D.hpp"
 
 #include "TerrainFace.hpp"
+#include "glm/ext/scalar_constants.hpp"
 
 constexpr vec3 directions[6]{
   {1.f,  0.f,  0.f }, // Right
@@ -22,6 +23,51 @@ constexpr vec3 palette[6]{
   {0.996f, 0.984f, 0.169f},
 };
 
+void Planet::_generateNormalMaps() {
+  // const uvec2& size = heightmaps[0].getSize(); // Both have equal sizes
+  Texture tex("res/tex/planet/heightmap2560.png", GL_TEXTURE_2D, "heightmap", 0, 1);
+  tex.bind();
+
+  ivec2 size = tex.getSize();
+
+  Shader computeShader("planet2.comp");
+
+  u32 textureOutput;
+  glGenTextures(1, &textureOutput);
+  glActiveTexture(GL_TEXTURE2);
+  glBindTexture(GL_TEXTURE_2D, textureOutput);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
+  glBindImageTexture(2, textureOutput, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+
+  byte* pixels = new byte[size.x * size.y * 4];
+  computeShader.setUniformTexture("heightmap", tex.getUnit());
+  computeShader.setUniform1f("seaLevel", seaLevel);
+  computeShader.setUniform1f("heightmapScale", heightmapScale);
+  computeShader.setUniform1f("worldRadius", radius);
+
+  puts("Creating normalmap3.png...");
+  glDispatchCompute(size.x, size.y, 1);
+  glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+  glActiveTexture(GL_TEXTURE2);
+  glBindTexture(GL_TEXTURE2, textureOutput);
+  glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+  image2D::write("res/tex/planet/normalmap3.png", size, 4, pixels);
+
+  // puts("Creating normalmap1.png...");
+  // computeShader.setUniform2i("offset", {size.x, 0});
+  // glDispatchCompute(size.x, size.y, 1);
+  // glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+  // glActiveTexture(GL_TEXTURE2);
+  // glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+  // image2D::write("res/tex/planet/normalmap1.png", size, 4, pixels);
+
+  delete[] pixels;
+}
+
 Planet::Planet(u32 resolution, u32 chunksPerFace, float radius, const fspath& texturePath)
   : resolution(resolution),
     radius(radius) {
@@ -34,9 +80,9 @@ Planet::Planet(u32 resolution, u32 chunksPerFace, float radius, const fspath& te
   img_w2.width /= 2;
 
   glPixelStorei(GL_UNPACK_ROW_LENGTH, img.width);
-  textures[0] = Texture(img_w2, GL_TEXTURE_2D, "heightmap0", 0, 1);
+  heightmaps[0] = Texture(img_w2, GL_TEXTURE_2D, "heightmap0", 0, 1);
   img_w2.pixels += img_w2.width * img_w2.channels;
-  textures[1] = Texture(img_w2, GL_TEXTURE_2D, "heightmap1", 1, 1);
+  heightmaps[1] = Texture(img_w2, GL_TEXTURE_2D, "heightmap1", 1, 1);
   glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
   img_w2.pixels = nullptr;
 

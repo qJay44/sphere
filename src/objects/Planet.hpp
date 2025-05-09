@@ -20,6 +20,8 @@ public:
   void rebuild(int resolution, float radius);
   void draw(const Camera* camera, const Shader& shader) const;
 
+  void _generateNormalMaps();
+
 private:
   friend struct gui;
   friend struct TerrainFace;
@@ -30,7 +32,7 @@ private:
   float heightmapScale = 0.225f;
   float seaLevel = 0.f;
   struct TerrainFace* terrainFaces = nullptr;
-  Texture textures[2];
+  Texture heightmaps[2];
 
   bool colorChunksInsteadOfFaces = true;
 

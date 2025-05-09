@@ -15,6 +15,7 @@ public:
   const GLenum& getType() const;
   const GLuint& getUnit() const;
   const std::string& getUniformName() const;
+  const uvec2& getSize() const;
 
 private:
   GLuint unit;
@@ -22,6 +23,7 @@ private:
 
   GLuint id;
   GLenum glType;
+  uvec2 size;
 
 private:
   void build2D(const image2D& img, u8 prefChannels);

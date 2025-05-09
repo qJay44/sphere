@@ -96,7 +96,10 @@ int main() {
 
   // ===== Planet =============================================== //
 
-  Planet planet(1024u, 256u, 45.f, "res/geo/textures/wem21600.png");
+  Planet planet(1024u, 256u, 45.f, "res/tex/planet/heightmap2560.png");
+  planet._generateNormalMaps();
+  puts("done");
+  exit(0);
   // Planet planet(128u, 256u, 20.f, "res/geo/textures/wem2560.png");
 
   // ===== Light ================================================ //
@@ -114,7 +117,7 @@ int main() {
 
   // ===== Cameras ============================================== //
 
-  Camera cameraFree({0.f, 0.f, planet.getRadius()}, {0.f, 0.f, -1.f}, 100.f);
+  Camera cameraFree({0.f, 0.f, planet.getRadius() + 3.f}, {0.f, 0.f, -1.f}, 100.f);
   AirplaneCamera cameraAirplane(airplane, 8.f, 200.f);
   CameraStorage::cameraFreePtr = &cameraFree;
   CameraStorage::cameraAirplanePtr= &cameraAirplane;
@@ -181,13 +184,7 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     planet.draw(camera, planetShader);
-    if (global::drawWireframe) planet.draw(camera, linesShader);
-    if (global::drawNormals)   planet.draw(camera, normalsShader);
-
     airplane.draw(camera, airplaneShader);
-    if (global::drawWireframe)  airplane.draw(camera, linesShader);
-    if (global::drawNormals)    airplane.draw(camera, normalsShader);
-    if (global::drawDirections) airplane.draw(camera, colorShader, AIRPLANE_FLAG_DRAW_DIRECTIONS);
 
     glDisable(GL_CULL_FACE);
 

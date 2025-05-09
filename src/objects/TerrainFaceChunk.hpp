@@ -41,7 +41,7 @@ struct TerrainFaceChunk : public Mesh {
         Vertex& vertex = vertices[idx];
 
         vertex = {pointOnSphereFancy(pointOnPlane), color};
-        vertex.normal = vertex.position;
+        vertex.normal = normalize(vertex.position);
         vertex.texture = {percentX, percentY};
         vertex.position *= planet->getRadius();
 

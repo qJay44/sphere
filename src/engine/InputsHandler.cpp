@@ -27,9 +27,6 @@ void InputsHandler::keyCallback(GLFWwindow* window, int key, int scancode, int a
     case GLFW_KEY_2:
       if (action == GLFW_PRESS) global::drawNormals = !global::drawNormals;
       break;
-    case GLFW_KEY_3:
-      if (action == GLFW_PRESS) global::drawDirections = !global::drawDirections;
-      break;
     case GLFW_KEY_F:
       if (action == GLFW_PRESS) global::camIsArcball = !global::camIsArcball;
       break;

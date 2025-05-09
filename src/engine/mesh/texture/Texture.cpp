@@ -84,11 +84,13 @@ void Texture::clear() {
 const GLenum& Texture::getType() const { return glType; }
 const GLuint& Texture::getUnit() const { return unit; }
 const std::string& Texture::getUniformName() const { return uniformName; }
+const uvec2& Texture::getSize() const { return size; }
 
 void Texture::build2D(const image2D& img, u8 prefChannels) {
+  size = {img.width, img.height};
   glType = GL_TEXTURE_2D;
   glGenTextures(1, &id);
-  glBindTexture(glType, id);
+  bind();
   glTexParameteri(glType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(glType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(glType, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -100,3 +102,4 @@ void Texture::build2D(const image2D& img, u8 prefChannels) {
   u32 formatImg = GLchannels[img.channels - 1];
   glTexImage2D(glType, 0, formatInternal, img.width, img.height, 0, formatImg, GL_UNSIGNED_BYTE, img.pixels);
 }
+

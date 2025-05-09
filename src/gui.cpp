@@ -151,7 +151,7 @@ void gui::draw() {
   if (TreeNode("Airplane Camera")) {
     SliderFloat("Near",     &cameraGUI.arcball->nearPlane, 0.01f, 1.f);
     SliderFloat("Far",      &cameraGUI.arcball->farPlane,  10.f , 100.f);
-    SliderFloat("Distance", &cameraGUI.arcball->distance,  1.f  , 10.f);
+    SliderFloat("Distance", &cameraGUI.arcball->distance,  1.f  , 50.f);
     SliderFloat("FOV",      &cameraGUI.arcball->fov,       45.f , 179.f);
 
     TreePop();
