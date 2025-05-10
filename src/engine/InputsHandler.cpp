@@ -28,7 +28,11 @@ void InputsHandler::keyCallback(GLFWwindow* window, int key, int scancode, int a
       if (action == GLFW_PRESS) global::drawNormals = !global::drawNormals;
       break;
     case GLFW_KEY_F:
-      if (action == GLFW_PRESS) global::camIsArcball = !global::camIsArcball;
+      if (action == GLFW_PRESS) {
+        global::camIsArcball = !global::camIsArcball;
+         CameraStorage::cameraFreePtr->position = CameraStorage::cameraAirplanePtr->position;
+         CameraStorage::cameraFreePtr->orientation = CameraStorage::cameraAirplanePtr->getForward();
+      }
       break;
   }
 }

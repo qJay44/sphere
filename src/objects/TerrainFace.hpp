@@ -39,8 +39,8 @@ struct TerrainFace {
         }
 
         TerrainFaceChunk chunk = TerrainFaceChunk::build(localUp, planet, chunkResolution, {xstart, ystart}, col);
-        chunk.add(&planet->heightmaps[0]);
-        chunk.add(&planet->heightmaps[1]);
+        chunk.add(&planet->normalheightmaps[0]);
+        chunk.add(&planet->normalheightmaps[1]);
         chunks.push_back(chunk);
       }
     }

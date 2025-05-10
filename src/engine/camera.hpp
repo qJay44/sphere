@@ -66,6 +66,6 @@ protected:
 
 private:
   friend struct gui;
-  friend struct CameraManager;
+  friend struct InputsHandler;
 };
 

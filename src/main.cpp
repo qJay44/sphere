@@ -96,11 +96,7 @@ int main() {
 
   // ===== Planet =============================================== //
 
-  Planet planet(1024u, 256u, 45.f, "res/tex/planet/heightmap2560.png");
-  planet._generateNormalMaps();
-  puts("done");
-  exit(0);
-  // Planet planet(128u, 256u, 20.f, "res/geo/textures/wem2560.png");
+  Planet planet(1024u, 256u, 45.f);
 
   // ===== Light ================================================ //
 

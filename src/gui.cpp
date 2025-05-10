@@ -2,6 +2,7 @@
 
 #include "imgui.h"
 #include <algorithm>
+#include <cmath>
 
 #define IM_RED   IM_COL32(255u, 0u  , 0u  , 255u)
 #define IM_GREEN IM_COL32(0u ,  255u, 0u  , 255u)
@@ -84,10 +85,20 @@ void gui::draw() {
     //
     Text("Resolution"); SameLine();
 
-    if (ArrowButton("##left", ImGuiDir_Left))   planetGUI.ptr->resolution >>= 1;  SameLine();
-    if (ArrowButton("##right", ImGuiDir_Right)) planetGUI.ptr->resolution <<= 1;  SameLine();
+    static u8 resRoot = sqrt(planetGUI.ptr->resolution);
+    if (ArrowButton("##left", ImGuiDir_Left)) {
+      resRoot--;
+      resRoot = std::max(resRoot, (u8)1);
+      planetGUI.ptr->resolution = resRoot * resRoot;
+    }
+    SameLine();
+    if (ArrowButton("##right", ImGuiDir_Right)) {
+      resRoot++;
+      planetGUI.ptr->resolution = resRoot * resRoot;
+    }
+    SameLine();
 
-    planetGUI.ptr->resolution = std::clamp(planetGUI.ptr->resolution, 2u, 1024u); SameLine();
+    planetGUI.ptr->resolution = std::clamp(planetGUI.ptr->resolution, 2u, 2048u);
     Text("%d", planetGUI.ptr->resolution);
 
     // +++++++++++++++ Chunks +++++++++++++++++++ //
@@ -121,13 +132,6 @@ void gui::draw() {
 
   if (!airplaneGUI.ptr) error("The airplane is not linked to gui");
   if (TreeNode("Airplane")) {
-    static float prevScale = airplaneGUI.scale;
-    if (SliderFloat("Scale", &airplaneGUI.scale, 0.01f, 10.f)) {
-      float scaleFactor = airplaneGUI.scale / prevScale;
-      airplaneGUI.ptr->scale(scaleFactor);
-      prevScale = airplaneGUI.scale;
-    }
-
     SliderFloat("Speed", &airplaneGUI.ptr->speedRad, 0.f, 10.f);
     SetItemTooltip("Radians");
 
@@ -141,6 +145,13 @@ void gui::draw() {
     SetItemTooltip("How long the momementum is decreasing");
     SliderFloat("Tilt recover momementum decrease factor", &airplaneGUI.ptr->tiltRecoverMomentumDecreaseFactor, 0.1f, 0.99f);
     SetItemTooltip("How long the momementum is decreasing");
+
+    static float prevScale = airplaneGUI.scale;
+    if (SliderFloat("Scale", &airplaneGUI.scale, 0.01f, 10.f)) {
+      float scaleFactor = airplaneGUI.scale / prevScale;
+      airplaneGUI.ptr->scale(scaleFactor);
+      prevScale = airplaneGUI.scale;
+    }
 
     TreePop();
   }
