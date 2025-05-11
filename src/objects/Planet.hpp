@@ -8,8 +8,8 @@ public:
   static const Texture* getTexNormalheightmap(const bool& id);
   static const Texture* getTexWorld(const bool& id);
 
-  static void addTexNormalheightmaps(const Texture* tex0, const Texture* tex1);
-  static void addTexWorld(const Texture* tex0, const Texture* tex1);
+  static void addTexNormalheightmaps(const Texture* tex);
+  static void addTexWorldcolors(const Texture* tex);
 
   Planet(u32 resolution, u32 chunksPerFace, float radius);
   ~Planet();
@@ -30,8 +30,8 @@ private:
   friend struct gui;
   friend struct TerrainFace;
 
-  static const Texture* normalheightmaps[2];
-  static const Texture* world[2];
+  static const Texture* normalheightmaps;
+  static const Texture* worldColors;
 
   u32 resolution;
   u32 chunks;

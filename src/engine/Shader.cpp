@@ -86,6 +86,7 @@ GLuint Shader::compile(const fspath& path, int type) {
     for (int i = 0; i < head.length() - 3; i++)
       printf(fmt.c_str(), "=");
     puts("");
+    exit(1);
   }
 
   return shaderId;
@@ -105,6 +106,7 @@ void Shader::link(GLuint program) {
     printf(fmt.c_str(), "\n===== Shader link error =====\n\n");
     puts(infoLog);
     printf(fmt.c_str(), "=============================\n\n");
+    exit(1);
   }
 }
 

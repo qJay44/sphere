@@ -20,21 +20,14 @@ constexpr vec3 palette[6]{
   {0.996f, 0.984f, 0.169f},
 };
 
-const Texture* Planet::normalheightmaps[2];
-const Texture* Planet::world[2];
+const Texture* Planet::normalheightmaps = nullptr;
+const Texture* Planet::worldColors = nullptr;
 
-const Texture* Planet::getTexNormalheightmap(const bool& id) { return normalheightmaps[id]; }
-const Texture* Planet::getTexWorld(const bool& id) { return world[id]; }
+const Texture* Planet::getTexNormalheightmap(const bool& id) { return normalheightmaps; }
+const Texture* Planet::getTexWorld(const bool& id) { return worldColors; }
 
-void Planet::addTexNormalheightmaps(const Texture* tex0, const Texture* tex1) {
-  normalheightmaps[0] = tex0;
-  normalheightmaps[1] = tex1;
-}
-
-void Planet::addTexWorld(const Texture* tex0, const Texture* tex1) {
-  world[0] = tex0;
-  world[1] = tex1;
-}
+void Planet::addTexNormalheightmaps(const Texture* tex) { normalheightmaps = tex; }
+void Planet::addTexWorldcolors(const Texture* tex)      { worldColors = tex; }
 
 Planet::Planet(u32 resolution, u32 chunksPerFace, float radius)
   : resolution(resolution),
@@ -71,37 +64,26 @@ void Planet::rebuild(int resolution, float radius) {
 }
 
 void Planet::draw(const Camera* camera, const Shader& shader) const {
-  assert(planet->normalheightmaps[0] != nullptr);
-  assert(planet->normalheightmaps[1] != nullptr);
-  assert(planet->world[0] != nullptr);
-  assert(planet->world[1] != nullptr);
+  assert(planet->normalheightmaps != nullptr);
 
   static const GLint heightmapScaleUniLoc = shader.getUniformLoc("heightmapScale");
   static const GLint seaLevelUniLoc = shader.getUniformLoc("seaLevel");
-  static const GLint nhms0Loc = shader.getUniformLoc("normalheightmap0");
-  static const GLint nhms1Loc = shader.getUniformLoc("normalheightmap1");
-  static const GLint world0Loc = shader.getUniformLoc("world0");
-  static const GLint world1Loc = shader.getUniformLoc("world1");
+  static const GLint nhmsLoc = shader.getUniformLoc("normalheightmaps");
+  static const GLint wcLoc = shader.getUniformLoc("worldColors");
 
   shader.setUniform1f(heightmapScaleUniLoc, heightmapScale * radius);
   shader.setUniform1f(seaLevelUniLoc, seaLevel);
-  shader.setUniformTexture(nhms0Loc, 0);
-  shader.setUniformTexture(nhms1Loc, 1);
-  shader.setUniformTexture(world0Loc, 2);
-  shader.setUniformTexture(world1Loc, 3);
+  shader.setUniformTexture(nhmsLoc, Planet::normalheightmaps->getUnit());
+  shader.setUniformTexture(wcLoc, Planet::worldColors->getUnit());
 
-  Planet::normalheightmaps[0]->bind();
-  Planet::normalheightmaps[1]->bind();
-  Planet::world[0]->bind();
-  Planet::world[1]->bind();
+  Planet::normalheightmaps->bind();
+  Planet::worldColors->bind();
 
   for (u8 i = 0; i < 6; i++)
     terrainFaces[i].draw(camera, shader);
 
-  Planet::normalheightmaps[0]->unbind();
-  Planet::normalheightmaps[1]->unbind();
-  Planet::world[0]->unbind();
-  Planet::world[1]->unbind();
+  Planet::normalheightmaps->unbind();
+  Planet::worldColors->unbind();
 }
 
 void Planet::build() {

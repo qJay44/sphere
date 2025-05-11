@@ -1,5 +1,6 @@
 #include "Texture.hpp"
 
+#include <cassert>
 #include <format>
 #include <windows.h>
 
@@ -7,20 +8,28 @@ constexpr u32 GLchannels[4] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
 
 Texture::Texture() {}
 
-Texture::Texture(const image2D& img, GLenum type, std::string uniform, GLuint unit, u8 prefChannels)
+Texture::Texture(const image2D& img0, const image2D& img1, const GLuint& unit)
+  : unit(unit) {
+  create2DArray(img0, img1);
+  unbind();
+}
+
+Texture::Texture(const image2D& img, const GLenum& type, const std::string& uniform, const GLuint& unit, const u8& prefChannels)
   : unit(unit),
     uniformName(uniform) {
   switch (type) {
     case GL_TEXTURE_2D:
       create2D(img, prefChannels);
+      break;
     default:
       error(std::format("Unhandled texture creation type: [{}]", type));
+      break;
   }
 
   unbind();
 }
 
-Texture::Texture(const fspath& path, GLenum type, std::string uniform, GLuint unit, u8 prefChannels)
+Texture::Texture(const fspath& path, const GLenum& type, const std::string& uniform, const GLuint& unit, const u8& prefChannels)
   : unit(unit),
     uniformName(uniform) {
   glGenTextures(1, &id);
@@ -88,11 +97,12 @@ void Texture::clear() {
 const GLenum& Texture::getType() const { return glType; }
 const GLuint& Texture::getUnit() const { return unit; }
 const std::string& Texture::getUniformName() const { return uniformName; }
-const uvec2& Texture::getSize() const { return size; }
+const uvec3& Texture::getSize() const { return size; }
 
 void Texture::create2D(const image2D& img, u8 prefChannels) {
   printf("Creating [%s]\n", img.name.c_str());
-  size = {img.width, img.height};
+
+  size = {img.width, img.height, 1};
   glType = GL_TEXTURE_2D;
   glGenTextures(1, &id);
   bind();
@@ -106,5 +116,26 @@ void Texture::create2D(const image2D& img, u8 prefChannels) {
   u32 formatInternal = GLchannels[idx];
   u32 formatImg = GLchannels[img.channels - 1];
   glTexImage2D(glType, 0, formatInternal, img.width, img.height, 0, formatImg, GL_UNSIGNED_BYTE, img.pixels);
+}
+
+void Texture::create2DArray(const image2D& img0, const image2D& img1) {
+  assert(img0.width == img1.width);
+  assert(img0.height == img1.height);
+  assert(img0.channels == img1.channels);
+
+  printf("Creating [%s] with [%s]\n", img0.name.c_str(), img1.name.c_str());
+
+  u32 formatImg = GLchannels[img0.channels - 1];
+  size = {img0.width, img0.height, 2};
+  glType = GL_TEXTURE_2D_ARRAY;
+  glGenTextures(1, &id);
+  bind();
+  glTexParameteri(glType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(glType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(glType, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(glType, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexStorage3D(glType, 1, GL_RGBA8, size.x, size.y, 2);
+  glTexSubImage3D(glType, 0, 0, 0, 0, size.x, size.y, 1, formatImg, GL_UNSIGNED_BYTE, img0.pixels);
+  glTexSubImage3D(glType, 0, 0, 0, 1, size.x, size.y, 1, formatImg, GL_UNSIGNED_BYTE, img1.pixels);
 }
 

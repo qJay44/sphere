@@ -12,32 +12,12 @@ out vec3 normal;
 uniform mat4 model;
 uniform mat4 cam;
 
-uniform sampler2D normalheightmap0;
-uniform sampler2D normalheightmap1;
-uniform sampler2D world0;
-uniform sampler2D world1;
+uniform sampler2DArray normalheightmaps;
+uniform sampler2DArray worldColors;
 
 uniform float heightmapScale;
 
 #define PI 3.141592265359f
-
-vec4 getNormalWithHeight(vec2 coord, uint idx) {
-  vec4 texs[2] = vec4[2](
-    texture(normalheightmap0, coord),
-    texture(normalheightmap1, coord)
-  );
-
-  return texs[idx];
-}
-
-vec3 getColor(vec2 coord, uint idx) {
-  vec3 texs[2] = vec3[2](
-    texture(world0, coord).rgb,
-    texture(world1, coord).rgb
-  );
-
-  return texs[idx];
-}
 
 // #define _COLOR_TERRAIN_CHUNKS
 
@@ -45,23 +25,20 @@ void main() {
   float lon = 0.5f - atan(in_normal.z, in_normal.x) / (2.f * PI);
   float lat = 0.5f + asin(in_normal.y) / PI;
   float idx = round(lon);
-  vec2 coord = vec2(lon, lat);
-  coord.x = (coord.x - 0.5f) * 2.f * idx + coord.x * 2.f * (1.f - idx);
+  vec2 texCoord = vec2(lon, lat);
+  texCoord.x = (texCoord.x - 0.5f) * 2.f * idx + texCoord.x * 2.f * (1.f - idx);
 
-  vec4 normalheightmap = getNormalWithHeight(coord, uint(idx));
+  vec4 normalheightmap = texture(normalheightmaps, vec3(texCoord, idx));
   vec3 vertPos = vec3(model * vec4(in_pos, 1.f));
-  // normal = normalheightmap.xyz;
-  normal = in_normal;
+  normal = normalheightmap.rgb;
 
   #ifdef _COLOR_TERRAIN_CHUNKS
     color = in_col;
   #else
-    // vertPos += in_normal * normalheightmap.w * heightmapScale;
-    vertPos += in_normal * 1.f * heightmapScale;
-    color = getColor(coord, uint(idx));
+    vertPos += in_normal * normalheightmap.a * heightmapScale;
+    color = texture(worldColors, vec3(texCoord, idx)).rgb;
   #endif
 
-  texCoord = in_tex;
   gl_Position = cam * vec4(vertPos, 1.f);
 }
 

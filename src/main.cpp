@@ -96,30 +96,15 @@ int main() {
 
   // ===== Textures ============================================= //
 
-  Texture normalheightmap0("res/tex/planet/normalheightmap0.png", GL_TEXTURE_2D, "normalheightmap0", 0, 4);
-  Texture normalheightmap1("res/tex/planet/normalheightmap1.png", GL_TEXTURE_2D, "normalheightmap1", 1, 4);
-
-  Texture world0;
-  Texture world1;
-  {
-    image2D img("res/tex/planet/world21600.jpg");
-    image2D img_w2 = img;
-    img_w2.width /= 2;
-
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, img.width);
-    world0 = Texture(img_w2, GL_TEXTURE_2D, "world0", 2, 3);
-    img_w2.pixels += img_w2.width * img_w2.channels;
-    world1 = Texture(img_w2, GL_TEXTURE_2D, "world1", 3, 3);
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    img_w2.pixels = nullptr;
-  }
-
+  // Texture normalheightmaps(image2D("res/tex/planet/heightmap2560_0.png"), image2D("res/tex/planet/heightmap2560_1.png"));
+  Texture normalheightmaps(image2D("res/tex/planet/normalheightmap0.png"), image2D("res/tex/planet/normalheightmap1.png"), 0);
+  Texture worldColors(image2D("res/tex/planet/worldColors0.jpg"), image2D("res/tex/planet/worldColors1.jpg"), 1);
 
   // ===== Planet =============================================== //
 
-  Planet::addTexNormalheightmaps(&normalheightmap0, &normalheightmap1);
-  Planet::addTexWorld(&world0, &world1);
-  Planet planet(1024u, 256u, 45.f);
+  Planet::addTexNormalheightmaps(&normalheightmaps);
+  Planet::addTexWorldcolors(&worldColors);
+  Planet planet(1024u, 256u, 40.f);
 
   // ===== Light ================================================ //
 
@@ -203,6 +188,7 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     planet.draw(camera, planetShader);
+    if (global::drawWireframe) planet.draw(camera, linesShader);
     airplane.draw(camera, airplaneShader);
 
     glDisable(GL_CULL_FACE);

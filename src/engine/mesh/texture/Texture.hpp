@@ -5,8 +5,9 @@
 class Texture {
 public:
   Texture();
-  Texture(const image2D& img, GLenum type, std::string uniform, GLuint unit = 0, u8 prefChannels = 0);
-  Texture(const fspath& path, GLenum type, std::string uniform, GLuint unit = 0, u8 prefChannels = 0);
+  Texture(const image2D& img0, const image2D& img1, const GLuint& unit = 0);
+  Texture(const image2D& img, const GLenum& type, const std::string& uniform, const GLuint& unit = 0, const u8& prefChannels = 0);
+  Texture(const fspath& path, const GLenum& type, const std::string& uniform, const GLuint& unit = 0, const u8& prefChannels = 0);
 
   void bind() const;
   void unbind() const;
@@ -15,7 +16,7 @@ public:
   const GLenum& getType() const;
   const GLuint& getUnit() const;
   const std::string& getUniformName() const;
-  const uvec2& getSize() const;
+  const uvec3& getSize() const;
 
 private:
   GLuint unit;
@@ -23,9 +24,10 @@ private:
 
   GLuint id;
   GLenum glType;
-  uvec2 size;
+  uvec3 size;
 
 private:
   void create2D(const image2D& img, u8 prefChannels);
+  void create2DArray(const image2D& img0, const image2D& img1);
 };
 
