@@ -10,9 +10,13 @@ Texture::Texture() {}
 Texture::Texture(const image2D& img, GLenum type, std::string uniform, GLuint unit, u8 prefChannels)
   : unit(unit),
     uniformName(uniform) {
-  if (type != GL_TEXTURE_2D) //
-    error(std::format("Unhandled texture creation type: [{}]", type));
-  build2D(img, prefChannels);
+  switch (type) {
+    case GL_TEXTURE_2D:
+      create2D(img, prefChannels);
+    default:
+      error(std::format("Unhandled texture creation type: [{}]", type));
+  }
+
   unbind();
 }
 
@@ -23,7 +27,7 @@ Texture::Texture(const fspath& path, GLenum type, std::string uniform, GLuint un
 
   switch (type) {
     case GL_TEXTURE_2D: {
-      build2D(image2D(path), prefChannels);
+      create2D(image2D(path), prefChannels);
       break;
     }
     case GL_TEXTURE_CUBE_MAP: {
@@ -86,7 +90,8 @@ const GLuint& Texture::getUnit() const { return unit; }
 const std::string& Texture::getUniformName() const { return uniformName; }
 const uvec2& Texture::getSize() const { return size; }
 
-void Texture::build2D(const image2D& img, u8 prefChannels) {
+void Texture::create2D(const image2D& img, u8 prefChannels) {
+  printf("Creating [%s]\n", img.name.c_str());
   size = {img.width, img.height};
   glType = GL_TEXTURE_2D;
   glGenTextures(1, &id);

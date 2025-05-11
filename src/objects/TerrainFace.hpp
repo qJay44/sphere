@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <cmath>
 #include <cstdlib>
 #include <list>
@@ -17,6 +18,7 @@ struct TerrainFace {
   TerrainFace() {}
 
   TerrainFace(const vec3& localUp, const Planet* planet, const vec3& color = vec3(0.f)) {
+
     chunksAmount = planet->chunks;
     heightmapScaleInv = 1.f / planet->heightmapScale;
 
@@ -38,10 +40,7 @@ struct TerrainFace {
           };
         }
 
-        TerrainFaceChunk chunk = TerrainFaceChunk::build(localUp, planet, chunkResolution, {xstart, ystart}, col);
-        chunk.add(&planet->normalheightmaps[0]);
-        chunk.add(&planet->normalheightmaps[1]);
-        chunks.push_back(chunk);
+        chunks.push_back(TerrainFaceChunk::build(localUp, planet, chunkResolution, {xstart, ystart}, col));
       }
     }
   }

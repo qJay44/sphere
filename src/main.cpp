@@ -94,8 +94,31 @@ int main() {
   GLint airplaneShaderLightPosLoc = airplaneShader.getUniformLoc("lightPos");
   GLint airplaneShaderLightColorLoc = airplaneShader.getUniformLoc("lightColor");
 
+  // ===== Textures ============================================= //
+
+  Texture normalheightmap0("res/tex/planet/normalheightmap0.png", GL_TEXTURE_2D, "normalheightmap0", 0, 4);
+  Texture normalheightmap1("res/tex/planet/normalheightmap1.png", GL_TEXTURE_2D, "normalheightmap1", 1, 4);
+
+  Texture world0;
+  Texture world1;
+  {
+    image2D img("res/tex/planet/world21600.jpg");
+    image2D img_w2 = img;
+    img_w2.width /= 2;
+
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, img.width);
+    world0 = Texture(img_w2, GL_TEXTURE_2D, "world0", 2, 3);
+    img_w2.pixels += img_w2.width * img_w2.channels;
+    world1 = Texture(img_w2, GL_TEXTURE_2D, "world1", 3, 3);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    img_w2.pixels = nullptr;
+  }
+
+
   // ===== Planet =============================================== //
 
+  Planet::addTexNormalheightmaps(&normalheightmap0, &normalheightmap1);
+  Planet::addTexWorld(&world0, &world1);
   Planet planet(1024u, 256u, 45.f);
 
   // ===== Light ================================================ //

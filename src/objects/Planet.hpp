@@ -5,6 +5,12 @@
 
 class Planet {
 public:
+  static const Texture* getTexNormalheightmap(const bool& id);
+  static const Texture* getTexWorld(const bool& id);
+
+  static void addTexNormalheightmaps(const Texture* tex0, const Texture* tex1);
+  static void addTexWorld(const Texture* tex0, const Texture* tex1);
+
   Planet(u32 resolution, u32 chunksPerFace, float radius);
   ~Planet();
 
@@ -24,18 +30,19 @@ private:
   friend struct gui;
   friend struct TerrainFace;
 
+  static const Texture* normalheightmaps[2];
+  static const Texture* world[2];
+
   u32 resolution;
   u32 chunks;
   float radius;
   float heightmapScale = 0.225f;
   float seaLevel = 0.f;
   struct TerrainFace* terrainFaces = nullptr;
-  Texture normalheightmaps[2];
 
   bool colorChunksInsteadOfFaces = true;
 
 private:
   void build();
-  vec3 pointOnSphereDefault(const vec3& v) const;
-  vec3 pointOnSphereFancy(const vec3& v) const;
 };
+

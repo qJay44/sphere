@@ -26,6 +26,6 @@ private:
   uvec2 size;
 
 private:
-  void build2D(const image2D& img, u8 prefChannels);
+  void create2D(const image2D& img, u8 prefChannels);
 };
 
