@@ -96,9 +96,27 @@ int main() {
 
   // ===== Textures ============================================= //
 
-  // Texture normalheightmaps(image2D("res/tex/planet/heightmap2560_0.png"), image2D("res/tex/planet/heightmap2560_1.png"));
-  Texture normalheightmaps(image2D("res/tex/planet/normalheightmap0.png"), image2D("res/tex/planet/normalheightmap1.png"), 0);
-  Texture worldColors(image2D("res/tex/planet/worldColors0.jpg"), image2D("res/tex/planet/worldColors1.jpg"), 1);
+  Texture normalheightmaps(
+    "res/tex/planet/normalheightmap0.png",  // First part
+    "res/tex/planet/normalheightmap1.png",  // Second part
+    "normalheightmaps",                     // Uniform name in shader
+    0,                                      // Texture slot
+    GL_TEXTURE_2D_ARRAY,                    // Texture type
+    GL_RGBA8_SNORM,                         // Color format in the OpenGL program
+    GL_RGBA,                                // Color format of the given image(s)
+    GL_BYTE                                 // Color bytes format of the given image(s)
+  );
+
+  Texture worldColors(
+    "res/tex/planet/worldColors0.jpg",
+    "res/tex/planet/worldColors1.jpg",
+    "worldColors",
+    1,
+    GL_TEXTURE_2D_ARRAY,
+    GL_RGB8,
+    GL_RGB,
+    GL_UNSIGNED_BYTE
+  );
 
   // ===== Planet =============================================== //
 
@@ -116,7 +134,7 @@ int main() {
   float airplaneFlyHeight = 10.f;
   airplanePosInit.z = planet.getRadius() + airplaneFlyHeight;
   Airplane airplane(planet, airplanePosInit, PI / 100.f, airplaneFlyHeight, PI / 10.f, 0.1f);
-  Texture airplaneTexture("res/tex/Aircraft_Texture.png", GL_TEXTURE_2D, "diffuse0");
+  Texture airplaneTexture("res/tex/Aircraft_Texture.png", "diffuse0", 0);
   airplane.add(&airplaneTexture);
 
   // ===== Cameras ============================================== //

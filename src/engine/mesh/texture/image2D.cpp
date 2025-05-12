@@ -22,11 +22,17 @@ image2D::~image2D() {
 }
 
 void image2D::load(const fspath& path) {
+  printf("Loading [%s]...\r", path.string().c_str());
+
   int w, h, colorChannels;
   stbi_set_flip_vertically_on_load(true);
   pixels = stbi_load(path.string().c_str(), &w, &h, &colorChannels, 0);
-  if (!pixels)
+  if (!pixels) {
+    printf("Loading [%s] %s\n", path.string().c_str(), clrp::statusNegative().c_str());
     error(std::format("stb didn't load the image: {}", path.string()));
+  }
+
+  printf("Loading [%s] %s\n", path.string().c_str(), clrp::statusPositive().c_str());
 
   width = static_cast<u16>(w);
   height = static_cast<u16>(h);

@@ -1,6 +1,7 @@
 #pragma once
 
 namespace clrp {
+
 enum class ATTRIBUTE : u16 {
   DEFAULT,
   BOLD,
@@ -82,7 +83,7 @@ std::string format(const std::string& str, clrp_t clrp);
 
 // @return string with %s
 [[nodiscard]]
-std::string prepare( //
+std::string prepare(
   ATTRIBUTE attr = ATTRIBUTE::DEFAULT,
   FG fg = FG::DEFAULT,
   BG bg = BG::DEFAULT,
@@ -92,4 +93,8 @@ std::string prepare( //
 // @return string with %s
 [[nodiscard]]
 std::string prepare(clrp_t clrp);
+
+constexpr std::string statusPositive() { return format("Done"  , ATTRIBUTE::BOLD, FG::GREEN); }
+constexpr std::string statusNegative() { return format("Failed", ATTRIBUTE::BOLD, FG::RED); }
+
 } // namespace clrp

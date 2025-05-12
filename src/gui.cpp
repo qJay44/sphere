@@ -122,6 +122,13 @@ void gui::draw() {
     RadioButton("Color only chunks per face", &rbChunksColoring, 1);
     planetGUI.ptr->colorChunksInsteadOfFaces = rbChunksColoring;
 
+    // +++++++++++++++ Lightning ++++++++++++++++ //
+
+    SliderFloat("ambient", &planetGUI.ptr->ambient, 0.f, 100.f);
+    SliderFloat("specularLight", &planetGUI.ptr->specularLight, 0.f, 100.f);
+
+    // ++++++++++++++++++++++++++++++++++++++++++ //
+
     if (Button("Rebuild"))
       planetGUI.ptr->rebuild();
 
@@ -132,10 +139,10 @@ void gui::draw() {
 
   if (!airplaneGUI.ptr) error("The airplane is not linked to gui");
   if (TreeNode("Airplane")) {
-    SliderFloat("Speed", &airplaneGUI.ptr->speedRad, 0.f, 10.f);
+    SliderFloat("Speed", &airplaneGUI.ptr->speedRad, 0.f, PI * 2.f);
     SetItemTooltip("Radians");
 
-    SliderFloat("Fly height", &airplaneGUI.ptr->flyHeight, 1.f, 10.f);
+    SliderFloat("Fly height", &airplaneGUI.ptr->flyHeight, 1.f, 100.f);
     SliderFloat("Turn speed", &airplaneGUI.ptr->turnSpeedRad, 0.f, 10.f);
     SetItemTooltip("Radians");
 

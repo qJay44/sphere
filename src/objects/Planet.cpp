@@ -65,14 +65,19 @@ void Planet::rebuild(int resolution, float radius) {
 
 void Planet::draw(const Camera* camera, const Shader& shader) const {
   assert(planet->normalheightmaps != nullptr);
+  assert(planet->worldColors != nullptr);
 
   static const GLint heightmapScaleUniLoc = shader.getUniformLoc("heightmapScale");
-  static const GLint seaLevelUniLoc = shader.getUniformLoc("seaLevel");
+  static const GLint seaLevelLoc = shader.getUniformLoc("seaLevel");
+  static const GLint ambientLoc = shader.getUniformLoc("ambient");
+  static const GLint specularLightLoc = shader.getUniformLoc("specularLight");
   static const GLint nhmsLoc = shader.getUniformLoc("normalheightmaps");
   static const GLint wcLoc = shader.getUniformLoc("worldColors");
 
   shader.setUniform1f(heightmapScaleUniLoc, heightmapScale * radius);
-  shader.setUniform1f(seaLevelUniLoc, seaLevel);
+  shader.setUniform1f(seaLevelLoc, seaLevel);
+  shader.setUniform1f(ambientLoc, ambient);
+  shader.setUniform1f(specularLightLoc, specularLight);
   shader.setUniformTexture(nhmsLoc, Planet::normalheightmaps->getUnit());
   shader.setUniformTexture(wcLoc, Planet::worldColors->getUnit());
 

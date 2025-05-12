@@ -13,7 +13,7 @@ uniform sampler2D diffuse0;
 
 vec4 directionalLight() {
   vec3 n = normalize(normal);
-  vec3 lightDirection = normalize(vec3(1.f, 1.f, 0.f));
+  vec3 lightDirection = normalize(lightPos - vertPos);
   float diffuse = max(dot(n, lightDirection), 0.f);
   float ambient = 0.2f;
 

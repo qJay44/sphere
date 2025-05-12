@@ -55,7 +55,7 @@ struct TerrainFace {
 
     for (const TerrainFaceChunk& chunk : chunks) {
       vec3 center = (chunk.lastVertex + chunk.firstVertex) * 0.5f;
-      float radius = glm::length(chunk.lastVertex - chunk.firstVertex) * heightmapScaleInv;
+      float radius = glm::length(chunk.lastVertex - chunk.firstVertex) * 2.f; // Additionally multipling by 2 to keep some chunks when camera is to close to the planet
       frustum::Sphere frustumSphere(center, radius);
 
       if (frustumSphere.isOnFrustum(tfFrustum, chunk))

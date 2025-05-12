@@ -5,9 +5,27 @@
 class Texture {
 public:
   Texture();
-  Texture(const image2D& img0, const image2D& img1, const GLuint& unit = 0);
-  Texture(const image2D& img, const GLenum& type, const std::string& uniform, const GLuint& unit = 0, const u8& prefChannels = 0);
-  Texture(const fspath& path, const GLenum& type, const std::string& uniform, const GLuint& unit = 0, const u8& prefChannels = 0);
+
+  Texture(
+    const fspath& path,
+    const std::string& uniform,
+    const GLuint& unit = 0,
+    const GLenum& target = GL_TEXTURE_2D,
+    const GLint& internalFormat = 0,
+    const GLenum& format = 0,
+    const GLenum& type = GL_UNSIGNED_BYTE
+  );
+
+  Texture(
+    const fspath& path1,
+    const fspath& path2,
+    const std::string& uniform,
+    const GLuint& unit,
+    const GLenum& target,
+    const GLint& internalFormat,
+    const GLenum& format,
+    const GLenum& type
+  );
 
   void bind() const;
   void unbind() const;
@@ -19,15 +37,18 @@ public:
   const uvec3& getSize() const;
 
 private:
-  GLuint unit;
-  std::string uniformName;
+  const GLenum target;
+  const GLint internalFormat;
+  const GLenum format;
+  const GLenum type;
+  const std::string uniformName;
+  const GLuint unit;
 
   GLuint id;
-  GLenum glType;
   uvec3 size;
 
 private:
-  void create2D(const image2D& img, u8 prefChannels);
+  void create2D(const image2D& img);
   void create2DArray(const image2D& img0, const image2D& img1);
 };
 
