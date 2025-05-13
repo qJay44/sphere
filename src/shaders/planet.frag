@@ -7,7 +7,10 @@
 out vec4 FragColor;
 
 in vec3 vertPos;
+
 in vec2 texCoord;
+in float u0;
+in float u1;
 in float idx;
 
 uniform vec3 camPos;
@@ -21,8 +24,9 @@ uniform float specularLight;
 uniform sampler2DArray normalheightmaps;
 uniform sampler2DArray worldColors;
 
-vec3 normal = texture(normalheightmaps, vec3(texCoord, idx)).rgb;
-vec3 color = texture(worldColors, vec3(texCoord, idx)).rgb;
+vec2 texUV = vec2((fwidth(u0) < fwidth(u1) - 0.001f) ? u0 : u1, texCoord.y);
+vec3 normal = texture(normalheightmaps, vec3(texUV, idx)).rgb;
+vec3 color = texture(worldColors, vec3(texUV, idx)).rgb;
 
 vec4 directionalLight() {
   vec3 lightDirection = normalize(lightPos - vertPos);
@@ -39,7 +43,7 @@ vec4 directionalLight() {
 vec4 pointLight() {
 	// used in two variables so I calculate it here to not have to do it twice
 	vec3 lightVec = lightPos - vertPos;
-  vec3 normal = texture(normalheightmaps, vec3(texCoord, idx)).rgb;
+  vec3 normal = texture(normalheightmaps, vec3(texUV, idx)).rgb;
 
 	// intensity of light with respect to distance
 	float dist = length(lightVec);
@@ -66,7 +70,6 @@ vec4 pointLight() {
 void main() {
   // if (HEIGHT_METRES(color.a) > seaLevel) col = vec3(0.f, 1.f, 0.f);
 
-  // FragColor = pointLight();
-  FragColor = directionalLight();
+  FragColor = pointLight();
 }
 

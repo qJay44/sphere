@@ -7,10 +7,12 @@ layout(location = 0) in vec3 in_pos;
 layout(location = 3) in vec3 in_normal;
 
 out vec2 texCoord;
+out float u0;
+out float u1;
 out float idx;
 
-uniform mat4 model;
 uniform mat4 cam;
+uniform mat4 model;
 uniform sampler2DArray normalheightmaps;
 uniform float heightmapScale;
 
@@ -19,13 +21,16 @@ uniform float heightmapScale;
 void main() {
   texCoord.x = 0.5f - atan(in_normal.z, in_normal.x) / (2.f * PI); // Longitude
   texCoord.y = 0.5f + asin(in_normal.y) / PI; // Latitude
+
   idx = round(texCoord.x);
   texCoord.x = (texCoord.x - 0.5f) * 2.f * idx + texCoord.x * 2.f * (1.f - idx);
 
   float height = texture(normalheightmaps, vec3(texCoord, idx)).a;
   vec3 vertPos = vec3(model * vec4(in_pos, 1.f));
-
   vertPos += in_normal * height * heightmapScale;
+
+  u0 = fract(texCoord.x);
+  u1 = fract(texCoord.x + 0.5f) - 0.5f;
 
   gl_Position = cam * vec4(vertPos, 1.f);
 }

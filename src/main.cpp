@@ -121,7 +121,7 @@ int main() {
 
   Planet::addTexNormalheightmaps(&normalheightmaps);
   Planet::addTexWorldcolors(&worldColors);
-  Planet planet(1024u, 256u, 40.f);
+  Planet planet(1024u, 256u, 80.f);
 
   // ===== Light ================================================ //
 
