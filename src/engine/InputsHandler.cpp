@@ -12,13 +12,13 @@ static bool isHoldingShift = false;
 
 void InputsHandler::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   switch (key) {
-    case GLFW_KEY_G:
+    case GLFW_KEY_R:
       if (action == GLFW_PRESS) {
         global::guiFocused = !global::guiFocused;
         guiWasFocused = true;
       }
       break;
-    case GLFW_KEY_I:
+    case GLFW_KEY_E:
       if (action == GLFW_PRESS) gui::toggle();
       break;
     case GLFW_KEY_1:

@@ -83,7 +83,6 @@ int main() {
 
   Shader::setDirectoryLocation("shaders");
   Shader planetShader("planet.vert", "planet.frag");
-  Shader linesShader("lines.vert", "lines.frag", "lines.geom");
   Shader colorShader("default/color.vert", "default/color.frag");
   Shader normalsShader("default/normal.vert", "default/normal.frag", "default/normal.geom");
   Shader textureShader("default/texture.vert", "default/texture.frag");
@@ -126,7 +125,7 @@ int main() {
 
   // ===== Light ================================================ //
 
-  Light light(planet.getRadius() + vec3{16.3f, 24.f, 26.6f}, 0.5f);
+  Light light(planet.getRadius() + vec3{16.3f, 24.f, 26.6f}, 1.5f);
 
   // ===== Airplane ============================================= //
 
@@ -206,7 +205,6 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     planet.draw(camera, planetShader);
-    if (global::drawWireframe) planet.draw(camera, linesShader);
     airplane.draw(camera, airplaneShader);
 
     glDisable(GL_CULL_FACE);

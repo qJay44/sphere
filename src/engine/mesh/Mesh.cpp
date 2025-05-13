@@ -196,8 +196,15 @@ void Mesh::draw(const Camera* camera, const Shader& shader) const {
   shader.setUniformMatrix4f("cam", camera->getMatrix());
   shader.setUniformMatrix4f("model", model);
 
-  if (indices.size()) glDrawElements(mode, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
-  else glDrawArrays(mode, 0, (GLsizei)vertices.size());
+  if (global::drawWireframe)
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+  if (indices.size())
+    glDrawElements(mode, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
+  else
+    glDrawArrays(mode, 0, (GLsizei)vertices.size());
+
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
   vao.unbind();
 }
