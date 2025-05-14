@@ -7,69 +7,25 @@
 out vec4 FragColor;
 
 in vec3 vertPos;
-
 in vec2 texCoord;
 in float u0;
 in float u1;
 in float idx;
 
-uniform vec3 camPos;
-uniform vec3 lightPos;
-uniform vec3 lightColor;
+uniform vec3 u_lightPos;
+uniform vec3 u_lightColor;
 
-uniform float seaLevel;
-uniform float ambient;
-uniform float specularLight;
-
-uniform sampler2DArray normalheightmaps;
-uniform sampler2DArray worldColors;
+uniform sampler2DArray u_normalheightmaps;
+uniform sampler2DArray u_worldColors;
 
 vec2 texUV = vec2((fwidth(u0) < fwidth(u1) - 0.001f) ? u0 : u1, texCoord.y);
-vec3 normal = texture(normalheightmaps, vec3(texUV, idx)).rgb;
-vec3 color = texture(worldColors, vec3(texUV, idx)).rgb;
-
-vec4 directionalLight() {
-  vec3 lightDirection = normalize(lightPos - vertPos);
-  float diffuse = max(dot(normal, lightDirection), 0.f);
-
-  vec3 viewDirection = normalize(camPos - vertPos);
-  vec3 reflectionDirection = reflect(-lightDirection, normal);
-  float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.f), 8);
-  float specular = specAmount * specularLight;
-
-  return vec4(color, 1.f) * vec4(lightColor, 1.f) * (diffuse + ambient + specular);
-}
-
-vec4 pointLight() {
-	// used in two variables so I calculate it here to not have to do it twice
-	vec3 lightVec = lightPos - vertPos;
-  vec3 normal = texture(normalheightmaps, vec3(texUV, idx)).rgb;
-
-	// intensity of light with respect to distance
-	float dist = length(lightVec);
-	float a = 3.f;
-	float b = 0.7f;
-	float inten = 1.f / (a * dist * dist + b * dist + 1.f);
-
-	// diffuse lighting
-	vec3 lightDirection = normalize(lightVec);
-	float diffuse = max(dot(normal, lightDirection), 0.f);
-
-	// specular lighting
-	float specular = 0.f;
-	if (diffuse) {
-		vec3 viewDirection = normalize(camPos - vertPos);
-		vec3 halfwayVec = normalize(viewDirection + lightDirection);
-		float specAmount = pow(max(dot(normal, halfwayVec), 0.f), 16);
-		specular = specAmount * specularLight;
-	};
-
-	return vec4(color, 1.f) * (diffuse * inten + ambient + specular) * vec4(lightColor, 1.f);
-}
+vec3 normal = texture(u_normalheightmaps, vec3(texUV, idx)).rgb;
+vec3 color = texture(u_worldColors, vec3(texUV, idx)).rgb;
 
 void main() {
-  // if (HEIGHT_METRES(color.a) > seaLevel) col = vec3(0.f, 1.f, 0.f);
+  vec3 lightDir = normalize(u_lightPos - vertPos);
+  vec3 col = color * max(0.f, dot(normal, lightDir)) * u_lightColor;
 
-  FragColor = pointLight();
+  FragColor = vec4(col, 1.f);
 }
 

@@ -192,9 +192,9 @@ void Mesh::draw(const Camera* camera, const Shader& shader) const {
 
   mat4 model = translation * rotation * scaleMat;
 
-  shader.setUniform3f("camPos", camera->getPosition());
-  shader.setUniformMatrix4f("cam", camera->getMatrix());
-  shader.setUniformMatrix4f("model", model);
+  shader.setUniform3f("u_camPos", camera->getPosition());
+  shader.setUniformMatrix4f("u_cam", camera->getMatrix());
+  shader.setUniformMatrix4f("u_model", model);
 
   if (global::drawWireframe)
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

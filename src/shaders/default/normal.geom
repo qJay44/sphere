@@ -9,26 +9,26 @@ in DATA {
   vec3 normal;
 } data_in[];
 
-uniform mat4 cam;
+uniform mat4 u_cam;
 
 const float scale = 0.1f;
 
 void main() {
-  gl_Position = cam * gl_in[0].gl_Position;
+  gl_Position = u_cam * gl_in[0].gl_Position;
   EmitVertex();
-  gl_Position = cam * (gl_in[0].gl_Position + vec4(data_in[0].normal, 0.f) * scale);
-  EmitVertex();
-  EndPrimitive();
-
-  gl_Position = cam * gl_in[1].gl_Position;
-  EmitVertex();
-  gl_Position = cam * (gl_in[1].gl_Position + vec4(data_in[1].normal, 0.f) * scale);
+  gl_Position = u_cam * (gl_in[0].gl_Position + vec4(data_in[0].normal, 0.f) * scale);
   EmitVertex();
   EndPrimitive();
 
-  gl_Position = cam * gl_in[2].gl_Position;
+  gl_Position = u_cam * gl_in[1].gl_Position;
   EmitVertex();
-  gl_Position = cam * (gl_in[2].gl_Position + vec4(data_in[2].normal, 0.f) * scale);
+  gl_Position = u_cam * (gl_in[1].gl_Position + vec4(data_in[1].normal, 0.f) * scale);
+  EmitVertex();
+  EndPrimitive();
+
+  gl_Position = u_cam * gl_in[2].gl_Position;
+  EmitVertex();
+  gl_Position = u_cam * (gl_in[2].gl_Position + vec4(data_in[2].normal, 0.f) * scale);
   EmitVertex();
   EndPrimitive();
 }

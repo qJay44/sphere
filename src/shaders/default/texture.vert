@@ -7,11 +7,11 @@ layout(location = 2) in vec2 inTex;
 out vec3 color;
 out vec2 tex;
 
-uniform mat4 model;
-uniform mat4 cam;
+uniform mat4 u_model;
+uniform mat4 u_cam;
 
 void main() {
   color = inColor;
   tex = inTex;
-  gl_Position = cam * model * vec4(inPos, 1.0f);
+  gl_Position = u_cam * u_model * vec4(inPos, 1.0f);
 }

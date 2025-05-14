@@ -11,11 +11,11 @@ out DATA {
   vec3 normal;
 } data_out;
 
-uniform mat4 model;
+uniform mat4 u_model;
 
 void main() {
   data_out.color = inColor;
   data_out.tex = inTex;
   data_out.normal = inNormal;
-  gl_Position = model * vec4(inPos, 1.0f);
+  gl_Position = u_model * vec4(inPos, 1.0f);
 }

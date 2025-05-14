@@ -115,19 +115,11 @@ void gui::draw() {
 
     SliderFloat("Radius", &planetGUI.ptr->radius, 1.f, 100.f);
     SliderFloat("Heightmap scale", &planetGUI.ptr->heightmapScale, 0.01f, 1.f);
-    SliderFloat("Sea level", &planetGUI.ptr->seaLevel, -10.f, 10.f);
 
     static int rbChunksColoring = planetGUI.ptr->colorChunksInsteadOfFaces;
     RadioButton("Color only faces", &rbChunksColoring, 0); SameLine();
     RadioButton("Color only chunks per face", &rbChunksColoring, 1);
     planetGUI.ptr->colorChunksInsteadOfFaces = rbChunksColoring;
-
-    // +++++++++++++++ Lightning ++++++++++++++++ //
-
-    SliderFloat("ambient", &planetGUI.ptr->ambient, 0.f, 100.f);
-    SliderFloat("specularLight", &planetGUI.ptr->specularLight, 0.f, 100.f);
-
-    // ++++++++++++++++++++++++++++++++++++++++++ //
 
     if (Button("Rebuild"))
       planetGUI.ptr->rebuild();
