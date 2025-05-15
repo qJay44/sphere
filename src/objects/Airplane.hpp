@@ -27,7 +27,8 @@ public:
 
   void turn(float dir);
   void update();
-  void draw(const Camera* camera, const Shader& shader, u32 flags = 0);
+  void draw(const Camera* camera, const Shader& shader);
+  void draw(const Camera* camera, u32 flags);
 
 private:
   friend struct gui;

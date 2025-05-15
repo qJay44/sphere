@@ -97,9 +97,10 @@ void Texture::create2D(const image2D& img) {
   glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  printf("Creating texture [%s]...\r", img.name.c_str());
+
+  status::start("Creating texture", img.name);
   glTexImage2D(target, 0, texFormat, img.width, img.height, 0, imgFormat, type, img.pixels);
-  printf("Creating texture [%s] %s\n", img.name.c_str(), clrp::statusPositive().c_str());
+  status::end(true);
 }
 
 void Texture::create2DArray(const image2D& img0, const image2D& img1) {
@@ -115,11 +116,13 @@ void Texture::create2DArray(const image2D& img0, const image2D& img1) {
   glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexStorage3D(target, 1, internalFormat, size.x, size.y, 2);
-  printf("Creating texture [%s]...\r", img0.name.c_str());
+
+  status::start("Creating texture", img0.name);
   glTexSubImage3D(target, 0, 0, 0, 0, size.x, size.y, 1, format, type, img0.pixels);
-  printf("Creating texture [%s] %s\n", img0.name.c_str(), clrp::statusPositive().c_str());
-  printf("Creating texture [%s]\r", img1.name.c_str());
+  status::end(true);
+
+  status::start("Creating texture", img1.name);
   glTexSubImage3D(target, 0, 0, 0, 1, size.x, size.y, 1, format, type, img1.pixels);
-  printf("Creating texture [%s] %s\n", img1.name.c_str(), clrp::statusPositive().c_str());
+  status::end(true);
 }
 

@@ -36,7 +36,7 @@ private:
   u32 resolution;
   u32 chunks;
   float radius;
-  float heightmapScale = 0.06f;
+  float heightmapScale = 1.f;
   struct TerrainFace* terrainFaces = nullptr;
 
   bool colorChunksInsteadOfFaces = true;

@@ -7,8 +7,8 @@ layout(location = 3) in vec3 inNormal;
 out vec2 texCoord;
 out vec3 normal;
 
-uniform mat4 u_model;
 uniform mat4 u_cam;
+uniform mat4 u_model;
 
 void main() {
   texCoord = inTex;

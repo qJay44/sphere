@@ -17,6 +17,7 @@ Camera::Camera(vec3 pos, vec3 orientation, double sensitivity)
   : position(pos),
     orientation(orientation),
     sensitivity(sensitivity) {
+  farPlane = 500.f;
   calcView();
 };
 

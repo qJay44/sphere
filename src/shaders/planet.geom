@@ -3,10 +3,9 @@
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
 
-out vec2 texCoord;
 out vec3 vertPos;
+out vec2 texCoord;
 out vec3 lightPos;
-out vec3 camPos;
 out float u0;
 out float u1;
 out float idx;
@@ -49,7 +48,6 @@ void main() {
   gl_Position = u_cam * gl_in[0].gl_Position;
   vertPos = TBN * gl_in[0].gl_Position.xyz;
   lightPos = TBN * u_lightPos;
-  camPos = TBN * u_camPos;
   texCoord = data_in[0].texCoord;
   idx = data_in[0].idx;
   u0 = data_in[0].u0;
@@ -59,7 +57,6 @@ void main() {
   gl_Position = u_cam * gl_in[1].gl_Position;
   vertPos = TBN * gl_in[1].gl_Position.xyz;
   lightPos = TBN * u_lightPos;
-  camPos = TBN * u_camPos;
   texCoord = data_in[1].texCoord;
   idx = data_in[1].idx;
   u0 = data_in[1].u0;
@@ -69,7 +66,6 @@ void main() {
   gl_Position = u_cam * gl_in[2].gl_Position;
   vertPos = TBN * gl_in[2].gl_Position.xyz;
   lightPos = TBN * u_lightPos;
-  camPos = TBN * u_camPos;
   texCoord = data_in[2].texCoord;
   idx = data_in[2].idx;
   u0 = data_in[2].u0;

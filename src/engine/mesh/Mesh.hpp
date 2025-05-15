@@ -15,6 +15,12 @@
 #define MESH_VERTEX_ATTRIBUTES 11 // 3 (position) + 3 (color) + 2 (texture) + 3 (normal)
 #define MESH_TEXTURE_LIMIT 10
 
+#define MESH_FLAG_DRAW_RIGHT    1
+#define MESH_FLAG_DRAW_UP       1 << 2
+#define MESH_FLAG_DRAW_FORWARD  1 << 3
+
+#define MESH_FLAG_DRAW_DIRECTIONS (AIRPLANE_FLAG_DRAW_RIGHT | AIRPLANE_FLAG_DRAW_UP | AIRPLANE_FLAG_DRAW_FORWARD)
+
 class Mesh {
 public:
   static Mesh loadObj(const fspath& file, bool printInfo = false);

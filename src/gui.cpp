@@ -1,8 +1,9 @@
 #include "gui.hpp"
 
-#include "imgui.h"
 #include <algorithm>
 #include <cmath>
+
+#include "imgui.h"
 
 #define IM_RED   IM_COL32(255u, 0u  , 0u  , 255u)
 #define IM_GREEN IM_COL32(0u ,  255u, 0u  , 255u)
@@ -114,7 +115,7 @@ void gui::draw() {
     // ++++++++++++++++++++++++++++++++++++++++++ //
 
     SliderFloat("Radius", &planetGUI.ptr->radius, 1.f, 100.f);
-    SliderFloat("Heightmap scale", &planetGUI.ptr->heightmapScale, 0.01f, 1.f);
+    SliderFloat("Heightmap scale", &planetGUI.ptr->heightmapScale, 0.01f, 100.f);
 
     static int rbChunksColoring = planetGUI.ptr->colorChunksInsteadOfFaces;
     RadioButton("Color only faces", &rbChunksColoring, 0); SameLine();
@@ -183,20 +184,25 @@ void gui::draw() {
 
   if (!lightGUI.ptr) error("The light is not linked to gui");
   if (TreeNode("Light")) {
-    const vec3& pos = lightGUI.ptr->position;
-    static vec3 posGui = pos;
+    bool update = false;
+    update += DragFloat("x", &lightGUI.ptr->position.x, 0.1f);
+    update += DragFloat("y", &lightGUI.ptr->position.y, 0.1f);
+    update += DragFloat("z", &lightGUI.ptr->position.z, 0.1f);
 
-    DragFloat("x", &posGui.x, 0.1f);
-    DragFloat("y", &posGui.y, 0.1f);
-    DragFloat("z", &posGui.z, 0.1f);
-
-    lightGUI.ptr->translate(posGui - pos * glm::sign(posGui));
-    lightGUI.ptr->position = posGui;
+    if (update)
+      lightGUI.ptr->translation = glm::translate(mat4(1.f), lightGUI.ptr->position);
 
     ColorEdit3("Color", (float*)&lightGUI.ptr->color);
 
     TreePop();
   };
+
+  // ================== Other ==========================
+
+  if (TreeNode("Other")) {
+    Checkbox("Show global axis", &global::drawGlobalAxis);
+    TreePop();
+  }
 
   End();
 }

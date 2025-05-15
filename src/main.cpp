@@ -8,6 +8,7 @@
 #include "engine/CameraStorage.hpp"
 #include "engine/Shader.hpp"
 #include "engine/InputsHandler.hpp"
+#include "engine/mesh/meshes.hpp"
 #include "global.hpp"
 #include "gui.hpp"
 #include "imgui.h"
@@ -82,10 +83,12 @@ int main() {
   // ===== Shaders ============================================== //
 
   Shader::setDirectoryLocation("shaders");
-  Shader planetShader("planet.vert", "planet.frag");
-  Shader colorShader("default/color.vert", "default/color.frag");
-  Shader normalsShader("default/normal.vert", "default/normal.frag", "default/normal.geom");
-  Shader textureShader("default/texture.vert", "default/texture.frag");
+  Shader::setDefaultShader(SHADER_DEFAULT_TYPE_COLOR_SHADER, "default/color.vert", "default/color.frag");
+  Shader::setDefaultShader(SHADER_DEFAULT_TYPE_NORMALS_SHADER, "default/normal.vert", "default/normal.frag", "default/normal.geom");
+  Shader::setDefaultShader(SHADER_DEFAULT_TYPE_TEXTURE_SHADER, "default/texture.vert", "default/texture.frag");
+
+  const Shader& colorShader = Shader::getDefaultShader(SHADER_DEFAULT_TYPE_COLOR_SHADER);
+  Shader planetShader("planet.vert", "planet.frag", "planet.geom");
   Shader airplaneShader("airplane.vert", "airplane.frag");
 
   const GLint planetShaderLightPosLoc = planetShader.getUniformLoc("u_lightPos");
@@ -96,14 +99,14 @@ int main() {
   // ===== Textures ============================================= //
 
   Texture normalheightmaps(
-    "res/tex/planet/normalheightmap0.png",  // First part
-    "res/tex/planet/normalheightmap1.png",  // Second part
+    "res/tex/planet/normalheightmap2560_0.png",  // First part
+    "res/tex/planet/normalheightmap2560_1.png",  // Second part
     "normalheightmaps",                     // Uniform name in shader
     0,                                      // Texture slot
     GL_TEXTURE_2D_ARRAY,                    // Texture type
-    GL_RGBA8_SNORM,                         // Color format in the OpenGL program
+    GL_RGBA8,                         // Color format in the OpenGL program
     GL_RGBA,                                // Color format of the given image(s)
-    GL_BYTE                                 // Color bytes format of the given image(s)
+    GL_UNSIGNED_BYTE                                 // Color bytes format of the given image(s)
   );
 
   Texture worldColors(
@@ -132,8 +135,8 @@ int main() {
   vec3 airplanePosInit(0.f);
   float airplaneFlyHeight = 10.f;
   airplanePosInit.z = planet.getRadius() + airplaneFlyHeight;
-  Airplane airplane(planet, airplanePosInit, PI / 100.f, airplaneFlyHeight, PI / 10.f, 0.1f);
-  Texture airplaneTexture("res/tex/Aircraft_Texture.png", "diffuse0", 0);
+  Airplane airplane(planet, airplanePosInit, PI / 100.f, airplaneFlyHeight, PI / 10.f, 0.001f);
+  Texture airplaneTexture("res/tex/11804_Airplane_diff.jpg", "diffuse0", 0);
   airplane.add(&airplaneTexture);
 
   // ===== Cameras ============================================== //
@@ -206,11 +209,15 @@ int main() {
 
     planet.draw(camera, planetShader);
     airplane.draw(camera, airplaneShader);
+    airplane.draw(camera, AIRPLANE_FLAG_DRAW_DIRECTIONS);
 
     glDisable(GL_CULL_FACE);
 
     light.draw(camera, colorShader);
     camera->draw(cameraAirplane, colorShader, CAMERA_FLAG_DRAW_FRUSTUM);
+
+    if (global::drawGlobalAxis)
+      meshes::axis(planet.getRadius() * 2.f).draw(camera, colorShader);
 
     glEnable(GL_CULL_FACE);
 

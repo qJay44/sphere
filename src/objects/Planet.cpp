@@ -34,6 +34,7 @@ Planet::Planet(u32 resolution, u32 chunksPerFace, float radius)
     radius(radius) {
   chunks = chunksPerFace;
   terrainFaces = new TerrainFace[6];
+  heightmapScale = radius * 0.065f;
 
   build();
 }
@@ -69,7 +70,7 @@ void Planet::draw(const Camera* camera, const Shader& shader) const {
   static const GLint nhmsLoc = shader.getUniformLoc("u_normalheightmaps");
   static const GLint wcLoc = shader.getUniformLoc("u_worldColors");
 
-  shader.setUniform1f(heightmapScaleUniLoc, heightmapScale * radius);
+  shader.setUniform1f(heightmapScaleUniLoc, heightmapScale);
   shader.setUniformTexture(nhmsLoc, Planet::normalheightmaps->getUnit());
   shader.setUniformTexture(wcLoc, Planet::worldColors->getUnit());
 

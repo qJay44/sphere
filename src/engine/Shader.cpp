@@ -2,11 +2,17 @@
 
 #include <cstdio>
 #include <format>
+#include <stdexcept>
 #include <string>
 
 #include "glm/gtc/type_ptr.hpp"
 
 fspath Shader::directory = "";
+Shader Shader::defaultColor;
+Shader Shader::defaultNormals;
+Shader Shader::defaultTexture;
+
+Shader::Shader() {}
 
 Shader::Shader(const fspath& vsPath, const fspath& fsPath, const fspath& gsPath) {
   program = glCreateProgram();
@@ -35,7 +41,42 @@ Shader::Shader(const fspath& compPath) {
   glDeleteShader(shader);
 }
 
+void Shader::clear() {
+  glDeleteProgram(program);
+}
+
+const Shader& Shader::getDefaultShader(u32 type) {
+  switch (type) {
+    case SHADER_DEFAULT_TYPE_COLOR_SHADER:
+      return Shader::defaultColor;
+    case SHADER_DEFAULT_TYPE_NORMALS_SHADER:
+      return Shader::defaultNormals;
+    case SHADER_DEFAULT_TYPE_TEXTURE_SHADER:
+      return Shader::defaultTexture;
+    default:
+      error(std::format("Unhandled default shader type (%d)\n", type));
+  }
+
+  throw std::runtime_error("Unhappenable happend");
+}
+
 void Shader::setDirectoryLocation(const fspath& path) { Shader::directory = path; }
+
+void Shader::setDefaultShader(u32 type, const fspath& vsPath, const fspath& fsPath, const fspath& gsPath) {
+  switch (type) {
+    case SHADER_DEFAULT_TYPE_COLOR_SHADER:
+      Shader::defaultColor = Shader(vsPath, fsPath, gsPath);
+      break;
+    case SHADER_DEFAULT_TYPE_NORMALS_SHADER:
+      Shader::defaultNormals = Shader(vsPath, fsPath, gsPath);
+      break;
+    case SHADER_DEFAULT_TYPE_TEXTURE_SHADER:
+      Shader::defaultTexture = Shader(vsPath, fsPath, gsPath);
+      break;
+    default:
+      error(std::format("Unhandled default shader type (%d)\n", type));
+  }
+}
 
 GLint Shader::getUniformLoc(const std::string& name) const {
   use();

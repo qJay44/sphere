@@ -2,16 +2,25 @@
 
 #include <string>
 
+#define SHADER_DEFAULT_TYPE_COLOR_SHADER   1
+#define SHADER_DEFAULT_TYPE_NORMALS_SHADER 1 << 1
+#define SHADER_DEFAULT_TYPE_TEXTURE_SHADER 1 << 2
+
 class Shader {
 public:
+  Shader();
   Shader(const fspath& vsPath, const fspath& fsPath, const fspath& gsPath = "");
   Shader(const fspath& compPath);
 
+  static const Shader& getDefaultShader(u32 type);
+
   static void setDirectoryLocation(const fspath& path);
+  static void setDefaultShader(u32 type, const fspath& vsPath, const fspath& fsPath, const fspath& gsPath = "");
 
   GLint getUniformLoc(const std::string& name) const;
 
   void use() const;
+  void clear();
 
   void setUniform1f(const GLint& loc, const float& n)          const;
   void setUniform3f(const GLint& loc, const vec3& v)           const;
@@ -29,10 +38,15 @@ public:
 
 private:
   static fspath directory;
-  GLuint program;
+  static Shader defaultColor;
+  static Shader defaultNormals;
+  static Shader defaultTexture;
+
+  GLuint program = 0;
 
 private:
   static GLuint load(fspath path, int type);
   static GLuint compile(const fspath& path, int type);
   static void link(GLuint program);
 };
+

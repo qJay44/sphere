@@ -11,12 +11,14 @@
 Mesh Mesh::loadObj(const fspath& file, bool printInfo) {
   tinyobj::ObjReaderConfig readerConfig;
   tinyobj::ObjReader reader;
+  status::start("Loading obj", file.string());
 
   if (!reader.ParseFromFile(file.string(), readerConfig)) {
     std::string msg = "ParseFromFile error";
     if (!reader.Error().empty())
       msg = "TinyObjReader: " + reader.Error();
 
+    status::end(false);
     error(msg);
   }
 
@@ -95,6 +97,8 @@ Mesh Mesh::loadObj(const fspath& file, bool printInfo) {
   }
 
   // ==================================== //
+
+  status::end(true);
 
   return Mesh(vertices, GL_TRIANGLES, false);
 }

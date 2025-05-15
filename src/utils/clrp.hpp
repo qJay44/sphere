@@ -94,7 +94,5 @@ std::string prepare(
 [[nodiscard]]
 std::string prepare(clrp_t clrp);
 
-constexpr std::string statusPositive() { return format("Done"  , ATTRIBUTE::BOLD, FG::GREEN); }
-constexpr std::string statusNegative() { return format("Failed", ATTRIBUTE::BOLD, FG::RED); }
-
 } // namespace clrp
+

@@ -14,6 +14,7 @@ extern bool guiFocused;
 extern bool camIsArcball;
 extern bool drawWireframe;
 extern bool drawNormals;
+extern bool drawGlobalAxis;
 
 }// global
 
