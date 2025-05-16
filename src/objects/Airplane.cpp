@@ -18,7 +18,7 @@ Airplane::Airplane(
   Mesh(Mesh::loadObj("res/obj/11804_Airplane_v2_l2.obj")) {
 
   // NOTE: The obj must face -Z initially
-  // Model's initial directions 
+  // Model's initial directions
   forward = {-1.f, 0.f, 0.f};
   up      = { 0.f, 0.f, 1.f};
   right   = { 0.f, 1.f, 0.f};
@@ -89,11 +89,8 @@ void Airplane::update() {
   tiltMomentumRad *= tiltMomentumDecreaseFactor;
 }
 
-void Airplane::draw(const Camera* camera, const Shader& shader) {
-  Mesh::draw(camera, shader);
-}
 
-void Airplane::draw(const Camera* camera, u32 flags) {
+void Airplane::draw(const Camera* camera, const Shader& shader, u32 flags) {
   const Shader& colorShader = Shader::getDefaultShader(SHADER_DEFAULT_TYPE_COLOR_SHADER);
 
   if (flags & AIRPLANE_FLAG_DRAW_RIGHT)
@@ -104,5 +101,7 @@ void Airplane::draw(const Camera* camera, u32 flags) {
 
   if (flags & AIRPLANE_FLAG_DRAW_FORWARD)
     meshes::line(position, position + forward, global::blue).draw(camera, colorShader);
+
+  Mesh::draw(camera, shader);
 }
 

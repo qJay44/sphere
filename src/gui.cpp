@@ -116,11 +116,8 @@ void gui::draw() {
 
     SliderFloat("Radius", &planetGUI.ptr->radius, 1.f, 100.f);
     SliderFloat("Heightmap scale", &planetGUI.ptr->heightmapScale, 0.01f, 100.f);
-
-    static int rbChunksColoring = planetGUI.ptr->colorChunksInsteadOfFaces;
-    RadioButton("Color only faces", &rbChunksColoring, 0); SameLine();
-    RadioButton("Color only chunks per face", &rbChunksColoring, 1);
-    planetGUI.ptr->colorChunksInsteadOfFaces = rbChunksColoring;
+    SliderFloat("Ambient", &planetGUI.ptr->ambient, 0.01f, 10.f);
+    SliderFloat("Specular light", &planetGUI.ptr->specularLight, 0.01f, 10.f);
 
     if (Button("Rebuild"))
       planetGUI.ptr->rebuild();

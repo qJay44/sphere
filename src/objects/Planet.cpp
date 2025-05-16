@@ -69,7 +69,11 @@ void Planet::draw(const Camera* camera, const Shader& shader) const {
   static const GLint heightmapScaleUniLoc = shader.getUniformLoc("u_heightmapScale");
   static const GLint nhmsLoc = shader.getUniformLoc("u_normalheightmaps");
   static const GLint wcLoc = shader.getUniformLoc("u_worldColors");
+  static const GLint ambientLoc = shader.getUniformLoc("u_ambient");
+  static const GLint specLightLoc = shader.getUniformLoc("u_specularLight");
 
+  shader.setUniform1f(ambientLoc, ambient);
+  shader.setUniform1f(specLightLoc, specularLight);
   shader.setUniform1f(heightmapScaleUniLoc, heightmapScale);
   shader.setUniformTexture(nhmsLoc, Planet::normalheightmaps->getUnit());
   shader.setUniformTexture(wcLoc, Planet::worldColors->getUnit());
@@ -85,16 +89,14 @@ void Planet::draw(const Camera* camera, const Shader& shader) const {
 }
 
 void Planet::build() {
-  const vec3 noColors[6] = {};
-  const vec3* colors = colorChunksInsteadOfFaces ? noColors : palette;
-
-  delete[] terrainFaces; terrainFaces = new TerrainFace[6] (
-    TerrainFace(directions[0], this, colors[0]),
-    TerrainFace(directions[1], this, colors[1]),
-    TerrainFace(directions[2], this, colors[2]),
-    TerrainFace(directions[3], this, colors[3]),
-    TerrainFace(directions[4], this, colors[4]),
-    TerrainFace(directions[5], this, colors[5])
+  delete[] terrainFaces;
+  terrainFaces = new TerrainFace[6] (
+    TerrainFace(directions[0], this),
+    TerrainFace(directions[1], this),
+    TerrainFace(directions[2], this),
+    TerrainFace(directions[3], this),
+    TerrainFace(directions[4], this),
+    TerrainFace(directions[5], this)
   );
 }
 

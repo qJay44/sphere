@@ -99,14 +99,14 @@ int main() {
   // ===== Textures ============================================= //
 
   Texture normalheightmaps(
-    "res/tex/planet/normalheightmap2560_0.png",  // First part
-    "res/tex/planet/normalheightmap2560_1.png",  // Second part
-    "normalheightmaps",                     // Uniform name in shader
-    0,                                      // Texture slot
-    GL_TEXTURE_2D_ARRAY,                    // Texture type
-    GL_RGBA8,                         // Color format in the OpenGL program
-    GL_RGBA,                                // Color format of the given image(s)
-    GL_UNSIGNED_BYTE                                 // Color bytes format of the given image(s)
+    "res/tex/planet/normalheightmap21600_0.png",  // First part
+    "res/tex/planet/normalheightmap21600_1.png",  // Second part
+    "normalheightmaps",                           // Uniform name in shader
+    0,                                            // Texture slot
+    GL_TEXTURE_2D_ARRAY,                          // Texture type
+    GL_RGBA8,                                     // Color format in the OpenGL program
+    GL_RGBA,                                      // Color format of the given image(s)
+    GL_UNSIGNED_BYTE                              // Color bytes format of the given image(s)
   );
 
   Texture worldColors(
@@ -209,7 +209,6 @@ int main() {
 
     planet.draw(camera, planetShader);
     airplane.draw(camera, airplaneShader);
-    airplane.draw(camera, AIRPLANE_FLAG_DRAW_DIRECTIONS);
 
     glDisable(GL_CULL_FACE);
 
