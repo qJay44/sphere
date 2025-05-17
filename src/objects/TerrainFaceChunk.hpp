@@ -4,7 +4,7 @@
 
 #include "Planet.hpp"
 
-struct TerrainFaceChunk : public Mesh {
+struct TerrainFaceChunk : public Mesh<Vertex1> {
   vec3 firstVertex;
   vec3 lastVertex;
 
@@ -12,8 +12,7 @@ struct TerrainFaceChunk : public Mesh {
     const vec3& up,
     const Planet* planet,
     const u32& size,
-    const ivec2& start,
-    const vec3& color = vec3(1.f)
+    const ivec2& start
   ) {
     const u32& resolution = planet->getResolution();
 
@@ -23,7 +22,7 @@ struct TerrainFaceChunk : public Mesh {
     u32 resolutionX = size + extraColumn;
     u32 resolutionY = size + extraRow;
 
-    std::vector<Vertex> vertices(resolutionX * resolutionY);
+    std::vector<Vertex1> vertices(resolutionX * resolutionY);
     std::vector<GLuint> indices(resolutionX * resolutionY * 2 * 3);
     vec3 axisA = vec3(up.y, up.z, up.x);
     vec3 axisB = cross(up, axisA);
@@ -38,12 +37,8 @@ struct TerrainFaceChunk : public Mesh {
         float percentX = (start.x + x) / (resolution - 1.f);
         vec3 pX = (percentX - 0.5f) * 2.f * axisA;
         vec3 pointOnPlane = up + pX + pY;
-        Vertex& vertex = vertices[idx];
-
-        vertex = {pointOnSphereFancy(pointOnPlane), color};
-        vertex.normal = normalize(vertex.position);
-        vertex.texture = {percentX, percentY};
-        vertex.position *= planet->getRadius();
+        Vertex1& vertex = vertices[idx];
+        vertex.position = pointOnSphereFancy(pointOnPlane) * planet->getRadius();
 
         if (x != resolutionX - 1 && y != resolutionY - 1) {
           indices[triIndex + 0] = idx;
@@ -64,7 +59,7 @@ struct TerrainFaceChunk : public Mesh {
 
   TerrainFaceChunk() {}
 
-  TerrainFaceChunk(std::vector<Vertex> vertices, std::vector<GLuint> indices, u32 resolutionX) : Mesh(vertices, indices, GL_TRIANGLES, false) {
+  TerrainFaceChunk(std::vector<Vertex1> vertices, std::vector<GLuint> indices, u32 resolutionX) : Mesh(vertices, indices, GL_TRIANGLES, false) {
     this->firstVertex = vertices.front().position;
     this->lastVertex = vertices.back().position;
   }

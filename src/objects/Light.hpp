@@ -2,7 +2,7 @@
 
 #include "../engine/mesh/Mesh.hpp"
 
-class Light : public Mesh {
+class Light : public Mesh<Vertex4> {
 public:
   Light(vec3 position, float size = 1.f, vec3 color = {1.f, 1.f, 1.f});
 

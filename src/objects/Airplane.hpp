@@ -10,7 +10,7 @@
 
 #define AIRPLANE_FLAG_DRAW_DIRECTIONS (AIRPLANE_FLAG_DRAW_RIGHT | AIRPLANE_FLAG_DRAW_UP | AIRPLANE_FLAG_DRAW_FORWARD)
 
-class Airplane : public Mesh {
+class Airplane : public Mesh<Vertex4> {
 public:
   Airplane(const Planet& planet, vec3 position, float speedRad, float flyHeight, float turnSpeedRad, float meshScale = 1.f);
   ~Airplane();

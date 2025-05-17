@@ -63,8 +63,8 @@ void Planet::rebuild(int resolution, float radius) {
 }
 
 void Planet::draw(const Camera* camera, const Shader& shader) const {
-  assert(planet->normalheightmaps != nullptr);
-  assert(planet->worldColors != nullptr);
+  assert(Planet::normalheightmaps != nullptr);
+  assert(Planet::worldColors != nullptr);
 
   static const GLint heightmapScaleUniLoc = shader.getUniformLoc("u_heightmapScale");
   static const GLint nhmsLoc = shader.getUniformLoc("u_normalheightmaps");
@@ -98,5 +98,8 @@ void Planet::build() {
     TerrainFace(directions[4], this),
     TerrainFace(directions[5], this)
   );
+
+  for (u32 i = 0; i < 6; i++)
+    printf("TerrainFace #%i vertices: %i\n", i, terrainFaces[i].chunks.back().getVerticesSize());
 }
 

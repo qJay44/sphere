@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cmath>
-#include <cstdlib>
 #include <list>
 
 #include "TerrainFaceChunk.hpp"
@@ -17,30 +16,19 @@ struct TerrainFace {
 
   TerrainFace() {}
 
-  TerrainFace(const vec3& localUp, const Planet* planet, const vec3& color = vec3(0.f)) {
+  TerrainFace(const vec3& localUp, const Planet* planet) {
 
     chunksAmount = planet->chunks;
     heightmapScaleInv = 1.f / planet->heightmapScale;
 
     u32 chunksAmountSq = sqrt(chunksAmount);
     u32 chunkResolution = planet->resolution / chunksAmountSq;
-    bool randomColor = glm::length(color) == 0.f;
 
     for (u32 y = 0; y < chunksAmountSq; y++) {
       u32 ystart = y * chunkResolution;
       for (u32 x = 0; x < chunksAmountSq; x++) {
         u32 xstart = x * chunkResolution;
-        vec3 col = color;
-
-        if (randomColor) {
-          col = {
-            (rand() % 256) / 255.f,
-            (rand() % 256) / 255.f,
-            (rand() % 256) / 255.f
-          };
-        }
-
-        chunks.push_back(TerrainFaceChunk::build(localUp, planet, chunkResolution, {xstart, ystart}, col));
+        chunks.push_back(TerrainFaceChunk::build(localUp, planet, chunkResolution, {xstart, ystart}));
       }
     }
   }
@@ -56,7 +44,7 @@ struct TerrainFace {
     for (const TerrainFaceChunk& chunk : chunks) {
       vec3 center = (chunk.lastVertex + chunk.firstVertex) * 0.5f;
       float radius = glm::length(chunk.lastVertex - chunk.firstVertex) * 2.f; // Additionally multipling by 2 to keep some chunks when camera is to close to the planet
-      frustum::Sphere frustumSphere(center, radius);
+      frustum::Sphere<Vertex1> frustumSphere(center, radius);
 
       if (frustumSphere.isOnFrustum(tfFrustum, chunk))
         chunk.draw(camera, shader);

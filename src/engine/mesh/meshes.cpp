@@ -7,17 +7,17 @@
 
 namespace meshes {
 
-Mesh line(vec3 p1, vec3 p2, vec3 color, bool clearable) {
-  std::vector<Vertex> vertices{
+Mesh<Vertex4> line(vec3 p1, vec3 p2, vec3 color, bool clearable) {
+  std::vector<Vertex4> vertices{
     {p1, color},
     {p2, color}
   };
 
-  return Mesh(vertices, GL_LINES, clearable);
+  return Mesh<Vertex4>(vertices, GL_LINES, clearable);
 }
 
-Mesh axis(float size, bool clearable) {
-  std::vector<Vertex> vertices{
+Mesh<Vertex4> axis(float size, bool clearable) {
+  std::vector<Vertex4> vertices{
     {{0.f, 0.f, 0.f}, {1.f, 0.f, 0.f}},
     {{size, 0.f, 0.f}, {1.f, 0.f, 0.f}},
     {{0.f, 0.f, 0.f}, {0.f, 1.f, 0.f}},
@@ -26,11 +26,11 @@ Mesh axis(float size, bool clearable) {
     {{0.f, 0.f, size}, {0.f, 0.f, 1.f}},
   };
 
-  return Mesh(vertices, GL_LINES, clearable);
+  return Mesh<Vertex4>(vertices, GL_LINES, clearable);
 }
 
-Mesh plane(vec3 pos, vec2 size, vec3 color, bool clearable) {
-  std::vector<Vertex> vertices{
+Mesh<Vertex4> plane(vec3 pos, vec2 size, vec3 color, bool clearable) {
+  std::vector<Vertex4> vertices{
     {{-0.1f, -0.1f, pos.z}, color, {0.f, 0.f}},
     {{-0.1f,  0.1f, pos.z}, color, {0.f, 1.f}},
     {{ 0.1f,  0.1f, pos.z}, color, {1.f, 1.f}},
@@ -43,14 +43,14 @@ Mesh plane(vec3 pos, vec2 size, vec3 color, bool clearable) {
   };
 
 
-  Mesh m = Mesh(vertices, indices, GL_TRIANGLES, clearable);
+  Mesh m = Mesh<Vertex4>(vertices, indices, GL_TRIANGLES, clearable);
   m.translate(pos);
   m.scale(size);
 
   return m;
 }
 
-Mesh cube(vec3 pos, float size, vec3 color, bool clearable) {
+Mesh<Vertex4> cube(vec3 pos, float size, vec3 color, bool clearable) {
   //        5--------6
   //       /|       /|
   //      1--------2 |
@@ -64,7 +64,7 @@ Mesh cube(vec3 pos, float size, vec3 color, bool clearable) {
   //      z: - to rear, + to front
 
   vec2 tex{0.f, 0.f};
-  std::vector<Vertex> vertices{
+  std::vector<Vertex4> vertices{
     {{-1.f, -1.f,  1.f}, color, tex, {-1.f, -1.f,  1.f}},
     {{-1.f,  1.f,  1.f}, color, tex, {-1.f,  1.f,  1.f}},
     {{ 1.f,  1.f,  1.f}, color, tex, { 1.f,  1.f,  1.f}},
@@ -90,14 +90,14 @@ Mesh cube(vec3 pos, float size, vec3 color, bool clearable) {
     7, 3, 0, //
   };
 
-  Mesh m = Mesh(vertices, indices, GL_TRIANGLES, clearable);
+  Mesh m = Mesh<Vertex4>(vertices, indices, GL_TRIANGLES, clearable);
   m.translate(pos);
   m.scale(size);
 
   return m;
 }
 
-Mesh frustum(const Camera& cam, vec3 color, bool clearable) {
+Mesh<Vertex4> frustum(const Camera& cam, vec3 color, bool clearable) {
   frustum::Frustum frustum(cam);
 
   vec2 winSize = getWinSize();
@@ -141,7 +141,7 @@ Mesh frustum(const Camera& cam, vec3 color, bool clearable) {
   vec3 centerRight  = (centerTR + centerBR) * 0.5f;
   vec3 centerLeft   = (centerTL + centerBL) * 0.5f;
 
-  std::vector<Vertex> vertices {
+  std::vector<Vertex4> vertices {
     // Near plane
     {nearTR, color},
     {nearTL, color},
@@ -192,7 +192,7 @@ Mesh frustum(const Camera& cam, vec3 color, bool clearable) {
     18, 19
   };
 
-  return Mesh(vertices, indices, GL_LINES, clearable);
+  return Mesh<Vertex4>(vertices, indices, GL_LINES, clearable);
 }
 
 } // namespace meshes

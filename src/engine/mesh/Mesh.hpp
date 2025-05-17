@@ -1,67 +1,64 @@
 #pragma once
 
-#include <vector>
+#include "MeshBase.hpp"
 
-#include "glm/gtc/quaternion.hpp"
-
-#include "../Camera.hpp"
-#include "../Shader.hpp"
 #include "EBO.hpp"
 #include "VAO.hpp"
 #include "VBO.hpp"
-#include "Vertex.hpp"
-#include "texture/Texture.hpp"
+#include "vertex.hpp"
 
-#define MESH_VERTEX_ATTRIBUTES 11 // 3 (position) + 3 (color) + 2 (texture) + 3 (normal)
-#define MESH_TEXTURE_LIMIT 10
-
-#define MESH_FLAG_DRAW_RIGHT    1
-#define MESH_FLAG_DRAW_UP       1 << 2
-#define MESH_FLAG_DRAW_FORWARD  1 << 3
-
-#define MESH_FLAG_DRAW_DIRECTIONS (AIRPLANE_FLAG_DRAW_RIGHT | AIRPLANE_FLAG_DRAW_UP | AIRPLANE_FLAG_DRAW_FORWARD)
-
-class Mesh {
+template<typename T>
+class Mesh : public MeshBase {
 public:
-  static Mesh loadObj(const fspath& file, bool printInfo = false);
+  Mesh() {};
+  Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indices, GLenum mode = GL_TRIANGLES, bool clearable = true);
+  Mesh(const std::vector<Vertex1>& vertices, const std::vector<GLuint>& indices, GLenum mode = GL_TRIANGLES, bool clearable = true);
+  Mesh(const std::vector<Vertex4>& vertices, GLenum mode, bool clearable = true);
 
-  Mesh();
-  Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, GLenum mode = GL_TRIANGLES, bool clearable = true);
-  Mesh(std::vector<Vertex> vertices, GLenum mode, bool clearable = true);
+  static Mesh<Vertex4> loadObj(const fspath& file, bool printInfo = false);
 
-  ~Mesh();
+  ~Mesh() {
+    if (clearable)
+      clear();
+  }
 
-  const mat4& getTranslation() const;
-  const mat4& getRotation()    const;
-  const mat4& getScale()       const;
-  mat4 getModel() const;
+  u32 getVerticesSize() const { return vertices.size(); }
 
-  void add(const Texture* texture);
-  void clear();
+  void draw(const Camera* camera, const Shader& shader) const {
+    vao.bind();
 
-  void translate(const vec3& v);
-  void rotate(const float& angle, const vec3& axis);
-  void rotate(const glm::quat& q);
-  void scale(const float& s);
-  void scale(const vec2& s);
+    for (const Texture* tex : textures) {
+      shader.setUniformTexture(tex->getUniformName(), tex->getUnit());
+      tex->bind();
+    }
 
-  void draw(const Camera* camera, const Shader& shader) const;
-  void drawAxis(const Camera* camera, const Shader& shader) const;
+    mat4 model = translation * rotation * scaleMat;
 
-protected:
-  mat4 translation = mat4(1.f);
-  mat4 rotation    = mat4(1.f);
-  mat4 scaleMat    = mat4(1.f);
+    shader.setUniform3f("u_camPos", camera->getPosition());
+    shader.setUniformMatrix4f("u_cam", camera->getMatrix());
+    shader.setUniformMatrix4f("u_model", model);
 
-  bool clearable;
+    if (global::drawWireframe)
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    if (indices.size())
+      glDrawElements(mode, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
+    else
+      glDrawArrays(mode, 0, (GLsizei)vertices.size());
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    vao.unbind();
+  }
+
+  void clear() {
+    if (vao.size) vao.clear();
+    if (vbo.size) vbo.clear();
+    if (ebo.size) ebo.clear();
+  }
 
 private:
-  std::vector<Vertex> vertices;
-  std::vector<GLuint> indices;
-  GLenum mode;
-
-  const Texture* textures[MESH_TEXTURE_LIMIT];
-  u8 texCount = 0;
+  std::vector<T> vertices;
 
   VAO vao;
   VBO vbo;
