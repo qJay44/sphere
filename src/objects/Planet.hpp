@@ -38,7 +38,7 @@ private:
   float radius;
   float heightmapScale = 1.f;
   float ambient = 0.2f;
-  float specularLight = 0.5f;
+  float specularLight = 0.8f;
   struct TerrainFace* terrainFaces = nullptr;
 
   bool colorChunksInsteadOfFaces = true;

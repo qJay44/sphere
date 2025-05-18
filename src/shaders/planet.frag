@@ -29,7 +29,7 @@ vec4 directionalLight() {
   float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.f), 8);
   float specular = specAmount * u_specularLight;
 
-  return vec4(color, 1.f) * (diffuse + u_ambient + u_specularLight) * vec4(u_lightColor, 1.f);
+  return vec4(color, 1.f) * (diffuse + u_ambient + specular) * vec4(u_lightColor, 1.f);
 }
 
 void main() {
