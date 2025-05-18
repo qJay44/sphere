@@ -69,11 +69,9 @@ void Planet::draw(const Camera* camera, const Shader& shader) const {
   static const GLint heightmapScaleUniLoc = shader.getUniformLoc("u_heightmapScale");
   static const GLint nhmsLoc = shader.getUniformLoc("u_normalheightmaps");
   static const GLint wcLoc = shader.getUniformLoc("u_worldColors");
-  static const GLint ambientLoc = shader.getUniformLoc("u_ambient");
-  static const GLint specLightLoc = shader.getUniformLoc("u_specularLight");
+  static const GLint lightMultLoc = shader.getUniformLoc("u_lightMultiplier");
 
-  shader.setUniform1f(ambientLoc, ambient);
-  shader.setUniform1f(specLightLoc, specularLight);
+  shader.setUniform1f(lightMultLoc, lightMultiplier);
   shader.setUniform1f(heightmapScaleUniLoc, heightmapScale);
   shader.setUniformTexture(nhmsLoc, Planet::normalheightmaps->getUnit());
   shader.setUniformTexture(wcLoc, Planet::worldColors->getUnit());

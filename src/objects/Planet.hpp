@@ -37,8 +37,7 @@ private:
   u32 chunks;
   float radius;
   float heightmapScale = 1.f;
-  float ambient = 0.2f;
-  float specularLight = 0.8f;
+  float lightMultiplier = 3.f;
   struct TerrainFace* terrainFaces = nullptr;
 
   bool colorChunksInsteadOfFaces = true;

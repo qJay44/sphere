@@ -40,31 +40,46 @@ void main() {
 
   vec3 T = normalize(vec3(u_model * vec4(tangent, 0.f)));
   vec3 B = normalize(vec3(u_model * vec4(bitangent, 0.f)));
-  vec3 N = normalize(vec3(u_model * vec4(cross(edge0, edge1), 0.f)));
+  vec3 N;
+  mat3 TBN;
+  vec4 vertPos4;
 
-  mat3 TBN = mat3(T, B, N);
-  TBN = transpose(TBN); // TBN is an orthogonal matrix and so its inverse is equal to its transpose
+  vertPos4 = gl_in[0].gl_Position;
+  gl_Position = u_cam * vertPos4;
+  vertPos = vertPos4.xyz;
+  N = normalize(vec3(u_model * vec4(normalize(vertPos), 0.f)));
+  TBN = transpose(mat3(T, B, N));
+  vertPos = TBN * vertPos;
   lightPos = TBN * u_lightPos;
   camPos = TBN * u_camPos;
-
-  gl_Position = u_cam * gl_in[0].gl_Position;
-  vertPos = TBN * gl_in[0].gl_Position.xyz;
   texCoord = data_in[0].texCoord;
   idx = data_in[0].idx;
   u0 = data_in[0].u0;
   u1 = data_in[0].u1;
   EmitVertex();
 
-  gl_Position = u_cam * gl_in[1].gl_Position;
-  vertPos = TBN * gl_in[1].gl_Position.xyz;
+  vertPos4 = gl_in[1].gl_Position;
+  gl_Position = u_cam * vertPos4;
+  vertPos = vertPos4.xyz;
+  N = normalize(vec3(u_model * vec4(normalize(vertPos), 0.f)));
+  TBN = transpose(mat3(T, B, N));
+  vertPos = TBN * vertPos;
+  lightPos = TBN * u_lightPos;
+  camPos = TBN * u_camPos;
   texCoord = data_in[1].texCoord;
   idx = data_in[1].idx;
   u0 = data_in[1].u0;
   u1 = data_in[1].u1;
   EmitVertex();
 
-  gl_Position = u_cam * gl_in[2].gl_Position;
-  vertPos = TBN * gl_in[2].gl_Position.xyz;
+  vertPos4 = gl_in[2].gl_Position;
+  gl_Position = u_cam * vertPos4;
+  vertPos = vertPos4.xyz;
+  N = normalize(vec3(u_model * vec4(normalize(vertPos), 0.f)));
+  TBN = transpose(mat3(T, B, N));
+  vertPos = TBN * vertPos;
+  lightPos = TBN * u_lightPos;
+  camPos = TBN * u_camPos;
   texCoord = data_in[2].texCoord;
   idx = data_in[2].idx;
   u0 = data_in[2].u0;

@@ -116,8 +116,7 @@ void gui::draw() {
 
     SliderFloat("Radius", &planetGUI.ptr->radius, 1.f, 100.f);
     SliderFloat("Heightmap scale", &planetGUI.ptr->heightmapScale, 0.01f, 100.f);
-    SliderFloat("Ambient", &planetGUI.ptr->ambient, 0.01f, 10.f);
-    SliderFloat("Specular light", &planetGUI.ptr->specularLight, 0.01f, 10.f);
+    SliderFloat("Light multiplier", &planetGUI.ptr->lightMultiplier, 0.1f, 20.f);
 
     if (Button("Rebuild"))
       planetGUI.ptr->rebuild();
