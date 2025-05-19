@@ -2,6 +2,7 @@
 
 #include "../engine/Camera.hpp"
 #include "../engine/mesh/texture/Texture.hpp"
+#include "../engine/mesh/Mesh.hpp"
 
 class Planet {
 public:
@@ -20,11 +21,12 @@ public:
   const float& getSeaLevel()       const;
 
   void setHeightmapScale(const float& n);
-  void setSeaLevel(const float& n);
+  void setCountriesBorders(const Mesh<Vertex1>& mesh);
 
   void rebuild();
   void rebuild(int resolution, float radius);
   void draw(const Camera* camera, const Shader& shader) const;
+  void drawBorders(const Camera* camera, const Shader& shader) const;
 
 private:
   friend struct gui;
@@ -38,9 +40,12 @@ private:
   float radius;
   float heightmapScale = 1.f;
   float lightMultiplier = 3.f;
+  float borderDataScale = 0.345625f;
   struct TerrainFace* terrainFaces = nullptr;
 
-  bool colorChunksInsteadOfFaces = true;
+  Mesh<Vertex1> countriesBorders;
+
+  bool printBuildInfo = false;
 
 private:
   void build();

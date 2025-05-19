@@ -51,6 +51,7 @@ const float& Planet::getRadius()         const { return radius;         }
 const float& Planet::getHeightmapScale() const { return heightmapScale; }
 
 void Planet::setHeightmapScale(const float& n) { heightmapScale = n; }
+void Planet::setCountriesBorders(const Mesh<Vertex1>& mesh) { countriesBorders = mesh; countriesBorders.scale(3.f); }
 
 void Planet::rebuild() {
   rebuild(resolution, radius);
@@ -86,6 +87,15 @@ void Planet::draw(const Camera* camera, const Shader& shader) const {
   Planet::worldColors->unbind();
 }
 
+void Planet::drawBorders(const Camera* camera, const Shader& shader) const {
+  const GLint radiusLoc = shader.getUniformLoc("u_planetRadius");
+  const GLint borderDataScaleLoc = shader.getUniformLoc("u_borderDataScale");
+
+  shader.setUniform1f(radiusLoc, radius);
+  shader.setUniform1f(borderDataScale, borderDataScale);
+  countriesBorders.draw(camera, shader);
+}
+
 void Planet::build() {
   delete[] terrainFaces;
   terrainFaces = new TerrainFace[6] (
@@ -97,7 +107,8 @@ void Planet::build() {
     TerrainFace(directions[5], this)
   );
 
-  for (u32 i = 0; i < 6; i++)
-    printf("TerrainFace #%i vertices: %i\n", i, terrainFaces[i].chunks.back().getVerticesSize());
+  if (printBuildInfo)
+    for (u32 i = 0; i < 6; i++)
+      printf("TerrainFace #%i vertices: %i\n", i, terrainFaces[i].chunks.back().getVerticesSize());
 }
 

@@ -117,6 +117,7 @@ void gui::draw() {
     SliderFloat("Radius", &planetGUI.ptr->radius, 1.f, 100.f);
     SliderFloat("Heightmap scale", &planetGUI.ptr->heightmapScale, 0.01f, 100.f);
     SliderFloat("Light multiplier", &planetGUI.ptr->lightMultiplier, 0.1f, 20.f);
+    SliderFloat("Border data scale", &planetGUI.ptr->borderDataScale, 0.1f, 1.f);
 
     if (Button("Rebuild"))
       planetGUI.ptr->rebuild();
@@ -197,6 +198,8 @@ void gui::draw() {
 
   if (TreeNode("Other")) {
     Checkbox("Show global axis", &global::drawGlobalAxis);
+    Checkbox("Planet print build info", &planetGUI.ptr->printBuildInfo);
+
     TreePop();
   }
 

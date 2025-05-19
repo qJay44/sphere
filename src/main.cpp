@@ -90,11 +90,12 @@ int main() {
   const Shader& colorShader = Shader::getDefaultShader(SHADER_DEFAULT_TYPE_COLOR_SHADER);
   Shader planetShader("planet.vert", "planet.frag", "planet.geom");
   Shader airplaneShader("airplane.vert", "airplane.frag");
+  Shader planetBordersShader("borders.vert", "borders.frag");
 
-  const GLint planetShaderLightPosLoc = planetShader.getUniformLoc("u_lightPos");
-  const GLint planetShaderLightColorLoc = planetShader.getUniformLoc("u_lightColor");
-  const GLint airplaneShaderLightPosLoc = airplaneShader.getUniformLoc("u_lightPos");
-  const GLint airplaneShaderLightColorLoc = airplaneShader.getUniformLoc("u_lightColor");
+  const GLint planetShaderLightPosLoc            = planetShader.getUniformLoc("u_lightPos");
+  const GLint planetShaderLightColorLoc          = planetShader.getUniformLoc("u_lightColor");
+  const GLint airplaneShaderLightPosLoc          = airplaneShader.getUniformLoc("u_lightPos");
+  const GLint airplaneShaderLightColorLoc        = airplaneShader.getUniformLoc("u_lightColor");
 
   // ===== Textures ============================================= //
 
@@ -125,6 +126,7 @@ int main() {
   Planet::addTexNormalheightmaps(&normalheightmaps);
   Planet::addTexWorldcolors(&worldColors);
   Planet planet(1024u, 256u, 80.f);
+  planet.setCountriesBorders(Mesh<Vertex1>::loadShapefile("ne_10m_admin_0_countries_lakes"));
 
   // ===== Light ================================================ //
 
@@ -145,6 +147,7 @@ int main() {
   AirplaneCamera cameraAirplane(airplane, 8.f, 200.f);
   CameraStorage::cameraFreePtr = &cameraFree;
   CameraStorage::cameraAirplanePtr= &cameraAirplane;
+  cameraFree.setSpeed(planet.getRadius() * 0.1f);
 
   // ===== Inputs Handler ======================================= //
 
@@ -208,6 +211,7 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     planet.draw(camera, planetShader);
+    planet.drawBorders(camera, planetBordersShader);
     airplane.draw(camera, airplaneShader);
 
     glDisable(GL_CULL_FACE);
