@@ -6,17 +6,28 @@ uniform mat4 u_model;
 uniform mat4 u_cam;
 uniform float u_planetRadius;
 uniform float u_borderDataScale;
+uniform float u_heightMultiplier;
+uniform sampler2DArray u_normalheightmaps;
 
 void main() {
-  vec3 coord = in_pos;
+  vec2 coord = in_pos.xy;
   float r = cos(coord.y);
   vec3 vertPos = vec3(
-    u_planetRadius * sin(coord.x) * r,
-    u_planetRadius * sin(coord.y),
-    u_planetRadius * cos(coord.x) * r
+    sin(coord.x) * r,
+    sin(coord.y),
+    cos(coord.x) * r
   );
+  vertPos *= u_planetRadius;
 
-  vertPos *= u_borderDataScale;
+  coord = coord * 0.5f + 0.5f; // to [0, 1]
+  float idx = round(coord.x);
+  coord.x = (coord.x - 0.5f) * 2.f * idx + coord.x * 2.f * (1.f - idx);
+
+  vec3 normal = normalize(vertPos);
+  float height = texture(u_normalheightmaps, vec3(coord, idx)).a;
+
+  vertPos += normal * height * u_heightMultiplier;
+  vertPos += normal * u_borderDataScale;
 
 	gl_Position = u_cam * u_model * vec4(vertPos, 1.0f);
 }

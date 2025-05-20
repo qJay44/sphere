@@ -51,7 +51,7 @@ const float& Planet::getRadius()         const { return radius;         }
 const float& Planet::getHeightmapScale() const { return heightmapScale; }
 
 void Planet::setHeightmapScale(const float& n) { heightmapScale = n; }
-void Planet::setCountriesBorders(const Mesh<Vertex1>& mesh) { countriesBorders = mesh; countriesBorders.scale(3.f); }
+void Planet::setCountriesBorders(const Mesh<Vertex1>& mesh) { countriesBorders = mesh; }
 
 void Planet::rebuild() {
   rebuild(resolution, radius);
@@ -67,13 +67,13 @@ void Planet::draw(const Camera* camera, const Shader& shader) const {
   assert(Planet::normalheightmaps != nullptr);
   assert(Planet::worldColors != nullptr);
 
-  static const GLint heightmapScaleUniLoc = shader.getUniformLoc("u_heightmapScale");
+  static const GLint heightmapScaleLoc = shader.getUniformLoc("u_heightmapScale");
   static const GLint nhmsLoc = shader.getUniformLoc("u_normalheightmaps");
   static const GLint wcLoc = shader.getUniformLoc("u_worldColors");
   static const GLint lightMultLoc = shader.getUniformLoc("u_lightMultiplier");
 
   shader.setUniform1f(lightMultLoc, lightMultiplier);
-  shader.setUniform1f(heightmapScaleUniLoc, heightmapScale);
+  shader.setUniform1f(heightmapScaleLoc, heightmapScale);
   shader.setUniformTexture(nhmsLoc, Planet::normalheightmaps->getUnit());
   shader.setUniformTexture(wcLoc, Planet::worldColors->getUnit());
 
@@ -88,12 +88,23 @@ void Planet::draw(const Camera* camera, const Shader& shader) const {
 }
 
 void Planet::drawBorders(const Camera* camera, const Shader& shader) const {
-  const GLint radiusLoc = shader.getUniformLoc("u_planetRadius");
-  const GLint borderDataScaleLoc = shader.getUniformLoc("u_borderDataScale");
+  static const GLint radiusLoc = shader.getUniformLoc("u_planetRadius");
+  static const GLint borderDataScaleLoc = shader.getUniformLoc("u_borderDataScale");
+  static const GLint heightMultiplierLoc = shader.getUniformLoc("u_heightMultiplier");
+  static const GLint nhmsLoc = shader.getUniformLoc("u_normalheightmaps");
+  static const GLint colorLoc = shader.getUniformLoc("u_color");
 
   shader.setUniform1f(radiusLoc, radius);
-  shader.setUniform1f(borderDataScale, borderDataScale);
+  shader.setUniform1f(borderDataScaleLoc, borderDataScale);
+  shader.setUniform1f(heightMultiplierLoc, borderHeightMultiplier);
+  shader.setUniform3f(colorLoc, borderColor);
+  shader.setUniformTexture(nhmsLoc, Planet::normalheightmaps->getUnit());
+
+  Planet::normalheightmaps->bind();
+
   countriesBorders.draw(camera, shader);
+
+  Planet::normalheightmaps->unbind();
 }
 
 void Planet::build() {

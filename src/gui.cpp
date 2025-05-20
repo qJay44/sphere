@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include "glm/gtc/type_ptr.hpp"
 #include "imgui.h"
 
 #define IM_RED   IM_COL32(255u, 0u  , 0u  , 255u)
@@ -117,8 +118,13 @@ void gui::draw() {
     SliderFloat("Radius", &planetGUI.ptr->radius, 1.f, 100.f);
     SliderFloat("Heightmap scale", &planetGUI.ptr->heightmapScale, 0.01f, 100.f);
     SliderFloat("Light multiplier", &planetGUI.ptr->lightMultiplier, 0.1f, 20.f);
-    SliderFloat("Border data scale", &planetGUI.ptr->borderDataScale, 0.1f, 1.f);
 
+    SeparatorText("Borders");
+    SliderFloat("Border data scale", &planetGUI.ptr->borderDataScale, 0.1f, 30.f);
+    SliderFloat("Border height multiplier", &planetGUI.ptr->borderHeightMultiplier, 0.1f, 30.f);
+    ColorEdit3("Border color", glm::value_ptr(planetGUI.ptr->borderColor));
+
+    Separator();
     if (Button("Rebuild"))
       planetGUI.ptr->rebuild();
 
@@ -189,7 +195,7 @@ void gui::draw() {
     if (update)
       lightGUI.ptr->translation = glm::translate(mat4(1.f), lightGUI.ptr->position);
 
-    ColorEdit3("Color", (float*)&lightGUI.ptr->color);
+    ColorEdit3("Color", glm::value_ptr(lightGUI.ptr->color));
 
     TreePop();
   };

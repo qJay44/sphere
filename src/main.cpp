@@ -211,7 +211,11 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     planet.draw(camera, planetShader);
+
+    glDisable(GL_DEPTH_TEST);
     planet.drawBorders(camera, planetBordersShader);
+    glEnable(GL_DEPTH_TEST);
+
     airplane.draw(camera, airplaneShader);
 
     glDisable(GL_CULL_FACE);
