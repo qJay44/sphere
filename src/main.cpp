@@ -16,6 +16,7 @@
 #include "imgui_impl_opengl3.h"
 #include "objects/Airplane.hpp"
 #include "objects/AirplaneCamera.hpp"
+#include "objects/Earth.hpp"
 #include "objects/Light.hpp"
 
 using global::window;
@@ -88,66 +89,40 @@ int main() {
   Shader::setDefaultShader(SHADER_DEFAULT_TYPE_TEXTURE_SHADER, "default/texture.vert", "default/texture.frag");
 
   const Shader& colorShader = Shader::getDefaultShader(SHADER_DEFAULT_TYPE_COLOR_SHADER);
-  Shader planetShader("planet.vert", "planet.frag", "planet.geom");
+  Shader earthShader("earth.vert", "earth.frag", "earth.geom");
   Shader airplaneShader("airplane.vert", "airplane.frag");
   Shader planetBordersShader("borders.vert", "borders.frag");
 
-  const GLint planetShaderLightPosLoc            = planetShader.getUniformLoc("u_lightPos");
-  const GLint planetShaderLightColorLoc          = planetShader.getUniformLoc("u_lightColor");
+  const GLint planetShaderLightPosLoc            = earthShader.getUniformLoc("u_lightPos");
+  const GLint planetShaderLightColorLoc          = earthShader.getUniformLoc("u_lightColor");
   const GLint airplaneShaderLightPosLoc          = airplaneShader.getUniformLoc("u_lightPos");
   const GLint airplaneShaderLightColorLoc        = airplaneShader.getUniformLoc("u_lightColor");
 
-  // ===== Textures ============================================= //
+  // ===== Earth =============================================== //
 
-  Texture normalheightmaps(
-    "res/tex/planet/normalheightmap21600_0.png",  // First part
-    "res/tex/planet/normalheightmap21600_1.png",  // Second part
-    "normalheightmaps",                           // Uniform name in shader
-    0,                                            // Texture slot
-    GL_TEXTURE_2D_ARRAY,                          // Texture type
-    GL_RGBA8,                                     // Color format in the OpenGL program
-    GL_RGBA,                                      // Color format of the given image(s)
-    GL_UNSIGNED_BYTE                              // Color bytes format of the given image(s)
-  );
-
-  Texture worldColors(
-    "res/tex/planet/worldColors0.jpg",
-    "res/tex/planet/worldColors1.jpg",
-    "worldColors",
-    1,
-    GL_TEXTURE_2D_ARRAY,
-    GL_RGB8,
-    GL_RGB,
-    GL_UNSIGNED_BYTE
-  );
-
-  // ===== Planet =============================================== //
-
-  Planet::addTexNormalheightmaps(&normalheightmaps);
-  Planet::addTexWorldcolors(&worldColors);
-  Planet planet(1024u, 256u, 80.f);
-  planet.setCountriesBorders(Mesh<Vertex1>::loadShapefile("ne_10m_admin_0_countries_lakes"));
+  Earth::loadTextures();
+  Earth earth(1024u, 256u, 80.f);
 
   // ===== Light ================================================ //
 
-  Light light(planet.getRadius() + vec3{16.3f, 24.f, 26.6f}, 1.5f);
+  Light light(earth.getRadius() + vec3{16.3f, 24.f, 26.6f}, 1.5f);
 
   // ===== Airplane ============================================= //
 
   vec3 airplanePosInit(0.f);
   float airplaneFlyHeight = 10.f;
-  airplanePosInit.z = planet.getRadius() + airplaneFlyHeight;
-  Airplane airplane(planet, airplanePosInit, PI / 100.f, airplaneFlyHeight, PI / 10.f, 0.001f);
+  airplanePosInit.z = earth.getRadius() + airplaneFlyHeight;
+  Airplane airplane(earth, airplanePosInit, PI / 100.f, airplaneFlyHeight, PI / 10.f, 0.001f);
   Texture airplaneTexture("res/tex/11804_Airplane_diff.jpg", "diffuse0", 0);
   airplane.add(&airplaneTexture);
 
   // ===== Cameras ============================================== //
 
-  Camera cameraFree({0.f, 0.f, planet.getRadius() + 3.f}, {0.f, 0.f, -1.f}, 100.f);
+  Camera cameraFree({0.f, 0.f, earth.getRadius() + 3.f}, {0.f, 0.f, -1.f}, 100.f);
   AirplaneCamera cameraAirplane(airplane, 8.f, 200.f);
   CameraStorage::cameraFreePtr = &cameraFree;
   CameraStorage::cameraAirplanePtr= &cameraAirplane;
-  cameraFree.setSpeed(planet.getRadius() * 0.1f);
+  cameraFree.setSpeed(earth.getRadius() * 0.1f);
 
   // ===== Inputs Handler ======================================= //
 
@@ -156,7 +131,7 @@ int main() {
 
   // ============================================================ //
 
-  gui::link(&planet);
+  gui::link(&earth);
   gui::link(&cameraAirplane);
   gui::link(&cameraFree);
   gui::link(&airplane);
@@ -200,8 +175,8 @@ int main() {
       titleTimer = currTime;
     }
 
-    planetShader.setUniform3f(planetShaderLightPosLoc, light.getPosition());
-    planetShader.setUniform3f(planetShaderLightColorLoc, light.getColor());
+    earthShader.setUniform3f(planetShaderLightPosLoc, light.getPosition());
+    earthShader.setUniform3f(planetShaderLightColorLoc, light.getColor());
     airplaneShader.setUniform3f(airplaneShaderLightPosLoc, light.getPosition());
     airplaneShader.setUniform3f(airplaneShaderLightColorLoc, light.getColor());
 
@@ -210,11 +185,7 @@ int main() {
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    planet.draw(camera, planetShader);
-
-    glDisable(GL_DEPTH_TEST);
-    planet.drawBorders(camera, planetBordersShader);
-    glEnable(GL_DEPTH_TEST);
+    earth.draw(camera, earthShader);
 
     airplane.draw(camera, airplaneShader);
 
@@ -224,7 +195,7 @@ int main() {
     camera->draw(cameraAirplane, colorShader, CAMERA_FLAG_DRAW_FRUSTUM);
 
     if (global::drawGlobalAxis)
-      meshes::axis(planet.getRadius() * 2.f).draw(camera, colorShader);
+      meshes::axis(earth.getRadius() * 2.f).draw(camera, colorShader);
 
     glEnable(GL_CULL_FACE);
 

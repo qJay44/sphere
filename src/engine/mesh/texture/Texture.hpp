@@ -17,15 +17,17 @@ public:
   );
 
   Texture(
-    const fspath& path1,
-    const fspath& path2,
-    const std::string& uniform,
-    const GLuint& unit,
-    const GLenum& target,
-    const GLint& internalFormat,
-    const GLenum& format,
-    const GLenum& type
+    const fspath& path1,         // First part
+    const fspath& path2,         // Second part
+    const std::string& uniform,  // Uniform name in shader
+    const GLuint& unit,          // Texture slot
+    const GLenum& target,        // Texture type
+    const GLint& internalFormat, // Color format in the OpenGL program
+    const GLenum& format,        // Color format of the given image(s)
+    const GLenum& type           // Color bytes format of the given image(s)
   );
+
+  Texture operator=(const Texture& other);
 
   void bind() const;
   void unbind() const;
@@ -48,6 +50,8 @@ private:
   uvec3 size;
 
 private:
+  Texture(const Texture& other);
+
   void create2D(const image2D& img);
   void create2DArray(const image2D& img0, const image2D& img1);
 };

@@ -18,14 +18,10 @@ constexpr ImU32 IM_U32_1024 = 2 << 9;
 
 using namespace ImGui;
 
-struct RunOnce {
-  template<typename T> RunOnce(T&& f) { f(); }
-};
-
 static bool collapsed = true;
 
-struct PlanetGUI {
-  Planet* ptr;
+struct EarthGUI {
+  Earth* ptr;
 };
 
 struct CameraGUI {
@@ -43,7 +39,7 @@ struct LightGUI {
   Light* ptr;
 };
 
-PlanetGUI planetGUI;
+EarthGUI earthGUI;
 CameraGUI cameraGUI;
 AirplaneGUI airplaneGUI;
 LightGUI lightGUI;
@@ -60,7 +56,7 @@ void drawDirection(ImDrawList* drawList, const vec2& dir, const ImU32& color, fl
   drawList->AddLine(p1, p2, color);
 }
 
-void gui::link(Planet* ptr)         { planetGUI.ptr     = ptr; }
+void gui::link(Earth* ptr)          { earthGUI.ptr     = ptr; }
 void gui::link(AirplaneCamera* ptr) { cameraGUI.arcball = ptr; }
 void gui::link(Camera* ptr)         { cameraGUI.free    = ptr; }
 void gui::link(Airplane* ptr)       { airplaneGUI.ptr   = ptr; }
@@ -80,53 +76,54 @@ void gui::draw() {
 
   // ================== Planet =========================
 
-  if (!planetGUI.ptr) error("The planet is not linked to gui");
+  if (!earthGUI.ptr) error("The earth object is not linked to gui");
   if (TreeNode("Planet")) {
 
     // +++++++++++++++ Resolution +++++++++++++++ //
     //
     Text("Resolution"); SameLine();
 
-    static u8 resRoot = sqrt(planetGUI.ptr->resolution);
+    static u8 resRoot = sqrt(earthGUI.ptr->resolution);
     if (ArrowButton("##left", ImGuiDir_Left)) {
       resRoot--;
       resRoot = std::max(resRoot, (u8)1);
-      planetGUI.ptr->resolution = resRoot * resRoot;
+      earthGUI.ptr->resolution = resRoot * resRoot;
     }
     SameLine();
     if (ArrowButton("##right", ImGuiDir_Right)) {
       resRoot++;
-      planetGUI.ptr->resolution = resRoot * resRoot;
+      earthGUI.ptr->resolution = resRoot * resRoot;
     }
     SameLine();
 
-    planetGUI.ptr->resolution = std::clamp(planetGUI.ptr->resolution, 2u, 2048u);
-    Text("%d", planetGUI.ptr->resolution);
+    earthGUI.ptr->resolution = std::clamp(earthGUI.ptr->resolution, 2u, 2048u);
+    Text("%d", earthGUI.ptr->resolution);
 
     // +++++++++++++++ Chunks +++++++++++++++++++ //
 
     Text("Chunks    "); SameLine();
 
-    if (ArrowButton("##left##2", ImGuiDir_Left))   planetGUI.ptr->chunks >>= 1; SameLine();
-    if (ArrowButton("##right##2", ImGuiDir_Right)) planetGUI.ptr->chunks <<= 1; SameLine();
+    if (ArrowButton("##left##2", ImGuiDir_Left))   earthGUI.ptr->chunks >>= 1; SameLine();
+    if (ArrowButton("##right##2", ImGuiDir_Right)) earthGUI.ptr->chunks <<= 1; SameLine();
 
-    planetGUI.ptr->chunks = std::clamp(planetGUI.ptr->chunks, 2u, 1024u);    SameLine();
-    Text("%d", planetGUI.ptr->chunks);
+    earthGUI.ptr->chunks = std::clamp(earthGUI.ptr->chunks, 2u, 1024u);    SameLine();
+    Text("%d", earthGUI.ptr->chunks);
 
     // ++++++++++++++++++++++++++++++++++++++++++ //
 
-    SliderFloat("Radius", &planetGUI.ptr->radius, 1.f, 100.f);
-    SliderFloat("Heightmap scale", &planetGUI.ptr->heightmapScale, 0.01f, 100.f);
-    SliderFloat("Light multiplier", &planetGUI.ptr->lightMultiplier, 0.1f, 20.f);
+    SliderFloat("Radius", &earthGUI.ptr->radius, 1.f, 100.f);
+    SliderFloat("Heightmap scale", &earthGUI.ptr->heightmapScale, 0.01f, 100.f);
+    SliderFloat("Light multiplier", &earthGUI.ptr->lightMultiplier, 0.1f, 20.f);
 
     SeparatorText("Borders");
-    SliderFloat("Border data scale", &planetGUI.ptr->borderDataScale, 0.1f, 30.f);
-    SliderFloat("Border height multiplier", &planetGUI.ptr->borderHeightMultiplier, 0.1f, 30.f);
-    ColorEdit3("Border color", glm::value_ptr(planetGUI.ptr->borderColor));
+    SliderFloat("Border data scale", &earthGUI.ptr->borderDataScale, 0.1f, 30.f);
+    SliderFloat("Border height multiplier", &earthGUI.ptr->borderHeightMultiplier, 0.1f, 30.f);
+    SliderFloat("Border thickness", &earthGUI.ptr->borderThickness, 0.1f, 30.f);
+    ColorEdit3("Border color", glm::value_ptr(earthGUI.ptr->borderColor));
 
     Separator();
     if (Button("Rebuild"))
-      planetGUI.ptr->rebuild();
+      earthGUI.ptr->rebuild();
 
     TreePop();
   }
@@ -204,7 +201,7 @@ void gui::draw() {
 
   if (TreeNode("Other")) {
     Checkbox("Show global axis", &global::drawGlobalAxis);
-    Checkbox("Planet print build info", &planetGUI.ptr->printBuildInfo);
+    Checkbox("Planet print build info", &earthGUI.ptr->printBuildInfo);
 
     TreePop();
   }

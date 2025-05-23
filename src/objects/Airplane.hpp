@@ -2,7 +2,7 @@
 
 #include "../engine/mesh/Mesh.hpp"
 
-#include "Planet.hpp"
+#include "Earth.hpp"
 
 #define AIRPLANE_FLAG_DRAW_RIGHT    1
 #define AIRPLANE_FLAG_DRAW_UP       1 << 2
@@ -12,7 +12,7 @@
 
 class Airplane : public Mesh<Vertex4> {
 public:
-  Airplane(const Planet& planet, vec3 position, float speedRad, float flyHeight, float turnSpeedRad, float meshScale = 1.f);
+  Airplane(const Earth& planet, vec3 position, float speedRad, float flyHeight, float turnSpeedRad, float meshScale = 1.f);
   ~Airplane();
 
   const vec3&  getPosition() const;
@@ -32,7 +32,7 @@ public:
 private:
   friend struct gui;
 
-  const Planet& planet;
+  const Earth& planet;
 
   vec3 position;
   vec3 forward;

@@ -4,16 +4,12 @@
 #include "../engine/mesh/texture/Texture.hpp"
 #include "../engine/mesh/Mesh.hpp"
 
-class Planet {
+class Earth {
 public:
-  static const Texture* getTexNormalheightmap(const bool& id);
-  static const Texture* getTexWorld(const bool& id);
+  Earth(u32 resolution, u32 chunksPerFace, float radius);
+  ~Earth();
 
-  static void addTexNormalheightmaps(const Texture* tex);
-  static void addTexWorldcolors(const Texture* tex);
-
-  Planet(u32 resolution, u32 chunksPerFace, float radius);
-  ~Planet();
+  static void loadTextures();
 
   const u32&   getResolution()     const;
   const float& getRadius()         const;
@@ -26,14 +22,14 @@ public:
   void rebuild();
   void rebuild(int resolution, float radius);
   void draw(const Camera* camera, const Shader& shader) const;
-  void drawBorders(const Camera* camera, const Shader& shader) const;
 
 private:
   friend struct gui;
   friend struct TerrainFace;
 
-  static const Texture* normalheightmaps;
-  static const Texture* worldColors;
+  static Texture* texNormalheightmaps;
+  static Texture* texWorldColors;
+  static Texture* texBorders;
 
   u32 resolution;
   u32 chunks;
@@ -44,7 +40,8 @@ private:
 
   float borderDataScale = 2.1f;
   float borderHeightMultiplier = 1.4f;
-  vec3 borderColor = vec3(0.4f);
+  float borderThickness = 1.f;
+  vec3 borderColor = vec3(0.55f);
 
   Mesh<Vertex1> countriesBorders;
 

@@ -31,7 +31,7 @@ public:
   const s32& getLength() const;
   const shapefile_t& getType() const;
   const char* getFirstRecordPtr() const;
-  s32 getMainFileHeaderSizeInBytes() const;
+  constexpr s32 getMainFileHeaderSizeInBytes() const;
   s32 getRecordsSizeInBytes() const;
 
 private:

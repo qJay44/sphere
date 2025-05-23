@@ -1,11 +1,11 @@
 #pragma once
 
-#include "objects/Planet.hpp"
+#include "objects/Earth.hpp"
 #include "objects/AirplaneCamera.hpp"
 #include "objects/Light.hpp"
 
 struct gui {
-  static void link(Planet* ptr);
+  static void link(Earth* ptr);
   static void link(AirplaneCamera* ptr);
   static void link(Camera* ptr);
   static void link(Airplane* ptr);

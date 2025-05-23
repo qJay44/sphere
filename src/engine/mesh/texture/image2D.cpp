@@ -29,7 +29,7 @@ void image2D::load(const fspath& path) {
   pixels = stbi_load(path.string().c_str(), &w, &h, &colorChannels, 0);
   if (!pixels) {
     status::end(false);
-    error(std::format("stb didn't load the image: {}", path.string()));
+    error(std::format("stb can't load the image: {}", path.string()));
   }
 
   width = static_cast<u16>(w);

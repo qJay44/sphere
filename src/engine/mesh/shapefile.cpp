@@ -134,7 +134,7 @@ const char* ShapefileReader::getFirstRecordPtr() const {
   return buffer + getMainFileHeaderSizeInBytes();
 }
 
-s32 ShapefileReader::getMainFileHeaderSizeInBytes() const {
+constexpr s32 ShapefileReader::getMainFileHeaderSizeInBytes() const {
   return 100;
 }
 

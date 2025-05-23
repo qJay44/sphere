@@ -20,7 +20,7 @@ Mesh<Vertex4>::Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLui
   vbo.bind();
   ebo.bind();
 
-  size_t typeSize = sizeof(GLfloat);
+  size_t typeSize = sizeof(float);
   GLsizei stride = static_cast<GLsizei>(MESH_VERTEX_ATTRIBUTES * typeSize);
 
   vao.linkAttrib(0, 3, GL_FLOAT, stride, (void*)(0 * typeSize));
@@ -48,7 +48,7 @@ Mesh<Vertex1>::Mesh(const std::vector<Vertex1>& vertices, const std::vector<GLui
   vbo.bind();
   ebo.bind();
 
-  vao.linkAttrib(0, 3, GL_FLOAT, 3 * sizeof(GLfloat), (void*)(0));
+  vao.linkAttrib(0, 3, GL_FLOAT, 3 * sizeof(float), (void*)(0));
 
   vao.unbind();
   vbo.unbind();
@@ -67,7 +67,7 @@ Mesh<Vertex4>::Mesh(const std::vector<Vertex4>& vertices, GLenum mode, bool clea
   vao.bind();
   vbo.bind();
 
-  size_t typeSize = sizeof(GLfloat);
+  size_t typeSize = sizeof(float);
   GLsizei stride = static_cast<GLsizei>(MESH_VERTEX_ATTRIBUTES * typeSize);
 
   vao.linkAttrib(0, 3, GL_FLOAT, stride, (void*)(0 * typeSize));
@@ -91,7 +91,7 @@ Mesh<Vertex1>::Mesh(const std::vector<Vertex1>& vertices, GLenum mode, bool clea
   vao.bind();
   vbo.bind();
 
-  vao.linkAttrib(0, 3, GL_FLOAT, 3 * sizeof(GLfloat), (void*)(0));
+  vao.linkAttrib(0, 3, GL_FLOAT, 3 * sizeof(float), (void*)(0));
 
   vao.unbind();
   vbo.unbind();

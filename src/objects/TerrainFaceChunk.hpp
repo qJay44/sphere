@@ -2,7 +2,7 @@
 
 #include "../engine/mesh/Mesh.hpp"
 
-#include "Planet.hpp"
+#include "Earth.hpp"
 
 struct TerrainFaceChunk : public Mesh<Vertex1> {
   vec3 firstVertex;
@@ -10,11 +10,11 @@ struct TerrainFaceChunk : public Mesh<Vertex1> {
 
   static TerrainFaceChunk build(
     const vec3& up,
-    const Planet* planet,
+    const Earth* earth,
     const u32& size,
     const ivec2& start
   ) {
-    const u32& resolution = planet->getResolution();
+    const u32& resolution = earth->getResolution();
 
     bool extraColumn = resolution - start.x != size;
     bool extraRow    = resolution - start.y != size;
@@ -38,7 +38,7 @@ struct TerrainFaceChunk : public Mesh<Vertex1> {
         vec3 pX = (percentX - 0.5f) * 2.f * axisA;
         vec3 pointOnPlane = up + pX + pY;
         Vertex1& vertex = vertices[idx];
-        vertex.position = pointOnSphereFancy(pointOnPlane) * planet->getRadius();
+        vertex.position = pointOnSphereFancy(pointOnPlane) * earth->getRadius();
 
         if (x != resolutionX - 1 && y != resolutionY - 1) {
           indices[triIndex + 0] = idx;

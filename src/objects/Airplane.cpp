@@ -3,7 +3,7 @@
 #include "../engine/mesh/meshes.hpp"
 
 Airplane::Airplane(
-  const Planet& planet,
+  const Earth& planet,
   vec3 position,
   float speedRad,
   float flyHeight,

@@ -6,6 +6,11 @@
 #include "clrp.hpp"
 #include "status.hpp"
 
+struct RunOnce {
+  template<typename T> RunOnce(T&& f) { f(); }
+};
+
+
 std::string readFile(const fspath& path);
 
 void printTabs(u8 n);

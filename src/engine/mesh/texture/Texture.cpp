@@ -68,6 +68,20 @@ Texture::Texture(
   unbind();
 }
 
+Texture::Texture(const Texture& other) :
+  target(other.target),
+  internalFormat(other.internalFormat),
+  format(other.format),
+  type(other.type),
+  uniformName(other.uniformName),
+  unit(other.unit),
+  id(other.id),
+  size(other.size) {}
+
+Texture Texture::operator=(const Texture& other) {
+  return Texture(other);
+}
+
 void Texture::bind() const {
   glActiveTexture(GL_TEXTURE0 + unit);
   glBindTexture(target, id);

@@ -16,19 +16,19 @@ struct TerrainFace {
 
   TerrainFace() {}
 
-  TerrainFace(const vec3& localUp, const Planet* planet) {
+  TerrainFace(const vec3& localUp, const Earth* earth) {
 
-    chunksAmount = planet->chunks;
-    heightmapScaleInv = 1.f / planet->heightmapScale;
+    chunksAmount = earth->chunks;
+    heightmapScaleInv = 1.f / earth->heightmapScale;
 
     u32 chunksAmountSq = sqrt(chunksAmount);
-    u32 chunkResolution = planet->resolution / chunksAmountSq;
+    u32 chunkResolution = earth->resolution / chunksAmountSq;
 
     for (u32 y = 0; y < chunksAmountSq; y++) {
       u32 ystart = y * chunkResolution;
       for (u32 x = 0; x < chunksAmountSq; x++) {
         u32 xstart = x * chunkResolution;
-        chunks.push_back(TerrainFaceChunk::build(localUp, planet, chunkResolution, {xstart, ystart}));
+        chunks.push_back(TerrainFaceChunk::build(localUp, earth, chunkResolution, {xstart, ystart}));
       }
     }
   }
@@ -43,7 +43,7 @@ struct TerrainFace {
 
     for (const TerrainFaceChunk& chunk : chunks) {
       vec3 center = (chunk.lastVertex + chunk.firstVertex) * 0.5f;
-      float radius = glm::length(chunk.lastVertex - chunk.firstVertex) * 2.f; // Additionally multipling by 2 to keep some chunks when camera is to close to the planet
+      float radius = glm::length(chunk.lastVertex - chunk.firstVertex) * 2.f; // Additionally multipling by 2 to keep some chunks when camera is to close to the earth
       frustum::Sphere<Vertex1> frustumSphere(center, radius);
 
       if (frustumSphere.isOnFrustum(tfFrustum, chunk))
