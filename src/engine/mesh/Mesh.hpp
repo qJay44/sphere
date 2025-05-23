@@ -18,7 +18,6 @@ public:
   Mesh(const std::vector<Vertex1>& vertices, GLenum mode, bool clearable = true);
 
   static Mesh<Vertex4> loadObj(const fspath& file, bool printInfo = false);
-  static Mesh<Vertex1> loadShapefile(const fspath& folder);
 
   ~Mesh() {
     if (clearable)

@@ -114,11 +114,6 @@ void gui::draw() {
     SliderFloat("Radius", &earthGUI.ptr->radius, 1.f, 100.f);
     SliderFloat("Heightmap scale", &earthGUI.ptr->heightmapScale, 0.01f, 100.f);
     SliderFloat("Light multiplier", &earthGUI.ptr->lightMultiplier, 0.1f, 20.f);
-
-    SeparatorText("Borders");
-    SliderFloat("Border data scale", &earthGUI.ptr->borderDataScale, 0.1f, 30.f);
-    SliderFloat("Border height multiplier", &earthGUI.ptr->borderHeightMultiplier, 0.1f, 30.f);
-    SliderFloat("Border thickness", &earthGUI.ptr->borderThickness, 0.1f, 30.f);
     ColorEdit3("Border color", glm::value_ptr(earthGUI.ptr->borderColor));
 
     Separator();

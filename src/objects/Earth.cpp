@@ -57,7 +57,6 @@ void Earth::loadTextures() {
     GL_RED,
     GL_UNSIGNED_BYTE
   );
-
 }
 
 Earth::Earth(u32 resolution, u32 chunksPerFace, float radius)
@@ -105,9 +104,11 @@ void Earth::draw(const Camera* camera, const Shader& shader) const {
   static const GLint wcLoc = shader.getUniformLoc("u_worldColors");
   static const GLint bordersLoc = shader.getUniformLoc("u_borders");
   static const GLint lightMultLoc = shader.getUniformLoc("u_lightMultiplier");
+  static const GLint borderColorLoc = shader.getUniformLoc("u_borderColor");
 
   shader.setUniform1f(lightMultLoc, lightMultiplier);
   shader.setUniform1f(heightmapScaleLoc, heightmapScale);
+  shader.setUniform3f(borderColorLoc, borderColor);
   shader.setUniformTexture(nhmsLoc, Earth::texNormalheightmaps->getUnit());
   shader.setUniformTexture(wcLoc, Earth::texWorldColors->getUnit());
   shader.setUniformTexture(bordersLoc, Earth::texBorders->getUnit());

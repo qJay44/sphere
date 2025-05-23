@@ -37,10 +37,6 @@ private:
   float heightmapScale = 1.f;
   float lightMultiplier = 3.f;
   struct TerrainFace* terrainFaces = nullptr;
-
-  float borderDataScale = 2.1f;
-  float borderHeightMultiplier = 1.4f;
-  float borderThickness = 1.f;
   vec3 borderColor = vec3(0.55f);
 
   Mesh<Vertex1> countriesBorders;
