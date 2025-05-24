@@ -36,6 +36,8 @@ private:
   float radius;
   float heightmapScale = 1.f;
   float lightMultiplier = 3.f;
+  float ambient = 0.2f;
+  float specularLight = 0.5f;
   struct TerrainFace* terrainFaces = nullptr;
   vec3 borderColor = vec3(0.55f);
 

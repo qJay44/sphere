@@ -113,10 +113,13 @@ void gui::draw() {
 
     SliderFloat("Radius", &earthGUI.ptr->radius, 1.f, 100.f);
     SliderFloat("Heightmap scale", &earthGUI.ptr->heightmapScale, 0.01f, 100.f);
-    SliderFloat("Light multiplier", &earthGUI.ptr->lightMultiplier, 0.1f, 20.f);
     ColorEdit3("Border color", glm::value_ptr(earthGUI.ptr->borderColor));
 
-    Separator();
+    SeparatorText("Lightning");
+    SliderFloat("Light multiplier", &earthGUI.ptr->lightMultiplier, 0.1f, 20.f);
+    SliderFloat("Ambient", &earthGUI.ptr->ambient, 0.0f, 20.f);
+    SliderFloat("Specular light", &earthGUI.ptr->specularLight, 0.0f, 20.f);
+
     if (Button("Rebuild"))
       earthGUI.ptr->rebuild();
 

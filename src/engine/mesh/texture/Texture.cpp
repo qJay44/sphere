@@ -125,8 +125,8 @@ void Texture::create2DArray(const image2D& img0, const image2D& img1) {
   size = {img0.width, img0.height, 2};
   glGenTextures(1, &id);
   bind();
-  glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexStorage3D(target, 1, internalFormat, size.x, size.y, 2);

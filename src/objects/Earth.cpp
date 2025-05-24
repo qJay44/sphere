@@ -26,8 +26,8 @@ Texture* Earth::texBorders = nullptr;
 
 void Earth::loadTextures() {
   Earth::texNormalheightmaps = new Texture(
-    "res/tex/earth/normalheightmap21600_0.png",
-    "res/tex/earth/normalheightmap21600_1.png",
+    "res/tex/earth/normalheightmap21600_50_0.png",
+    "res/tex/earth/normalheightmap21600_50_1.png",
     "u_normalheightmaps",
     0,
     GL_TEXTURE_2D_ARRAY,
@@ -104,10 +104,14 @@ void Earth::draw(const Camera* camera, const Shader& shader) const {
   static const GLint wcLoc = shader.getUniformLoc("u_worldColors");
   static const GLint bordersLoc = shader.getUniformLoc("u_borders");
   static const GLint lightMultLoc = shader.getUniformLoc("u_lightMultiplier");
+  static const GLint ambientLoc = shader.getUniformLoc("u_ambient");
+  static const GLint specularLightLoc = shader.getUniformLoc("u_specularLight");
   static const GLint borderColorLoc = shader.getUniformLoc("u_borderColor");
 
   shader.setUniform1f(lightMultLoc, lightMultiplier);
   shader.setUniform1f(heightmapScaleLoc, heightmapScale);
+  shader.setUniform1f(ambientLoc, ambient);
+  shader.setUniform1f(specularLightLoc, specularLight);
   shader.setUniform3f(borderColorLoc, borderColor);
   shader.setUniformTexture(nhmsLoc, Earth::texNormalheightmaps->getUnit());
   shader.setUniformTexture(wcLoc, Earth::texWorldColors->getUnit());
