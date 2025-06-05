@@ -36,6 +36,8 @@ vec3 Camera::getRight()   const { return -getLeft(); }
 vec3 Camera::getForward() const { return -getBack(); }
 vec3 Camera::getDown()    const { return -getUp(); }
 
+void Camera::setNearPlane(const float& p) { nearPlane = p; }
+void Camera::setFarPlane(const float& p) { farPlane = p; }
 void Camera::setSpeed(const float& s) { speed = s; }
 
 void Camera::update(bool ignoreMousePos) {

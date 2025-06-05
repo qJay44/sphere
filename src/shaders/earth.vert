@@ -13,8 +13,9 @@ uniform mat4 u_cam;
 uniform mat4 u_model;
 uniform vec3 u_camPos;
 uniform vec3 u_lightPos;
-uniform sampler2DArray u_normalheightmaps;
+uniform sampler2DArray u_normalheightmapsLand;
 uniform float u_heightmapScale;
+uniform float u_seaLevel;
 
 #define PI 3.141592265359f
 
@@ -28,8 +29,8 @@ void main() {
   float idx = round(texCoord.x);
   texCoord.x = (texCoord.x - 0.5f) * 2.f * idx + texCoord.x * 2.f * (1.f - idx);
 
-  float height = texture(u_normalheightmaps, vec3(texCoord, idx)).a;
-  vec3 vertPos = in_pos + normal * height * u_heightmapScale;
+  float height = texture(u_normalheightmapsLand, vec3(texCoord, idx)).a;
+  vec3 vertPos = in_pos + normal * (height * u_heightmapScale);
 
   data_out.texCoord = texCoord;
   data_out.idx = idx;

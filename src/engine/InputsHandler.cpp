@@ -22,10 +22,12 @@ void InputsHandler::keyCallback(GLFWwindow* window, int key, int scancode, int a
       if (action == GLFW_PRESS) gui::toggle();
       break;
     case GLFW_KEY_1:
-      if (action == GLFW_PRESS) global::drawWireframe = !global::drawWireframe;
+      if (action == GLFW_PRESS && !global::guiFocused)
+        global::drawWireframe = !global::drawWireframe;
       break;
     case GLFW_KEY_2:
-      if (action == GLFW_PRESS) global::drawNormals = !global::drawNormals;
+      if (action == GLFW_PRESS && !global::guiFocused)
+        global::drawNormals = !global::drawNormals;
       break;
     case GLFW_KEY_F:
       if (action == GLFW_PRESS) {

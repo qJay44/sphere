@@ -32,6 +32,8 @@ public:
   vec3 getForward() const;
   vec3 getDown()  const;
 
+  void setNearPlane(const float& p);
+  void setFarPlane(const float& p);
   void setSpeed(const float& s);
 
   void update(bool ignoreMousePos = false);

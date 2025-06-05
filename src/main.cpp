@@ -101,7 +101,7 @@ int main() {
   // ===== Earth =============================================== //
 
   Earth::loadTextures();
-  Earth earth(1024u, 256u, 80.f);
+  Earth earth(512u, 256u, 80.f);
 
   // ===== Light ================================================ //
 
@@ -113,12 +113,13 @@ int main() {
   float airplaneFlyHeight = 10.f;
   airplanePosInit.z = earth.getRadius() + airplaneFlyHeight;
   Airplane airplane(earth, airplanePosInit, PI / 100.f, airplaneFlyHeight, PI / 10.f, 0.001f);
-  Texture airplaneTexture("res/tex/11804_Airplane_diff.jpg", "diffuse0", 0);
+  Texture airplaneTexture("res/tex/airplane/11804_Airplane_diff.jpg", "diffuse0", 0);
   airplane.add(&airplaneTexture);
 
   // ===== Cameras ============================================== //
 
   Camera cameraFree({0.f, 0.f, earth.getRadius() + 3.f}, {0.f, 0.f, -1.f}, 100.f);
+  cameraFree.setFarPlane(300.f);
   AirplaneCamera cameraAirplane(airplane, 8.f, 200.f);
   CameraStorage::cameraFreePtr = &cameraFree;
   CameraStorage::cameraAirplanePtr= &cameraAirplane;

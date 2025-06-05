@@ -7,6 +7,7 @@ out vec3 vertPos;
 out vec2 texCoord;
 out vec3 lightPos;
 out vec3 camPos;
+out vec3 defaultNormal;
 out float u0;
 out float u1;
 out float idx;
@@ -47,7 +48,8 @@ void main() {
   vertPos4 = gl_in[0].gl_Position;
   gl_Position = u_cam * vertPos4;
   vertPos = vertPos4.xyz;
-  N = normalize(vec3(u_model * vec4(normalize(vertPos), 0.f)));
+  defaultNormal = normalize(vertPos);
+  N = normalize(vec3(u_model * vec4(defaultNormal, 0.f)));
   TBN = transpose(mat3(T, B, N));
   vertPos = TBN * vertPos;
   lightPos = TBN * u_lightPos;
@@ -61,7 +63,8 @@ void main() {
   vertPos4 = gl_in[1].gl_Position;
   gl_Position = u_cam * vertPos4;
   vertPos = vertPos4.xyz;
-  N = normalize(vec3(u_model * vec4(normalize(vertPos), 0.f)));
+  defaultNormal = normalize(vertPos);
+  N = normalize(vec3(u_model * vec4(defaultNormal, 0.f)));
   TBN = transpose(mat3(T, B, N));
   vertPos = TBN * vertPos;
   lightPos = TBN * u_lightPos;
@@ -75,7 +78,8 @@ void main() {
   vertPos4 = gl_in[2].gl_Position;
   gl_Position = u_cam * vertPos4;
   vertPos = vertPos4.xyz;
-  N = normalize(vec3(u_model * vec4(normalize(vertPos), 0.f)));
+  defaultNormal = normalize(vertPos);
+  N = normalize(vec3(u_model * vec4(defaultNormal, 0.f)));
   TBN = transpose(mat3(T, B, N));
   vertPos = TBN * vertPos;
   lightPos = TBN * u_lightPos;

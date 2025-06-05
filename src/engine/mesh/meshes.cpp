@@ -31,10 +31,10 @@ Mesh<Vertex4> axis(float size, bool clearable) {
 
 Mesh<Vertex4> plane(vec3 pos, vec2 size, vec3 color, bool clearable) {
   std::vector<Vertex4> vertices{
-    {{-0.1f, -0.1f, pos.z}, color, {0.f, 0.f}},
-    {{-0.1f,  0.1f, pos.z}, color, {0.f, 1.f}},
-    {{ 0.1f,  0.1f, pos.z}, color, {1.f, 1.f}},
-    {{ 0.1f, -0.1f, pos.z}, color, {1.f, 0.f}},
+    {{-0.1f, -0.1f, 0.f}, color, {0.f, 0.f}},
+    {{-0.1f,  0.1f, 0.f}, color, {0.f, 1.f}},
+    {{ 0.1f,  0.1f, 0.f}, color, {1.f, 1.f}},
+    {{ 0.1f, -0.1f, 0.f}, color, {1.f, 0.f}},
   };
 
   std::vector<GLuint> indices{
@@ -49,6 +49,28 @@ Mesh<Vertex4> plane(vec3 pos, vec2 size, vec3 color, bool clearable) {
 
   return m;
 }
+
+Mesh<Vertex1> plane1(vec3 pos, vec2 size, bool clearable) {
+  std::vector<Vertex1> vertices{
+    {{-0.1f, -0.1f, 0.f}},
+    {{-0.1f,  0.1f, 0.f}},
+    {{ 0.1f,  0.1f, 0.f}},
+    {{ 0.1f, -0.1f, 0.f}},
+  };
+
+  std::vector<GLuint> indices{
+    0, 1, 2,
+    2, 3, 0
+  };
+
+
+  Mesh m = Mesh<Vertex1>(vertices, indices, GL_TRIANGLES, clearable);
+  m.translate(pos);
+  m.scale(size);
+
+  return m;
+}
+
 
 Mesh<Vertex4> cube(vec3 pos, float size, vec3 color, bool clearable) {
   //        5--------6

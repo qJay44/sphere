@@ -17,8 +17,8 @@ public:
   );
 
   Texture(
-    const fspath& path1,         // First part
-    const fspath& path2,         // Second part
+    const fspath& path0,         // First part
+    const fspath& path1,         // Second part
     const std::string& uniform,  // Uniform name in shader
     const GLuint& unit,          // Texture slot
     const GLenum& target,        // Texture type

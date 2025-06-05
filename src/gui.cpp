@@ -113,7 +113,13 @@ void gui::draw() {
 
     SliderFloat("Radius", &earthGUI.ptr->radius, 1.f, 100.f);
     SliderFloat("Heightmap scale", &earthGUI.ptr->heightmapScale, 0.01f, 100.f);
-    ColorEdit3("Border color", glm::value_ptr(earthGUI.ptr->borderColor));
+    SliderFloat("Sea level", &earthGUI.ptr->seaLevel, -5.f, 0.f);
+    ColorEdit3("Border color", glm::value_ptr(earthGUI.ptr->bordersColor));
+
+    SeparatorText("Water");
+    SliderFloat("Deep factor", &earthGUI.ptr->waterDeepFactor, -50.f, 50.f);
+    ColorEdit3("Shallow color", glm::value_ptr(earthGUI.ptr->waterShallowColor));
+    ColorEdit3("Deep color", glm::value_ptr(earthGUI.ptr->waterDeepColor));
 
     SeparatorText("Lightning");
     SliderFloat("Light multiplier", &earthGUI.ptr->lightMultiplier, 0.1f, 20.f);

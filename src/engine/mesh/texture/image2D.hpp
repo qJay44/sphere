@@ -8,11 +8,13 @@ struct image2D {
   ~image2D();
 
   u16 width, height, channels;
-  byte* pixels = nullptr;
+  void* pixels = nullptr;
   std::string name;
 
   void load(const fspath& path);
+  void loadTifInt16Single(const fspath& path);
 
 private:
   bool stbiLoad = false;
+  bool tifInt16Load = false;
 };

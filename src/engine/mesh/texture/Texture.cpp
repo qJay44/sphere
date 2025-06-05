@@ -41,8 +41,8 @@ Texture::Texture(
 }
 
 Texture::Texture(
+  const fspath& path0,
   const fspath& path1,
-  const fspath& path2,
   const std::string& uniform,
   const GLuint& unit,
   const GLenum& target,
@@ -59,7 +59,7 @@ Texture::Texture(
 {
   switch (target) {
     case GL_TEXTURE_2D_ARRAY:
-      create2DArray(image2D(path1), image2D(path2));
+      create2DArray(image2D(path0), image2D(path1));
       break;
     default:
       error(std::format("Unhandled texture creation type: [{}]", target));

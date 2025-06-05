@@ -1,5 +1,8 @@
 #include "image2D.hpp"
+
 #include <format>
+
+#include "tiffio.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
@@ -17,27 +20,70 @@ image2D::image2D() {}
 image2D::image2D(const fspath& path) { load(path); }
 
 image2D::~image2D() {
-  if (stbiLoad) stbi_image_free(pixels);
-  else if (pixels) error("image2D is not nullptr");
+  if (stbiLoad)
+    stbi_image_free(pixels);
+  else if(tifInt16Load)
+      delete[] (s16*)pixels;
+  else if (pixels)
+    error("image2D is not nullptr");
 }
 
 void image2D::load(const fspath& path) {
   status::start("Loading", path.string());
 
-  int w, h, colorChannels;
-  stbi_set_flip_vertically_on_load(true);
-  pixels = stbi_load(path.string().c_str(), &w, &h, &colorChannels, 0);
-  if (!pixels) {
+  if (path.extension() == ".tif")
+    loadTifInt16Single(path);
+  else {
+    int w, h, colorChannels;
+    stbi_set_flip_vertically_on_load(true);
+    pixels = stbi_load(path.string().c_str(), &w, &h, &colorChannels, 0);
+    if (!pixels) {
+      status::end(false);
+      error(std::format("stb can't load the image: {}", path.string()));
+    }
+
+    width = static_cast<u16>(w);
+    height = static_cast<u16>(h);
+    channels = static_cast<u16>(colorChannels);
+    name = path.string();
+    stbiLoad = true;
+  }
+
+  status::end(true);
+}
+
+void image2D::loadTifInt16Single(const fspath& path) {
+  TIFF* tif = TIFFOpen(path.string().c_str(), "r");
+  if (!tif) {
     status::end(false);
-    error(std::format("stb can't load the image: {}", path.string()));
+    error(std::format("tif can't load the image: {}", path.string()));
+  }
+
+  u32 w, h;
+  TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &w);
+  TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &h);
+  s16* buf = new s16[w * h];
+
+  for (u32 row = 0; row < h; row++) {
+    s16* bufRow = buf + row * w;
+    if (TIFFReadScanline(tif, bufRow, row) < 0)
+      error("tif scanline read error");
+  }
+
+  // Flip vertically
+  for (int y = 0; y < h / 2; ++y) {
+    short* rowTop = buf + y * w;
+    short* rowBottom = buf + (h - y - 1) * w;
+    std::swap_ranges(rowTop, rowTop + w, rowBottom);
   }
 
   width = static_cast<u16>(w);
   height = static_cast<u16>(h);
-  channels = static_cast<u16>(colorChannels);
+  channels = 1u;
   name = path.string();
-  stbiLoad = true;
+  pixels = (void*)buf;
+  tifInt16Load = true;
 
-  status::end(true);
+  TIFFClose(tif);
 }
 

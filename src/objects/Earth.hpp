@@ -2,7 +2,6 @@
 
 #include "../engine/Camera.hpp"
 #include "../engine/mesh/texture/Texture.hpp"
-#include "../engine/mesh/Mesh.hpp"
 
 class Earth {
 public:
@@ -14,10 +13,6 @@ public:
   const u32&   getResolution()     const;
   const float& getRadius()         const;
   const float& getHeightmapScale() const;
-  const float& getSeaLevel()       const;
-
-  void setHeightmapScale(const float& n);
-  void setCountriesBorders(const Mesh<Vertex1>& mesh);
 
   void rebuild();
   void rebuild(int resolution, float radius);
@@ -27,21 +22,27 @@ private:
   friend struct gui;
   friend struct TerrainFace;
 
-  static Texture* texNormalheightmaps;
+  static Texture* texNormalheightmapsLand;
+  static Texture* texHeightmapsWater;
   static Texture* texWorldColors;
   static Texture* texBorders;
 
+  struct TerrainFace* terrainFaces = nullptr;
+
   u32 resolution;
   u32 chunks;
+
   float radius;
-  float heightmapScale = 1.f;
+  float heightmapScale = 2.f;
+  float seaLevel = 0.f;
   float lightMultiplier = 3.f;
   float ambient = 0.2f;
   float specularLight = 0.5f;
-  struct TerrainFace* terrainFaces = nullptr;
-  vec3 borderColor = vec3(0.55f);
+  float waterDeepFactor = 1.f;
 
-  Mesh<Vertex1> countriesBorders;
+  vec3 bordersColor = vec3(0.55f);
+  vec3 waterShallowColor = vec3(0.f, 0.705f, 0.799f);
+  vec3 waterDeepColor = vec3(0.f, 0.127f, 0.255f);
 
   bool printBuildInfo = false;
 
