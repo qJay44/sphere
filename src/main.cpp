@@ -93,8 +93,9 @@ int main() {
   Shader airplaneShader("airplane.vert", "airplane.frag");
   Shader planetBordersShader("borders.vert", "borders.frag");
 
-  const GLint planetShaderLightPosLoc     = earthShader.getUniformLoc("u_lightPos");
-  const GLint planetShaderLightColorLoc   = earthShader.getUniformLoc("u_lightColor");
+  const GLint earthShaderLightPosLoc      = earthShader.getUniformLoc("u_lightPos");
+  const GLint earthShaderLightColorLoc    = earthShader.getUniformLoc("u_lightColor");
+  const GLint earthShaderTimeLoc          = earthShader.getUniformLoc("u_time");
   const GLint airplaneShaderLightPosLoc   = airplaneShader.getUniformLoc("u_lightPos");
   const GLint airplaneShaderLightColorLoc = airplaneShader.getUniformLoc("u_lightColor");
 
@@ -159,6 +160,7 @@ int main() {
     else prevTime = currTime;
 
     camera = global::camIsArcball ? &cameraAirplane : &cameraFree;
+    global::time += global::dt;
 
     if (glfwGetWindowAttrib(window, GLFW_FOCUSED))
       InputsHandler::process(camera);
@@ -176,8 +178,9 @@ int main() {
       titleTimer = currTime;
     }
 
-    earthShader.setUniform3f(planetShaderLightPosLoc, light.getPosition());
-    earthShader.setUniform3f(planetShaderLightColorLoc, light.getColor());
+    earthShader.setUniform3f(earthShaderLightPosLoc, light.getPosition());
+    earthShader.setUniform3f(earthShaderLightColorLoc, light.getColor());
+    earthShader.setUniform1f(earthShaderTimeLoc, global::time);
     airplaneShader.setUniform3f(airplaneShaderLightPosLoc, light.getPosition());
     airplaneShader.setUniform3f(airplaneShaderLightColorLoc, light.getColor());
 
