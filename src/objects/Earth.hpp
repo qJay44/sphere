@@ -38,11 +38,12 @@ private:
   float lightMultiplier = 3.f;
   float ambient = 0.2f;
   float specularLight = 0.5f;
-  float waterDeepFactor = 1.f;
+  float waterDeepFactor = -0.325f;
 
   vec3 bordersColor = vec3(0.55f);
   vec3 waterShallowColor = vec3(0.f, 0.705f, 0.799f);
   vec3 waterDeepColor = vec3(0.f, 0.127f, 0.255f);
+  float waterSpecularSmoothness = 0.325f;
 
   bool printBuildInfo = false;
 

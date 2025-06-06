@@ -118,6 +118,7 @@ void gui::draw() {
 
     SeparatorText("Water");
     SliderFloat("Deep factor", &earthGUI.ptr->waterDeepFactor, -50.f, 50.f);
+    SliderFloat("Specular smoothness", &earthGUI.ptr->waterSpecularSmoothness, 0.f, 10.f);
     ColorEdit3("Shallow color", glm::value_ptr(earthGUI.ptr->waterShallowColor));
     ColorEdit3("Deep color", glm::value_ptr(earthGUI.ptr->waterDeepColor));
 

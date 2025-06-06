@@ -37,17 +37,6 @@ void Earth::loadTextures() {
     GL_UNSIGNED_BYTE
   );
 
-  // Earth::texHeightmapsWater = new Texture(
-  //   "res/tex/earth/heightmapWater21600_0.png",
-  //   "res/tex/earth/heightmapWater21600_1.png",
-  //   "u_heightmapsWater",
-  //   1,
-  //   GL_TEXTURE_2D_ARRAY,
-  //   GL_R8,
-  //   GL_RED,
-  //   GL_UNSIGNED_BYTE
-  // );
-
   Earth::texHeightmapsWater = new Texture(
     "res/tex/earth/bathymetry0.tif",
     "res/tex/earth/bathymetry1.tif",
@@ -58,7 +47,6 @@ void Earth::loadTextures() {
     GL_RED_INTEGER,
     GL_SHORT
   );
-
 
   Earth::texWorldColors = new Texture(
     "res/tex/earth/worldColors0.jpg",
@@ -119,32 +107,34 @@ void Earth::rebuild(int resolution, float radius) {
 }
 
 void Earth::draw(const Camera* camera, const Shader& shader) const {
-  static const GLint heightmapScaleLoc    = shader.getUniformLoc("u_heightmapScale");
-  static const GLint nhmsLandLoc          = shader.getUniformLoc("u_normalheightmapsLand");
-  static const GLint hmsWaterLoc          = shader.getUniformLoc("u_heightmapsWater");
-  static const GLint wcLoc                = shader.getUniformLoc("u_worldColors");
-  static const GLint bordersLoc           = shader.getUniformLoc("u_borders");
-  static const GLint seaLevelLoc          = shader.getUniformLoc("u_seaLevel");
-  static const GLint lightMultLoc         = shader.getUniformLoc("u_lightMultiplier");
-  static const GLint ambientLoc           = shader.getUniformLoc("u_ambient");
-  static const GLint specularLightLoc     = shader.getUniformLoc("u_specularLight");
-  static const GLint bordersColorLoc      = shader.getUniformLoc("u_bordersColor");
-  static const GLint waterShallowColorLoc = shader.getUniformLoc("u_waterShallowColor");
-  static const GLint waterDeepColorLoc    = shader.getUniformLoc("u_waterDeepColor");
-  static const GLint waterDeepFactorLoc   = shader.getUniformLoc("u_waterDeepFactor");
+  static const GLint heightmapScaleLoc      = shader.getUniformLoc("u_heightmapScale");
+  static const GLint nheightmapsLandLoc     = shader.getUniformLoc("u_normalheightmapsLand");
+  static const GLint heightmapsWaterLoc     = shader.getUniformLoc("u_heightmapsWater");
+  static const GLint waterColorsLoc         = shader.getUniformLoc("u_worldColors");
+  static const GLint bordersLoc             = shader.getUniformLoc("u_borders");
+  static const GLint seaLevelLoc            = shader.getUniformLoc("u_seaLevel");
+  static const GLint lightMultLoc           = shader.getUniformLoc("u_lightMultiplier");
+  static const GLint ambientLoc             = shader.getUniformLoc("u_ambient");
+  static const GLint specularLightLoc       = shader.getUniformLoc("u_specularLight");
+  static const GLint bordersColorLoc        = shader.getUniformLoc("u_bordersColor");
+  static const GLint waterShallowColorLoc   = shader.getUniformLoc("u_waterShallowColor");
+  static const GLint waterDeepColorLoc      = shader.getUniformLoc("u_waterDeepColor");
+  static const GLint waterDeepFactorLoc     = shader.getUniformLoc("u_waterDeepFactor");
+  static const GLint waterSpecSmoothnessLoc = shader.getUniformLoc("u_waterSpecularSmoothness");
 
   shader.setUniform1f(seaLevelLoc, seaLevel);
   shader.setUniform1f(lightMultLoc, lightMultiplier);
   shader.setUniform1f(heightmapScaleLoc, heightmapScale);
   shader.setUniform1f(ambientLoc, ambient);
   shader.setUniform1f(specularLightLoc, specularLight);
+  shader.setUniform1f(waterSpecSmoothnessLoc, waterSpecularSmoothness);
   shader.setUniform1f(waterDeepFactorLoc, waterDeepFactor);
   shader.setUniform3f(bordersColorLoc, bordersColor);
   shader.setUniform3f(waterShallowColorLoc, waterShallowColor);
   shader.setUniform3f(waterDeepColorLoc, waterDeepColor);
-  shader.setUniformTexture(nhmsLandLoc, Earth::texNormalheightmapsLand->getUnit());
-  shader.setUniformTexture(hmsWaterLoc, Earth::texHeightmapsWater->getUnit());
-  shader.setUniformTexture(wcLoc, Earth::texWorldColors->getUnit());
+  shader.setUniformTexture(nheightmapsLandLoc, Earth::texNormalheightmapsLand->getUnit());
+  shader.setUniformTexture(heightmapsWaterLoc, Earth::texHeightmapsWater->getUnit());
+  shader.setUniformTexture(waterColorsLoc, Earth::texWorldColors->getUnit());
   shader.setUniformTexture(bordersLoc, Earth::texBorders->getUnit());
 
   Earth::texNormalheightmapsLand->bind();
