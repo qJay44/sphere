@@ -11,3 +11,10 @@ struct Vertex4 {
   vec3 normal;
 };
 
+struct VertexPT {
+  vec3 position;
+  vec2 texture;
+};
+
+typedef Vertex1 VertexP;
+typedef Vertex4 VertexPCTN;

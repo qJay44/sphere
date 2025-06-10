@@ -13,9 +13,6 @@
 
 #define IM_CIRCLE_RADIUS 30.f
 
-constexpr ImU32 IM_U32_2 = 2;
-constexpr ImU32 IM_U32_1024 = 2 << 9;
-
 using namespace ImGui;
 
 static bool collapsed = true;
@@ -72,8 +69,6 @@ void gui::draw() {
 
   Begin("Settings");
 
-  ImDrawList* drawList = GetWindowDrawList();
-
   // ================== Planet =========================
 
   if (!earthGUI.ptr) error("The earth object is not linked to gui");
@@ -103,8 +98,8 @@ void gui::draw() {
 
     Text("Chunks    "); SameLine();
 
-    if (ArrowButton("##left##2", ImGuiDir_Left))   earthGUI.ptr->chunks >>= 1; SameLine();
-    if (ArrowButton("##right##2", ImGuiDir_Right)) earthGUI.ptr->chunks <<= 1; SameLine();
+    if (ArrowButton("##left##2", ImGuiDir_Left))   {earthGUI.ptr->chunks >>= 1;} SameLine();
+    if (ArrowButton("##right##2", ImGuiDir_Right)) {earthGUI.ptr->chunks <<= 1;} SameLine();
 
     earthGUI.ptr->chunks = std::clamp(earthGUI.ptr->chunks, 2u, 1024u);    SameLine();
     Text("%d", earthGUI.ptr->chunks);
@@ -114,13 +109,14 @@ void gui::draw() {
     SliderFloat("Radius", &earthGUI.ptr->radius, 1.f, 100.f);
     SliderFloat("Heightmap scale", &earthGUI.ptr->heightmapScale, 0.01f, 100.f);
     SliderFloat("Sea level", &earthGUI.ptr->seaLevel, -5.f, 0.f);
+    SliderFloat("Triplanar blend sharpness", &earthGUI.ptr->triplanarBlendSharpness, 1.f, 10.f);
     ColorEdit3("Border color", glm::value_ptr(earthGUI.ptr->bordersColor));
 
     SeparatorText("Water");
     SliderFloat("Deep factor", &earthGUI.ptr->waterDeepFactor, -50.f, 50.f);
     SliderFloat("Specular smoothness", &earthGUI.ptr->waterSpecularSmoothness, 0.f, 10.f);
     SliderFloat("Wave frequency", &earthGUI.ptr->waterWaveFreq, -0.5f, 0.5f);
-    SliderFloat("Wave resolution multiplier", &earthGUI.ptr->waterWaveResMult, 1.f, 100.f);
+    SliderFloat("Wave resolution multiplier", &earthGUI.ptr->waterWaveResMult, 0.001f, 50.f);
     ColorEdit3("Shallow color", glm::value_ptr(earthGUI.ptr->waterShallowColor));
     ColorEdit3("Deep color", glm::value_ptr(earthGUI.ptr->waterDeepColor));
 

@@ -3,15 +3,15 @@
 #include "TerrainFace.hpp"
 
 constexpr vec3 directions[6]{
-  {1.f,  0.f,  0.f }, // Right
-  {-1.f, 0.f,  0.f }, // Left
-  {0.f,  1.f,  0.f }, // Top
-  {0.f,  -1.f, 0.f }, // Bottom
+  {1.f,  0.f,  0.f},  // Right
+  {-1.f, 0.f,  0.f},  // Left
+  {0.f,  1.f,  0.f},  // Top
+  {0.f,  -1.f, 0.f},  // Bottom
+  {0.f,  0.f,  1.f},  // Front
   {0.f,  0.f,  -1.f}, // Back
-  {0.f,  0.f,  1.f }, // Front
 };
 
-constexpr vec3 palette[6]{
+constexpr vec3 debug_terrainFaceColors[6] {
   {0.f,    0.992f, 1.f   },
   {1.f,    0.149f, 0.f   },
   {1.f,    0.251f, 0.988f},
@@ -28,52 +28,41 @@ Texture* Earth::texNormalmapWave0 = nullptr;
 Texture* Earth::texNormalmapWave1 = nullptr;
 
 void Earth::loadTextures() {
-  Earth::texNormalheightmapsLand = new Texture(
-    "res/tex/earth/normalheightmapLand21600_50_0.png",
-    "res/tex/earth/normalheightmapLand21600_50_1.png",
-    "u_normalheightmapsLand",
-    0,
-    GL_TEXTURE_2D_ARRAY,
-    GL_RGBA8,
-    GL_RGBA,
-    GL_UNSIGNED_BYTE
-  );
+  size_t unit = 0;
 
   Earth::texHeightmapsWater = new Texture(
-    "res/tex/earth/bathymetry0.tif",
-    "res/tex/earth/bathymetry1.tif",
+    "res/tex/earth/faces/water",
     "u_heightmapsWater",
-    1,
-    GL_TEXTURE_2D_ARRAY,
+    unit++,
+    GL_TEXTURE_CUBE_MAP,
     GL_R16I,
     GL_RED_INTEGER,
     GL_SHORT
   );
 
+  Earth::texNormalheightmapsLand = new Texture(
+    "res/tex/earth/faces/land/normalheightmap21600_50",
+    "u_normalheightmapsLand",
+    unit++,
+    GL_TEXTURE_CUBE_MAP
+  );
+
   Earth::texWorldColors = new Texture(
-    "res/tex/earth/worldColors21600_0.jpg",
-    "res/tex/earth/worldColors21600_1.jpg",
+    "res/tex/earth/faces/worldColors21600",
     "u_worldColors",
-    2,
-    GL_TEXTURE_2D_ARRAY,
-    GL_RGB8,
-    GL_RGB,
-    GL_UNSIGNED_BYTE
+    unit++,
+    GL_TEXTURE_CUBE_MAP
   );
 
   Earth::texBorders = new Texture(
-    "res/tex/earth/borders21600_0.png",
-    "res/tex/earth/borders21600_1.png",
+    "res/tex/earth/faces/borders21600",
     "u_borders",
-    3,
-    GL_TEXTURE_2D_ARRAY,
-    GL_R8,
-    GL_RED,
-    GL_UNSIGNED_BYTE
+    unit++,
+    GL_TEXTURE_CUBE_MAP
   );
 
-  Earth::texNormalmapWave0 = new Texture("res/tex/earth/normalmapWave0.png", "u_normalmapWave0", 4);
-  Earth::texNormalmapWave1 = new Texture("res/tex/earth/normalmapWave1.png", "u_normalmapWave1", 5);
+  Earth::texNormalmapWave0 = new Texture("res/tex/earth/normalmapWave0.png", "u_normalmapWave0", unit++);
+  Earth::texNormalmapWave1 = new Texture("res/tex/earth/normalmapWave1.png", "u_normalmapWave1", unit++);
 }
 
 Earth::Earth(u32 resolution, u32 chunksPerFace, float radius)
@@ -115,17 +104,19 @@ void Earth::rebuild(int resolution, float radius) {
 }
 
 void Earth::draw(const Camera* camera, const Shader& shader) const {
+  static const GLint heightmapsWaterLoc = shader.getUniformLoc(Earth::texHeightmapsWater->getUniformName());
+  static const GLint nheightmapsLandLoc = shader.getUniformLoc(Earth::texNormalheightmapsLand->getUniformName());
+  static const GLint worldColorsLoc     = shader.getUniformLoc(Earth::texWorldColors->getUniformName());
+  static const GLint bordersLoc         = shader.getUniformLoc(Earth::texBorders->getUniformName());
+  static const GLint normalmapWave0Loc  = shader.getUniformLoc(Earth::texNormalmapWave0->getUniformName());
+  static const GLint normalmapWave1Loc  = shader.getUniformLoc(Earth::texNormalmapWave1->getUniformName());
+
   static const GLint heightmapScaleLoc      = shader.getUniformLoc("u_heightmapScale");
-  static const GLint nheightmapsLandLoc     = shader.getUniformLoc("u_normalheightmapsLand");
-  static const GLint heightmapsWaterLoc     = shader.getUniformLoc("u_heightmapsWater");
-  static const GLint waterColorsLoc         = shader.getUniformLoc("u_worldColors");
-  static const GLint normalmapWave0Loc      = shader.getUniformLoc("u_normalmapWave0");
-  static const GLint normalmapWave1Loc      = shader.getUniformLoc("u_normalmapWave1");
-  static const GLint bordersLoc             = shader.getUniformLoc("u_borders");
   static const GLint seaLevelLoc            = shader.getUniformLoc("u_seaLevel");
   static const GLint lightMultLoc           = shader.getUniformLoc("u_lightMultiplier");
   static const GLint ambientLoc             = shader.getUniformLoc("u_ambient");
   static const GLint specularLightLoc       = shader.getUniformLoc("u_specularLight");
+  static const GLint tpBlendSharpnessLoc    = shader.getUniformLoc("u_triplanarBlendSharpness");
   static const GLint bordersColorLoc        = shader.getUniformLoc("u_bordersColor");
   static const GLint waterShallowColorLoc   = shader.getUniformLoc("u_waterShallowColor");
   static const GLint waterDeepColorLoc      = shader.getUniformLoc("u_waterDeepColor");
@@ -134,11 +125,19 @@ void Earth::draw(const Camera* camera, const Shader& shader) const {
   static const GLint waterWaveFreqLoc       = shader.getUniformLoc("u_waterWaveFreq");
   static const GLint waterWaveResMultLoc    = shader.getUniformLoc("u_waterWaveResMult");
 
+  shader.setUniformTexture(heightmapsWaterLoc, Earth::texHeightmapsWater->getUnit());
+  shader.setUniformTexture(nheightmapsLandLoc, Earth::texNormalheightmapsLand->getUnit());
+  shader.setUniformTexture(worldColorsLoc,     Earth::texWorldColors->getUnit());
+  shader.setUniformTexture(bordersLoc,         Earth::texBorders->getUnit());
+  shader.setUniformTexture(normalmapWave0Loc,  Earth::texNormalmapWave0->getUnit());
+  shader.setUniformTexture(normalmapWave1Loc,  Earth::texNormalmapWave1->getUnit());
+
   shader.setUniform1f(seaLevelLoc, seaLevel);
   shader.setUniform1f(lightMultLoc, lightMultiplier);
   shader.setUniform1f(heightmapScaleLoc, heightmapScale);
   shader.setUniform1f(ambientLoc, ambient);
   shader.setUniform1f(specularLightLoc, specularLight);
+  shader.setUniform1f(tpBlendSharpnessLoc, triplanarBlendSharpness);
   shader.setUniform1f(waterSpecSmoothnessLoc, waterSpecularSmoothness);
   shader.setUniform1f(waterDeepFactorLoc, waterDeepFactor);
   shader.setUniform1f(waterWaveFreqLoc, waterWaveFreq);
@@ -146,12 +145,6 @@ void Earth::draw(const Camera* camera, const Shader& shader) const {
   shader.setUniform3f(bordersColorLoc, bordersColor);
   shader.setUniform3f(waterShallowColorLoc, waterShallowColor);
   shader.setUniform3f(waterDeepColorLoc, waterDeepColor);
-  shader.setUniformTexture(nheightmapsLandLoc, Earth::texNormalheightmapsLand->getUnit());
-  shader.setUniformTexture(heightmapsWaterLoc, Earth::texHeightmapsWater->getUnit());
-  shader.setUniformTexture(waterColorsLoc, Earth::texWorldColors->getUnit());
-  shader.setUniformTexture(bordersLoc, Earth::texBorders->getUnit());
-  shader.setUniformTexture(normalmapWave0Loc, Earth::texNormalmapWave0->getUnit());
-  shader.setUniformTexture(normalmapWave1Loc, Earth::texNormalmapWave1->getUnit());
 
   Earth::texNormalheightmapsLand->bind();
   Earth::texHeightmapsWater->bind();
@@ -161,7 +154,7 @@ void Earth::draw(const Camera* camera, const Shader& shader) const {
   Earth::texNormalmapWave1->bind();
 
   for (u8 i = 0; i < 6; i++)
-    terrainFaces[i].draw(camera, shader);
+    terrainFaces[i].draw(camera, shader, debug_terrainFaceColors[i]);
 
   Earth::texNormalheightmapsLand->unbind();
   Earth::texHeightmapsWater->unbind();

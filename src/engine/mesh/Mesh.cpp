@@ -32,6 +32,33 @@ Mesh<Vertex4>::Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLui
 }
 
 template<>
+Mesh<VertexPT>::Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool clearable)
+  : MeshBase(indices, mode, clearable),
+    vertices(vertices),
+    vao(VAO(1)),
+    vbo(VBO(1, vertices.data(), sizeof(VertexPT) * vertices.size())),
+    ebo(1, indices.data(), sizeof(GLuint) * indices.size())
+{
+  this->vertices.resize(vertices.size());
+  this->vertices.reserve(vertices.size());
+
+  vao.bind();
+  vbo.bind();
+  ebo.bind();
+
+  size_t typeSize = sizeof(float);
+  GLsizei stride = static_cast<GLsizei>((3 + 2) * typeSize);
+
+  vao.linkAttrib(0, 3, GL_FLOAT, stride, (void*)(0 * typeSize));
+  vao.linkAttrib(1, 2, GL_FLOAT, stride, (void*)(3 * typeSize));
+
+  vao.unbind();
+  vbo.unbind();
+  ebo.unbind();
+}
+
+
+template<>
 Mesh<Vertex1>::Mesh(const std::vector<Vertex1>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool clearable)
   : MeshBase(indices, mode, clearable),
     vertices(vertices),
@@ -115,7 +142,7 @@ Mesh<Vertex4> Mesh<Vertex4>::loadObj(const fspath& file, bool printInfo) {
 
   const tinyobj::attrib_t& attrib = reader.GetAttrib();
   const std::vector<tinyobj::shape_t>& shapes = reader.GetShapes();
-  const std::vector<tinyobj::material_t>& materials = reader.GetMaterials();
+  // const std::vector<tinyobj::material_t>& materials = reader.GetMaterials();
 
   std::vector<Vertex4> vertices;
 

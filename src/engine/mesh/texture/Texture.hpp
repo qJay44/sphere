@@ -39,12 +39,12 @@ public:
   const uvec3& getSize() const;
 
 private:
+  const std::string uniformName;
+  const GLuint unit;
   const GLenum target;
   const GLint internalFormat;
   const GLenum format;
   const GLenum type;
-  const std::string uniformName;
-  const GLuint unit;
 
   GLuint id;
   uvec3 size;
@@ -54,5 +54,6 @@ private:
 
   void create2D(const image2D& img);
   void create2DArray(const image2D& img0, const image2D& img1);
+  void createCubemap(const fspath& folder);
 };
 

@@ -4,6 +4,7 @@
 
 #include "../gui.hpp"
 #include "CameraStorage.hpp"
+#include "imgui.h"
 
 using global::window;
 
@@ -40,8 +41,13 @@ void InputsHandler::keyCallback(GLFWwindow* window, int key, int scancode, int a
 }
 
 void InputsHandler::scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-  assert(CameraStorage::cameraAirplanePtr != nullptr);
-  CameraStorage::cameraAirplanePtr->zoom(static_cast<float>(yoffset));
+  if (global::guiFocused) {
+    ImGuiIO& io = ImGui::GetIO();
+    io.AddMouseWheelEvent(xoffset, yoffset);
+  } else {
+    assert(CameraStorage::cameraAirplanePtr != nullptr);
+    CameraStorage::cameraAirplanePtr->zoom(static_cast<float>(yoffset));
+  }
 }
 
 void InputsHandler::process(Camera* camera) {

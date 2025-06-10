@@ -27,3 +27,7 @@ inline void print(const vec3& v, const std::string& name = "vec") {
   printf("%s\n", std::format("{}: {}, {}, {}", name, v.x, v.y, v.z).c_str());
 }
 
+inline void print(const vec2& v, const std::string& name = "vec") {
+  printf("%s\n", std::format("{}: {}, {}", name, v.x, v.y).c_str());
+}
+

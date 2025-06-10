@@ -3,51 +3,60 @@
 #include "../engine/mesh/Mesh.hpp"
 
 #include "Earth.hpp"
+#include <cmath>
+#include <cstdlib>
 
-struct TerrainFaceChunk : public Mesh<Vertex1> {
+struct TerrainFaceChunk : public Mesh<VertexPT> {
   vec3 firstVertex;
   vec3 lastVertex;
+  vec3 debug_color;
 
   static TerrainFaceChunk build(
     const vec3& up,
     const Earth* earth,
-    const u32& size,
+    const size_t& size,
     const ivec2& start
   ) {
-    const u32& resolution = earth->getResolution();
+    const size_t& resolution = earth->getResolution();
 
     bool extraColumn = resolution - start.x != size;
     bool extraRow    = resolution - start.y != size;
 
-    u32 resolutionX = size + extraColumn;
-    u32 resolutionY = size + extraRow;
+    size_t resolutionX = size + extraColumn + 1;
+    size_t resolutionY = size + extraRow;
 
-    std::vector<Vertex1> vertices(resolutionX * resolutionY);
+    std::vector<VertexPT> vertices(resolutionX * resolutionY);
     std::vector<GLuint> indices(resolutionX * resolutionY * 2 * 3);
     vec3 axisA = vec3(up.y, up.z, up.x);
     vec3 axisB = cross(up, axisA);
-    u32 triIndex = 0;
+    size_t triIndex = 0;
 
-    for (u32 y = 0; y < resolutionY; y++) {
+    for (size_t y = 0; y < resolutionY; y++) {
       float percentY = (start.y + y) / (resolution - 1.f);
       vec3 pY = (percentY - 0.5f) * 2.f * axisB;
 
-      for (u32 x = 0; x < resolutionX; x++) {
-        u32 idx = x + y * resolutionX;
+      for (size_t x = 0; x < resolutionX; x++) {
+        size_t idx = x + y * resolutionX;
         float percentX = (start.x + x) / (resolution - 1.f);
         vec3 pX = (percentX - 0.5f) * 2.f * axisA;
         vec3 pointOnPlane = up + pX + pY;
-        Vertex1& vertex = vertices[idx];
+        VertexPT& vertex = vertices[idx];
         vertex.position = pointOnSphereFancy(pointOnPlane) * earth->getRadius();
 
-        if (x != resolutionX - 1 && y != resolutionY - 1) {
-          indices[triIndex + 0] = idx;
-          indices[triIndex + 1] = idx + resolutionX + 1;
-          indices[triIndex + 2] = idx + resolutionX;
+        vec3 normal = normalize(vertex.position);
+        vertex.texture = {
+          0.5f - atan2(normal.z, normal.x) / (2.f * PI),
+          0.5f + asin(normal.y) / PI
+        };
 
-          indices[triIndex + 3] = idx;
-          indices[triIndex + 4] = idx + 1;
-          indices[triIndex + 5] = idx + resolutionX + 1;
+        if (x != resolutionX - 1 && y != resolutionY - 1) {
+          indices[triIndex + 0] = idx + resolutionX;      // 2       0 -------- 1
+          indices[triIndex + 1] = idx;                    // 0       |          |
+          indices[triIndex + 2] = idx + 1;                // 1       |          |
+          //                                                         |          |
+          indices[triIndex + 3] = idx + 1;                // 1       |          |
+          indices[triIndex + 4] = idx + resolutionX + 1;  // 3       |          |
+          indices[triIndex + 5] = idx + resolutionX;      // 2       2 -------- 3
 
           triIndex += 6;
         }
@@ -59,9 +68,18 @@ struct TerrainFaceChunk : public Mesh<Vertex1> {
 
   TerrainFaceChunk() {}
 
-  TerrainFaceChunk(std::vector<Vertex1> vertices, std::vector<GLuint> indices, u32 resolutionX) : Mesh(vertices, indices, GL_TRIANGLES, false) {
-    this->firstVertex = vertices.front().position;
-    this->lastVertex = vertices.back().position;
+  TerrainFaceChunk(
+    const std::vector<VertexPT>& vertices,
+    const std::vector<GLuint>& indices,
+    const size_t& resolutionX
+  ) : Mesh(vertices, indices, GL_TRIANGLES, false) {
+    firstVertex = vertices.front().position;
+    lastVertex = vertices.back().position;
+    debug_color = {
+      (rand() % 255) / 255.f,
+      (rand() % 255) / 255.f,
+      (rand() % 255) / 255.f
+    };
   }
 
 private:

@@ -33,8 +33,11 @@ private:
   friend struct gui;
 
   const Earth& planet;
-
   vec3 position;
+  float speedRad;
+  float flyHeight;
+  float turnSpeedRad;
+
   vec3 forward;
   vec3 up;
   vec3 right;
@@ -43,9 +46,6 @@ private:
   float tiltMomentumDecreaseFactor = 0.91f;
   float tiltRecoverMomentumDecreaseFactor = 0.11f;
 
-  float speedRad;
-  float flyHeight;
-  float turnSpeedRad;
   float turnMomentumRad = 0.f;
   float tiltMomentumRad = 0.f;
   float tiltRecoverMomentumRad = 0.f;

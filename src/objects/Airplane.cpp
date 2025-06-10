@@ -10,13 +10,12 @@ Airplane::Airplane(
   float turnSpeedRad,
   float meshScale
 ) :
+  Mesh(Mesh::loadObj("res/obj/11804_Airplane_v2_l2.obj")),
   planet(planet),
   position(position),
   speedRad(speedRad),
   flyHeight(flyHeight),
-  turnSpeedRad(turnSpeedRad),
-  Mesh(Mesh::loadObj("res/obj/11804_Airplane_v2_l2.obj")) {
-
+  turnSpeedRad(turnSpeedRad) {
   // NOTE: The obj must face -Z initially
   // Model's initial directions
   forward = {-1.f, 0.f, 0.f};

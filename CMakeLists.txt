@@ -10,7 +10,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Run)
 project(MyProject VERSION 1.0)
 
 file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
-set_source_files_properties(${GLAD_PATH}/src/glad.c PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
 
 # Using mannually built imgui with GLFW (copying dll)
 set(GLFW_IMGUI_LIB_FILE libGLFW_IMGUI.dll)
@@ -47,6 +46,9 @@ add_executable(${PROJECT_NAME}
   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${GLAD_LIB_FILE}
   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${LIBTIFF_LIB_FILE}
   ${SOURCES})
+
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror)
+target_compile_options(${PROJECT_NAME} PRIVATE -isystem ${GENERAL_INCLUDES}/stb)
 
 target_precompile_headers(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src/pch.hpp)
 

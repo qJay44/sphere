@@ -11,7 +11,7 @@
 
 struct TerrainFace {
   std::list<TerrainFaceChunk> chunks;
-  u32 chunksAmount;
+  size_t chunksAmount;
   float heightmapScaleInv;
 
   TerrainFace() {}
@@ -38,13 +38,20 @@ struct TerrainFace {
       chunk.clear();
   }
 
-  void draw(const Camera* camera, const Shader& shader) const {
+  void draw(const Camera* camera, const Shader& shader, const vec3& tfColor) const {
+    static const GLint tfColorLoc = shader.getUniformLoc("u_debug_terrainFaceColor");
+    static const GLint tfChunkColorLoc = shader.getUniformLoc("u_debug_terrainFaceChunkColor");
+
+    shader.setUniform3f(tfColorLoc, tfColor);
+
     frustum::Frustum tfFrustum(*CameraStorage::cameraAirplanePtr);
 
     for (const TerrainFaceChunk& chunk : chunks) {
+      shader.setUniform3f(tfChunkColorLoc, chunk.debug_color);
+
       vec3 center = (chunk.lastVertex + chunk.firstVertex) * 0.5f;
       float radius = glm::length(chunk.lastVertex - chunk.firstVertex) * 2.f; // Additionally multipling by 2 to keep some chunks when camera is to close to the earth
-      frustum::Sphere<Vertex1> frustumSphere(center, radius);
+      frustum::Sphere<VertexPT> frustumSphere(center, radius);
 
       if (frustumSphere.isOnFrustum(tfFrustum, chunk))
         chunk.draw(camera, shader);

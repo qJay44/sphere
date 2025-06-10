@@ -4,3 +4,4 @@
 * topography and Earth colors: https://visibleearth.nasa.gov/collection/1484/blue-marble?page=1
 * bathymetry: https://www.gebco.net/data-products/gridded-bathymetry-data
 * airplane: https://free3d.com/3d-model/airplane-v2--659376.html
+* borders: https://www.naturalearthdata.com/downloads/10m-cultural-vectors/ (Admin 0 - Countries)

@@ -40,6 +40,7 @@ private:
   float lightMultiplier = 3.f;
   float ambient = 0.2f;
   float specularLight = 0.5f;
+  float triplanarBlendSharpness = 1.f;
 
   vec3 bordersColor = vec3(0.55f);
   vec3 waterShallowColor = vec3(0.f, 0.705f, 0.799f);
@@ -47,7 +48,7 @@ private:
   float waterSpecularSmoothness = 0.325f;
   float waterDeepFactor = -0.325f;
   float waterWaveFreq = 0.01f;
-  float waterWaveResMult = 25.f;
+  float waterWaveResMult = 0.1f;
 
   bool printBuildInfo = false;
 

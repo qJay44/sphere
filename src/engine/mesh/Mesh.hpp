@@ -12,8 +12,9 @@ class Mesh : public MeshBase {
 public:
   Mesh() {};
 
-  Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indices, GLenum mode = GL_TRIANGLES, bool clearable = true);
-  Mesh(const std::vector<Vertex1>& vertices, const std::vector<GLuint>& indices, GLenum mode = GL_TRIANGLES, bool clearable = true);
+  Mesh(const std::vector<Vertex4>&  vertices, const std::vector<GLuint>& indices, GLenum mode = GL_TRIANGLES, bool clearable = true);
+  Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& indices, GLenum mode = GL_TRIANGLES, bool clearable = true);
+  Mesh(const std::vector<Vertex1>&  vertices, const std::vector<GLuint>& indices, GLenum mode = GL_TRIANGLES, bool clearable = true);
   Mesh(const std::vector<Vertex4>& vertices, GLenum mode, bool clearable = true);
   Mesh(const std::vector<Vertex1>& vertices, GLenum mode, bool clearable = true);
 
