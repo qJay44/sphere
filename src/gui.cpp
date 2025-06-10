@@ -114,6 +114,8 @@ void gui::draw() {
 
     SeparatorText("Water");
     SliderFloat("Deep factor", &earthGUI.ptr->waterDeepFactor, -50.f, 50.f);
+    SliderFloat("Deep edge start", &earthGUI.ptr->waterDeepEdgeStart, 0.f, 1.f);
+    SliderFloat("Deep edge end", &earthGUI.ptr->waterDeepEdgeEnd, 0.f, 1.f);
     SliderFloat("Specular smoothness", &earthGUI.ptr->waterSpecularSmoothness, 0.f, 10.f);
     SliderFloat("Wave frequency", &earthGUI.ptr->waterWaveFreq, -0.5f, 0.5f);
     SliderFloat("Wave resolution multiplier", &earthGUI.ptr->waterWaveResMult, 0.001f, 50.f);

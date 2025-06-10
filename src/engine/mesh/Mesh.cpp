@@ -126,7 +126,7 @@ template<>
 Mesh<Vertex4> Mesh<Vertex4>::loadObj(const fspath& file, bool printInfo) {
   tinyobj::ObjReaderConfig readerConfig;
   tinyobj::ObjReader reader;
-  status::start("Loading obj", file.string());
+  status::start("Loading", file.string());
 
   if (!reader.ParseFromFile(file.string(), readerConfig)) {
     std::string msg = "ParseFromFile error";

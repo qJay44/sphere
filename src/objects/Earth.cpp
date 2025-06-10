@@ -41,7 +41,7 @@ void Earth::loadTextures() {
   );
 
   Earth::texNormalheightmapsLand = new Texture(
-    "res/tex/earth/faces/land/normalheightmap21600_50",
+    "res/tex/earth/faces/land/normalheightmap21600_5",
     "u_normalheightmapsLand",
     unit++,
     GL_TEXTURE_CUBE_MAP
@@ -121,6 +121,8 @@ void Earth::draw(const Camera* camera, const Shader& shader) const {
   static const GLint waterShallowColorLoc   = shader.getUniformLoc("u_waterShallowColor");
   static const GLint waterDeepColorLoc      = shader.getUniformLoc("u_waterDeepColor");
   static const GLint waterDeepFactorLoc     = shader.getUniformLoc("u_waterDeepFactor");
+  static const GLint waterDeepEdgeStartLoc  = shader.getUniformLoc("u_waterDeepEdgeStart");
+  static const GLint waterDeepEdgeEndLoc    = shader.getUniformLoc("u_waterDeepEdgeEnd");
   static const GLint waterSpecSmoothnessLoc = shader.getUniformLoc("u_waterSpecularSmoothness");
   static const GLint waterWaveFreqLoc       = shader.getUniformLoc("u_waterWaveFreq");
   static const GLint waterWaveResMultLoc    = shader.getUniformLoc("u_waterWaveResMult");
@@ -140,6 +142,8 @@ void Earth::draw(const Camera* camera, const Shader& shader) const {
   shader.setUniform1f(tpBlendSharpnessLoc, triplanarBlendSharpness);
   shader.setUniform1f(waterSpecSmoothnessLoc, waterSpecularSmoothness);
   shader.setUniform1f(waterDeepFactorLoc, waterDeepFactor);
+  shader.setUniform1f(waterDeepEdgeStartLoc, waterDeepEdgeStart);
+  shader.setUniform1f(waterDeepEdgeEndLoc, waterDeepEdgeEnd);
   shader.setUniform1f(waterWaveFreqLoc, waterWaveFreq);
   shader.setUniform1f(waterWaveResMultLoc, waterWaveResMult);
   shader.setUniform3f(bordersColorLoc, bordersColor);

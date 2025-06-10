@@ -26,6 +26,8 @@ uniform float u_lightMultiplier;
 uniform float u_ambient;
 uniform float u_specularLight;
 uniform float u_waterDeepFactor;
+uniform float u_waterDeepEdgeStart;
+uniform float u_waterDeepEdgeEnd;
 uniform float u_waterSpecularSmoothness;
 uniform float u_waterWaveFreq;
 uniform float u_waterWaveResMult;
@@ -81,8 +83,9 @@ void main() {
 
   deepness = deepness / 32768.f * 0.5f + 0.5f;
 
-  color += isWater * u_waterDeepColor * deepness;
-  color += isWater * u_waterShallowColor * (deepness + u_waterDeepFactor);
+  float t = pow(deepness, u_waterDeepFactor);
+  t = smoothstep(u_waterDeepEdgeStart, u_waterDeepEdgeEnd, t);
+  color = isWater * mix(u_waterDeepColor, u_waterShallowColor, t) + isLand * color;
 
   color *= isLand * directionalLight(normal) + isWater;
   color *= isWater * directionalLight(normalWaves) + isLand;
