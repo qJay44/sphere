@@ -24,10 +24,6 @@ mat4 MeshBase::getModel() const {
 
 u32 MeshBase::getIndicesSize()  const { return indices.size();  }
 
-void MeshBase::add(const Texture* texture) {
-  textures.push_back(texture);
-}
-
 void MeshBase::translate(const vec3& v) { translation = glm::translate(translation, v); }
 
 void MeshBase::rotate(const float& angle, const vec3& axis) { rotation = glm::rotate(rotation, angle, axis);}

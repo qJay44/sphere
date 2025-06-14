@@ -1,13 +1,11 @@
 #pragma once
 
-#include <list>
 #include <vector>
 
 #include "glm/gtc/quaternion.hpp"
 
 #include "../Camera.hpp"
 #include "../Shader.hpp"
-#include "texture/Texture.hpp"
 
 #define MESH_VERTEX_ATTRIBUTES 11 // 3 (position) + 3 (color) + 2 (texture) + 3 (normal)
 #define MESH_TEXTURE_LIMIT 10
@@ -27,8 +25,6 @@ public:
   const mat4& getScale()       const;
   mat4 getModel() const;
   u32 getIndicesSize() const;
-
-  void add(const Texture* texture);
 
   void translate(const vec3& v);
   void rotate(const float& angle, const vec3& axis);
@@ -50,7 +46,5 @@ protected:
   mat4 scaleMat    = mat4(1.f);
 
   bool clearable;
-
-  std::list<const Texture*> textures;
 };
 

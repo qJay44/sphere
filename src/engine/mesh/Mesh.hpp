@@ -30,11 +30,6 @@ public:
   void draw(const Camera* camera, const Shader& shader) const {
     vao.bind();
 
-    for (const Texture* tex : textures) {
-      shader.setUniformTexture(tex->getUniformName(), tex->getUnit());
-      tex->bind();
-    }
-
     mat4 model = translation * rotation * scaleMat;
 
     shader.setUniform3f("u_camPos", camera->getPosition());

@@ -12,6 +12,8 @@
 
 class Airplane : public Mesh<Vertex4> {
 public:
+  static void loadTextures();
+
   Airplane(const Earth& planet, vec3 position, float speedRad, float flyHeight, float turnSpeedRad, float meshScale = 1.f);
   ~Airplane();
 
@@ -31,6 +33,8 @@ public:
 
 private:
   friend struct gui;
+
+  static Texture* texDiffuse;
 
   const Earth& planet;
   vec3 position;

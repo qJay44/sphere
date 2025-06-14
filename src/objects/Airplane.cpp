@@ -2,6 +2,12 @@
 
 #include "../engine/mesh/meshes.hpp"
 
+Texture* Airplane::texDiffuse = nullptr;
+
+void Airplane::loadTextures() {
+  Airplane::texDiffuse = new Texture("res/tex/airplane/11804_Airplane_diff.jpg", "diffuse0", 0);
+}
+
 Airplane::Airplane(
   const Earth& planet,
   vec3 position,
@@ -90,6 +96,11 @@ void Airplane::update() {
 
 
 void Airplane::draw(const Camera* camera, const Shader& shader, u32 flags) {
+  static const GLint diffuseLoc = shader.getUniformLoc(Airplane::texDiffuse->getUniformName());
+
+  shader.setUniformTexture(diffuseLoc, *Airplane::texDiffuse);
+  Airplane::texDiffuse->bind();
+
   const Shader& colorShader = Shader::getDefaultShader(SHADER_DEFAULT_TYPE_COLOR_SHADER);
 
   if (flags & AIRPLANE_FLAG_DRAW_RIGHT)
@@ -102,5 +113,7 @@ void Airplane::draw(const Camera* camera, const Shader& shader, u32 flags) {
     meshes::line(position, position + forward, global::blue).draw(camera, colorShader);
 
   Mesh::draw(camera, shader);
+
+  Airplane::texDiffuse->unbind();
 }
 

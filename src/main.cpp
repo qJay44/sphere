@@ -37,6 +37,7 @@ void GLAPIENTRY MessageCallback(
     stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
     (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, clrp::format(message, clrpError).c_str()
   );
+  exit(1);
 }
 
 int main() {
@@ -48,6 +49,7 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, TRUE);
 
   // Window init
   window = glfwCreateWindow(1200, 720, "Sphere", NULL, NULL);
@@ -110,12 +112,11 @@ int main() {
 
   // ===== Airplane ============================================= //
 
+  Airplane::loadTextures();
   vec3 airplanePosInit(0.f);
   float airplaneFlyHeight = 10.f;
   airplanePosInit.z = earth.getRadius() + airplaneFlyHeight;
   Airplane airplane(earth, airplanePosInit, PI / 100.f, airplaneFlyHeight, PI / 10.f, 0.001f);
-  Texture airplaneTexture("res/tex/airplane/11804_Airplane_diff.jpg", "diffuse0", 0);
-  airplane.add(&airplaneTexture);
 
   // ===== Cameras ============================================== //
 

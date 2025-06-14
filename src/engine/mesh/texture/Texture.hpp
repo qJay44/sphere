@@ -42,9 +42,6 @@ private:
   const std::string uniformName;
   const GLuint unit;
   const GLenum target;
-  const GLint internalFormat;
-  const GLenum format;
-  const GLenum type;
 
   GLuint id;
   uvec3 size;
@@ -52,8 +49,10 @@ private:
 private:
   Texture(const Texture& other);
 
-  void create2D(const image2D& img);
-  void create2DArray(const image2D& img0, const image2D& img1);
-  void createCubemap(const fspath& folder);
+  GLenum defineFormat(const GLenum& f);
+
+  void create2D(const image2D& img, GLenum internalFormat, GLenum format, GLenum type);
+  void create2DArray(const image2D& img0, const image2D& img1, GLenum internalFormat, GLenum format, GLenum type);
+  void createCubemap(const fspath& folder, GLenum internalFormat, GLenum format, GLenum type);
 };
 

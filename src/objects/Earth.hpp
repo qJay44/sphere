@@ -22,8 +22,9 @@ private:
   friend struct gui;
   friend struct TerrainFace;
 
-  static Texture* texNormalheightmapsLand;
   static Texture* texHeightmapsWater;
+  static Texture* texDistanceFieldWater;
+  static Texture* texNormalheightmapsLand;
   static Texture* texWorldColors;
   static Texture* texBorders;
   static Texture* texNormalmapWave0;
@@ -51,6 +52,12 @@ private:
   float waterDeepEdgeEnd = 0.8f;
   float waterWaveFreq = 0.01f;
   float waterWaveResMult = 0.1f;
+  float waterShoreWaveScale = 53.f;
+  float waterShoreWaveFreq = 0.01f;
+  float waterShoreWaveThreshold = 7.4f;
+  float waterShoreWaveAmplitudeScale = 0.4f;
+  float waterShoreWaveSmoothnessStart = 0.34f;
+  float waterShoreWaveSmoothnessEnd = 0.829f;
 
   bool printBuildInfo = false;
 

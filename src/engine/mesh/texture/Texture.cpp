@@ -10,10 +10,8 @@ constexpr GLenum GL_STANDARD_CHANNELS[4] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
 Texture::Texture()
   : uniformName(),
     unit(),
-    target(),
-    internalFormat(),
-    format(),
-    type() {}
+    target()
+{}
 
 Texture::Texture(
   const fspath& path,
@@ -26,17 +24,14 @@ Texture::Texture(
 )
   : uniformName(uniform),
     unit(unit),
-    target(target),
-    internalFormat(internalFormat),
-    format(format),
-    type(type)
+    target(target)
 {
   switch (target) {
     case GL_TEXTURE_2D:
-      create2D(image2D(path, true));
+      create2D(image2D(path, true), internalFormat, format, type);
       break;
     case GL_TEXTURE_CUBE_MAP:
-      createCubemap(path);
+      createCubemap(path, internalFormat, format, type);
       break;
     default:
       error(std::format("Unhandled texture creation type: [{}]", target));
@@ -57,14 +52,11 @@ Texture::Texture(
 )
   : uniformName(uniform),
     unit(unit),
-    target(target),
-    internalFormat(internalFormat),
-    format(format),
-    type(type)
+    target(target)
 {
   switch (target) {
     case GL_TEXTURE_2D_ARRAY:
-      create2DArray(image2D(path0, true), image2D(path1, true));
+      create2DArray(image2D(path0, true), image2D(path1, true), internalFormat, format, type);
       break;
     default:
       error(std::format("Unhandled texture creation type: [{}]", target));
@@ -77,9 +69,6 @@ Texture::Texture(const Texture& other) :
   uniformName(other.uniformName),
   unit(other.unit),
   target(other.target),
-  internalFormat(other.internalFormat),
-  format(other.format),
-  type(other.type),
   id(other.id),
   size(other.size) {}
 
@@ -105,9 +94,9 @@ const GLuint& Texture::getUnit() const { return unit; }
 const std::string& Texture::getUniformName() const { return uniformName; }
 const uvec3& Texture::getSize() const { return size; }
 
-void Texture::create2D(const image2D& img) {
-  const GLenum& texFormat = internalFormat ? internalFormat : GL_STANDARD_CHANNELS[img.channels - 1];
-  const GLenum& imgFormat = format ? format : GL_STANDARD_CHANNELS[img.channels - 1];
+void Texture::create2D(const image2D& img, GLenum internalFormat, GLenum format, GLenum type) {
+  internalFormat = internalFormat ? internalFormat : GL_STANDARD_CHANNELS[img.channels - 1];
+  format = format ? format : GL_STANDARD_CHANNELS[img.channels - 1];
 
   size = {img.width, img.height, 1};
   glGenTextures(1, &id);
@@ -116,10 +105,10 @@ void Texture::create2D(const image2D& img) {
   glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexImage2D(target, 0, texFormat, img.width, img.height, 0, imgFormat, type, img.pixels);
+  glTexImage2D(target, 0, internalFormat, img.width, img.height, 0, format, type, img.pixels);
 }
 
-void Texture::create2DArray(const image2D& img0, const image2D& img1) {
+void Texture::create2DArray(const image2D& img0, const image2D& img1, GLenum internalFormat, GLenum format, GLenum type) {
   assert(img0.width == img1.width);
   assert(img0.height == img1.height);
   assert(img0.channels == img1.channels);
@@ -136,7 +125,7 @@ void Texture::create2DArray(const image2D& img0, const image2D& img1) {
   glTexSubImage3D(target, 0, 0, 0, 1, size.x, size.y, 1, format, type, img1.pixels);
 }
 
-void Texture::createCubemap(const fspath& folder) {
+void Texture::createCubemap(const fspath& folder, GLenum internalFormat, GLenum format, GLenum type) {
   // NOTE: Order matters
   constexpr const char* texNames[6] = {
     "right",
@@ -186,10 +175,10 @@ void Texture::createCubemap(const fspath& folder) {
     fspath filePath = std::format("{}/{}{}", folder.string().c_str(), texNames[i], extension.c_str());
     image2D img = image2D(filePath);
 
-    const GLenum& texFormat = internalFormat ? internalFormat : GL_STANDARD_CHANNELS[img.channels - 1];
-    const GLenum& imgFormat = format ? format : GL_STANDARD_CHANNELS[img.channels - 1];
+    internalFormat = internalFormat ? internalFormat : GL_STANDARD_CHANNELS[img.channels - 1];
+    format = format ? format : GL_STANDARD_CHANNELS[img.channels - 1];
 
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, texFormat, img.width, img.height, 0, imgFormat, type, img.pixels);
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, img.width, img.height, 0, format, type, img.pixels);
   }
 }
 
