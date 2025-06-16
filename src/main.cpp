@@ -18,6 +18,7 @@
 #include "objects/AirplaneCamera.hpp"
 #include "objects/Earth.hpp"
 #include "objects/Light.hpp"
+#include "utils/clrp.hpp"
 
 using global::window;
 
@@ -53,7 +54,8 @@ int main() {
 
   // Window init
   window = glfwCreateWindow(1200, 720, "Sphere", NULL, NULL);
-  ivec2 winSize = getWinSize();
+  ivec2 winSize;
+  glfwGetWindowSize(global::window, &winSize.x, &winSize.y);
   dvec2 winCenter = winSize / 2;
 
   if (!window) {

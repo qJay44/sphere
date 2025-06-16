@@ -41,8 +41,9 @@ void Camera::setFarPlane(const float& p) { farPlane = p; }
 void Camera::setSpeed(const float& s) { speed = s; }
 
 void Camera::update(bool ignoreMousePos) {
-  dvec2 winSize = getWinSize();
-  dvec2 winCenter = winSize / 2.;
+  ivec2 winSize;
+  glfwGetWindowSize(global::window, &winSize.x, &winSize.y);
+  dvec2 winCenter = dvec2(winSize) / 2.;
 
   dvec2 mousePos;
   glfwGetCursorPos(global::window, &mousePos.x, &mousePos.y);
@@ -94,7 +95,12 @@ void Camera::moveUp()   { position +=  up * speed * global::dt; }
 void Camera::moveDown() { position += -up * speed * global::dt; }
 
 void Camera::moveByMouse(const dvec2& mousePos) {
-  dvec2 winSize = getWinSize();
+  dvec2 winSize;
+  {
+    ivec2 winSizeTemp;
+    glfwGetWindowSize(global::window, &winSizeTemp.x, &winSizeTemp.y);
+    winSize = dvec2(winSizeTemp);
+  }
   dvec2 winCenter = winSize / 2.;
 
   // Normalizes and shifts the coordinates of the cursor such that they begin in the middle of the screen

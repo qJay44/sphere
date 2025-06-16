@@ -16,7 +16,8 @@ struct Frustum {
   Plane nearFace;
 
   Frustum(const Camera& cam) {
-    ivec2 winSize = getWinSize();
+    ivec2 winSize;
+    glfwGetWindowSize(global::window, &winSize.x, &winSize.y);
     float aspectRatio = static_cast<float>(winSize.x) / winSize.y;
 
     const float& camNear = cam.getNearPlane();

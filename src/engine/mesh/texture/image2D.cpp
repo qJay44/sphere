@@ -10,6 +10,8 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
+#include "utils/status.hpp"
+
 void image2D::write(const std::string& path, uvec2 size, u8 channels, byte* buf) {
   stbi_flip_vertically_on_write(true);
   stbi_write_png(path.c_str(), size.x, size.y, channels, buf, size.x * channels);

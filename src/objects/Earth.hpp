@@ -52,12 +52,12 @@ private:
   float waterDeepEdgeEnd = 0.8f;
   float waterWaveFreq = 0.01f;
   float waterWaveResMult = 0.1f;
-  float waterShoreWaveScale = 53.f;
   float waterShoreWaveFreq = 0.01f;
   float waterShoreWaveThreshold = 7.4f;
   float waterShoreWaveAmplitudeScale = 0.4f;
-  float waterShoreWaveSmoothnessStart = 0.34f;
-  float waterShoreWaveSmoothnessEnd = 0.829f;
+  float waterShoreWaveNoiseScale = 3.f;
+  float waterShoreWaveNoiseSpeed = 0.5f;
+  float waterShoreWaveNoiseAmplitude = 0.3f;
 
   bool printBuildInfo = false;
 

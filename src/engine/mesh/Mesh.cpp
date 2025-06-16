@@ -3,6 +3,9 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
+#include "utils/status.hpp"
+#include "utils/clrp.hpp"
+
 template<>
 Mesh<Vertex4>::Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool clearable)
   : MeshBase(indices, mode, clearable),

@@ -9,7 +9,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Run)
 
 project(MyProject VERSION 1.0)
 
-file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE SOURCES
+  ${PROJECT_SOURCE_DIR}/src/*.cpp
+  ${UTILS_PATH}/src/*.cpp)
 
 # Using mannually built imgui with GLFW (copying dll)
 set(GLFW_IMGUI_LIB_FILE libGLFW_IMGUI.dll)
@@ -53,11 +55,12 @@ target_compile_options(${PROJECT_NAME} PRIVATE -isystem ${GENERAL_INCLUDES}/stb)
 target_precompile_headers(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src/pch.hpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
+  ${GENERAL_INCLUDES}
   ${GLAD_PATH}/include
   ${GLFW_PATH}/include
   ${GLM_PATH}/include
-  ${GENERAL_INCLUDES}
   ${IMGUI_PATH}/include
+  ${UTILS_PATH}/include
   ${LIBTIFF_PATH}/include
 )
 

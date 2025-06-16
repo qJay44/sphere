@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <string>
 
+#include "utils/clrp.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
 fspath Shader::directory = "";

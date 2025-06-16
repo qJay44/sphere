@@ -54,7 +54,8 @@ void InputsHandler::process(Camera* camera) {
   if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
 
-  glm::ivec2 winSize = getWinSize();
+  glm::ivec2 winSize;
+  glfwGetWindowSize(global::window, &winSize.x, &winSize.y);
   glm::dvec2 winCenter = winSize / 2;
 
   if (!global::guiFocused) {

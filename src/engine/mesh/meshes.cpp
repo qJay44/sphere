@@ -122,8 +122,9 @@ Mesh<Vertex4> cube(vec3 pos, float size, vec3 color, bool clearable) {
 Mesh<Vertex4> frustum(const Camera& cam, vec3 color, bool clearable) {
   frustum::Frustum frustum(cam);
 
-  vec2 winSize = getWinSize();
-  float aspect = winSize.x / winSize.y;
+  ivec2 winSize;
+  glfwGetWindowSize(global::window, &winSize.x, &winSize.y);
+  float aspect = static_cast<float>(winSize.x) / winSize.y;
 
   vec3 camCrossUp = normalize(cross(cam.getForward(), cam.getLeft()));
   float fovRad = glm::radians(cam.getFov());
