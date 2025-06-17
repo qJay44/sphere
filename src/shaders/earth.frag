@@ -47,6 +47,28 @@ uniform float u_waterShoreWaveNoiseAmplitude;
 uniform float u_time;
 uniform float u_triplanarBlendSharpness;
 
+float hash(vec2 p) {
+  p = fract(p * vec2(123.34, 456.21));
+  p += dot(p, p + 78.233);
+  return fract(p.x * p.y);
+}
+
+float noise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+
+  // Four corners
+  float a = hash(i);
+  float b = hash(i + vec2(1.0, 0.0));
+  float c = hash(i + vec2(0.0, 1.0));
+  float d = hash(i + vec2(1.0, 1.0));
+
+  // Interpolation
+  vec2 u = f * f * (3.0 - 2.0 * f);
+
+  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+
 vec3 directionalLight(vec3 normal) {
   vec3 lightDirection = normalize(lightPos - vertPos);
   float diffuse = max(dot(normal, lightDirection), 0.f);
@@ -95,7 +117,8 @@ float calculateShoreWaves() {
   const uint distFromShore = texture(u_distanceFieldsWater, defaultNormal).r;
   float dist = 1.f - float(distFromShore) / UINT16_MAX;
   float factor = smoothstep(u_waterShoreWaveThresholdStart, u_waterShoreWaveThresholdEnd, dist);
-  float wave = sin((dist * -u_waterShoreWaveFreq) + u_time * 2.f) * u_waterShoreWaveAmplitude;
+  float n = noise(vertPosOriginal.xy * u_waterShoreWaveNoiseScale + u_time * u_waterShoreWaveNoiseSpeed);
+  float wave = sin(dist * -u_waterShoreWaveFreq + u_time * 2.f + n * u_waterShoreWaveNoiseAmplitude) * u_waterShoreWaveAmplitude;
 
   return abs(mix(0.f, wave, factor));
 }
@@ -106,14 +129,15 @@ void main() {
   vec3 normalWave0 = triplanarNormal(u_normalmapWave0, -u_time * u_waterWaveFreq);
   vec3 normalWave1 = triplanarNormal(u_normalmapWave1,  u_time * u_waterWaveFreq);
   vec3 normalWaves = normalize(normalWave0 + normalWave1);
+  vec3 dirLight = directionalLight(normal);
   int deepness = texture(u_heightmapsWater, defaultNormal).r; // [-32768, 32767]
   float border = texture(u_borders, defaultNormal).r;
   float isWater = 1.f - (sign(deepness) * 0.5f + 0.5f);
   float isLand = 1.f - isWater;
 
   color = isWater * calculateDeepColor(deepness) + isLand * color;
-  color *= isLand * directionalLight(normal) + isWater;
-  color += isWater * calculateShoreWaves();
+  color *= isLand * dirLight + isWater;
+  color += isWater * calculateShoreWaves() * dirLight;
   color *= isWater * directionalLight(normalWaves) + isLand;
   color += isWater * calculateSpecular(normalWaves);
   color += border * u_bordersColor;

@@ -140,7 +140,6 @@ void Earth::draw(const Camera* camera, const Shader& shader) const {
   static const GLint waterWaveFreqLoc                = shader.getUniformLoc("u_waterWaveFreq");
   static const GLint waterWaveResMultLoc             = shader.getUniformLoc("u_waterWaveResMult");
   static const GLint waterShoreWaveFreqLoc           = shader.getUniformLoc("u_waterShoreWaveFreq");
-  static const GLint waterShoreWaveThresholdLoc      = shader.getUniformLoc("u_waterShoreWaveThreshold");
   static const GLint waterShoreWaveThresholdStartLoc = shader.getUniformLoc("u_waterShoreWaveThresholdStart");
   static const GLint waterShoreWaveThresholdEndLoc   = shader.getUniformLoc("u_waterShoreWaveThresholdEnd");
   static const GLint waterShoreWaveAmplitudeLoc      = shader.getUniformLoc("u_waterShoreWaveAmplitude");
@@ -169,7 +168,6 @@ void Earth::draw(const Camera* camera, const Shader& shader) const {
   shader.setUniform1f(waterWaveFreqLoc, waterWaveFreq);
   shader.setUniform1f(waterWaveResMultLoc, waterWaveResMult);
   shader.setUniform1f(waterShoreWaveFreqLoc, waterShoreWaveFreq);
-  shader.setUniform1f(waterShoreWaveThresholdLoc, waterShoreWaveThreshold);
   shader.setUniform1f(waterShoreWaveThresholdStartLoc, waterShoreWaveThresholdStart);
   shader.setUniform1f(waterShoreWaveThresholdEndLoc, waterShoreWaveThresholdEnd);
   shader.setUniform1f(waterShoreWaveAmplitudeLoc, waterShoreWaveAmplitude);
