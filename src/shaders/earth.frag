@@ -1,5 +1,9 @@
 #version 460 core
 
+#define INT16_MIN -32768
+#define INT16_MAX  32767
+#define UINT16_MAX 65535u
+
 out vec4 FragColor;
 
 in vec3 vertPos;
@@ -34,37 +38,14 @@ uniform float u_waterWaveFreq;
 uniform float u_waterWaveResMult;
 uniform float u_waterShoreWaveFreq;
 uniform float u_waterShoreWaveThreshold;
-uniform float u_waterShoreWaveAmplitudeScale;
+uniform float u_waterShoreWaveThresholdStart;
+uniform float u_waterShoreWaveThresholdEnd;
+uniform float u_waterShoreWaveAmplitude;
 uniform float u_waterShoreWaveNoiseScale;
 uniform float u_waterShoreWaveNoiseSpeed;
 uniform float u_waterShoreWaveNoiseAmplitude;
 uniform float u_time;
 uniform float u_triplanarBlendSharpness;
-
-// Hash function for pseudo-randomness
-float hash(vec2 p) {
-  p = fract(p * vec2(123.34, 456.21));
-  p += dot(p, p + 78.233);
-  return fract(p.x * p.y);
-}
-
-// Interpolation function
-float smoothNoise(vec2 p) {
-  vec2 i = floor(p);
-  vec2 f = fract(p);
-
-  // Four corners
-  float a = hash(i);
-  float b = hash(i + vec2(1.0, 0.0));
-  float c = hash(i + vec2(0.0, 1.0));
-  float d = hash(i + vec2(1.0, 1.0));
-
-  // Smooth interpolation
-  vec2 u = f * f * (3.0 - 2.0 * f);
-
-  // Mix results
-  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
-}
 
 vec3 directionalLight(vec3 normal) {
   vec3 lightDirection = normalize(lightPos - vertPos);
@@ -103,7 +84,7 @@ float calculateSpecular(vec3 normal) {
 }
 
 vec3 calculateDeepColor(int deepness) {
-  float d = deepness / 32768.f * 0.5f + 0.5f;
+  float d = float(deepness) / INT16_MAX * 0.5f + 0.5f;
   float t = pow(d, u_waterDeepFactor);
   t = smoothstep(u_waterDeepEdgeStart, u_waterDeepEdgeEnd, t);
 
@@ -111,21 +92,12 @@ vec3 calculateDeepColor(int deepness) {
 }
 
 float calculateShoreWaves() {
-  float distFromShore = float(texture(u_distanceFieldsWater, defaultNormal).r);
-  float proximity = smoothstep(u_waterShoreWaveThreshold, u_waterShoreWaveThreshold * 0.5, distFromShore);
-  float seed = hash(vec2(vertPosOriginal.xy));
+  const uint distFromShore = texture(u_distanceFieldsWater, defaultNormal).r;
+  float dist = 1.f - float(distFromShore) / UINT16_MAX;
+  float factor = smoothstep(u_waterShoreWaveThresholdStart, u_waterShoreWaveThresholdEnd, dist);
+  float wave = sin((dist * -u_waterShoreWaveFreq) + u_time * 2.f) * u_waterShoreWaveAmplitude;
 
-  float localFreq = u_waterShoreWaveFreq * mix(0.8f, 1.2f, seed);
-  float localAmpScale = u_waterShoreWaveAmplitudeScale * mix(0.8f, 1.2f, seed);
-
-  float phaseShift = hash(vec2(distFromShore * 10.f));
-  float baseWave = sin(localFreq * (u_time - distFromShore) + phaseShift);
-
-  float n = smoothNoise(vec2(distFromShore * u_waterShoreWaveNoiseScale + seed * 10.f, u_time * u_waterShoreWaveNoiseSpeed));
-  float variation = n * u_waterShoreWaveNoiseAmplitude;
-  float combinedWave = abs(baseWave) + variation;
-
-  return combinedWave * proximity;
+  return abs(mix(0.f, wave, factor));
 }
 
 void main() {

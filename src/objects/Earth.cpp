@@ -42,7 +42,7 @@ void Earth::loadTextures() {
   );
 
   Earth::texDistanceFieldWater = new Texture(
-    "res/tex/earth/faces/distanceFieldWater21600_50",
+    "res/tex/earth/faces/distanceFieldWater21600",
     "u_distanceFieldsWater",
     unit++,
     GL_TEXTURE_CUBE_MAP,
@@ -124,27 +124,29 @@ void Earth::draw(const Camera* camera, const Shader& shader) const {
   static const GLint normalmapWave0Loc  = shader.getUniformLoc(Earth::texNormalmapWave0->getUniformName());
   static const GLint normalmapWave1Loc  = shader.getUniformLoc(Earth::texNormalmapWave1->getUniformName());
 
-  static const GLint heightmapScaleLoc           = shader.getUniformLoc("u_heightmapScale");
-  static const GLint seaLevelLoc                 = shader.getUniformLoc("u_seaLevel");
-  static const GLint lightMultLoc                = shader.getUniformLoc("u_lightMultiplier");
-  static const GLint ambientLoc                  = shader.getUniformLoc("u_ambient");
-  static const GLint specularLightLoc            = shader.getUniformLoc("u_specularLight");
-  static const GLint tpBlendSharpnessLoc         = shader.getUniformLoc("u_triplanarBlendSharpness");
-  static const GLint bordersColorLoc             = shader.getUniformLoc("u_bordersColor");
-  static const GLint waterShallowColorLoc        = shader.getUniformLoc("u_waterShallowColor");
-  static const GLint waterDeepColorLoc           = shader.getUniformLoc("u_waterDeepColor");
-  static const GLint waterDeepFactorLoc          = shader.getUniformLoc("u_waterDeepFactor");
-  static const GLint waterDeepEdgeStartLoc       = shader.getUniformLoc("u_waterDeepEdgeStart");
-  static const GLint waterDeepEdgeEndLoc         = shader.getUniformLoc("u_waterDeepEdgeEnd");
-  static const GLint waterSpecSmoothnessLoc      = shader.getUniformLoc("u_waterSpecularSmoothness");
-  static const GLint waterWaveFreqLoc            = shader.getUniformLoc("u_waterWaveFreq");
-  static const GLint waterWaveResMultLoc         = shader.getUniformLoc("u_waterWaveResMult");
-  static const GLint waterShoreWaveFreqLoc       = shader.getUniformLoc("u_waterShoreWaveFreq");
-  static const GLint waterShoreWaveThresholdLoc  = shader.getUniformLoc("u_waterShoreWaveThreshold");
-  static const GLint waterShoreWaveAmplScaleLoc  = shader.getUniformLoc("u_waterShoreWaveAmplitudeScale");
-  static const GLint waterShoreWaveNoiseScaleLoc = shader.getUniformLoc("u_waterShoreWaveNoiseScale");
-  static const GLint waterShoreWaveNoiseSpeedLoc = shader.getUniformLoc("u_waterShoreWaveNoiseSpeed");
-  static const GLint waterShoreWaveNoiseAmplLoc  = shader.getUniformLoc("u_waterShoreWaveNoiseAmplitude");
+  static const GLint heightmapScaleLoc               = shader.getUniformLoc("u_heightmapScale");
+  static const GLint seaLevelLoc                     = shader.getUniformLoc("u_seaLevel");
+  static const GLint lightMultLoc                    = shader.getUniformLoc("u_lightMultiplier");
+  static const GLint ambientLoc                      = shader.getUniformLoc("u_ambient");
+  static const GLint specularLightLoc                = shader.getUniformLoc("u_specularLight");
+  static const GLint tpBlendSharpnessLoc             = shader.getUniformLoc("u_triplanarBlendSharpness");
+  static const GLint bordersColorLoc                 = shader.getUniformLoc("u_bordersColor");
+  static const GLint waterShallowColorLoc            = shader.getUniformLoc("u_waterShallowColor");
+  static const GLint waterDeepColorLoc               = shader.getUniformLoc("u_waterDeepColor");
+  static const GLint waterDeepFactorLoc              = shader.getUniformLoc("u_waterDeepFactor");
+  static const GLint waterDeepEdgeStartLoc           = shader.getUniformLoc("u_waterDeepEdgeStart");
+  static const GLint waterDeepEdgeEndLoc             = shader.getUniformLoc("u_waterDeepEdgeEnd");
+  static const GLint waterSpecSmoothnessLoc          = shader.getUniformLoc("u_waterSpecularSmoothness");
+  static const GLint waterWaveFreqLoc                = shader.getUniformLoc("u_waterWaveFreq");
+  static const GLint waterWaveResMultLoc             = shader.getUniformLoc("u_waterWaveResMult");
+  static const GLint waterShoreWaveFreqLoc           = shader.getUniformLoc("u_waterShoreWaveFreq");
+  static const GLint waterShoreWaveThresholdLoc      = shader.getUniformLoc("u_waterShoreWaveThreshold");
+  static const GLint waterShoreWaveThresholdStartLoc = shader.getUniformLoc("u_waterShoreWaveThresholdStart");
+  static const GLint waterShoreWaveThresholdEndLoc   = shader.getUniformLoc("u_waterShoreWaveThresholdEnd");
+  static const GLint waterShoreWaveAmplitudeLoc      = shader.getUniformLoc("u_waterShoreWaveAmplitude");
+  static const GLint waterShoreWaveNoiseScaleLoc     = shader.getUniformLoc("u_waterShoreWaveNoiseScale");
+  static const GLint waterShoreWaveNoiseSpeedLoc     = shader.getUniformLoc("u_waterShoreWaveNoiseSpeed");
+  static const GLint waterShoreWaveNoiseAmplitudeLoc = shader.getUniformLoc("u_waterShoreWaveNoiseAmplitude");
 
   shader.setUniformTexture(heightmapsWaterLoc, *Earth::texHeightmapsWater);
   shader.setUniformTexture(distFieldWaterLoc,  *Earth::texDistanceFieldWater);
@@ -168,10 +170,12 @@ void Earth::draw(const Camera* camera, const Shader& shader) const {
   shader.setUniform1f(waterWaveResMultLoc, waterWaveResMult);
   shader.setUniform1f(waterShoreWaveFreqLoc, waterShoreWaveFreq);
   shader.setUniform1f(waterShoreWaveThresholdLoc, waterShoreWaveThreshold);
-  shader.setUniform1f(waterShoreWaveAmplScaleLoc, waterShoreWaveAmplitudeScale);
+  shader.setUniform1f(waterShoreWaveThresholdStartLoc, waterShoreWaveThresholdStart);
+  shader.setUniform1f(waterShoreWaveThresholdEndLoc, waterShoreWaveThresholdEnd);
+  shader.setUniform1f(waterShoreWaveAmplitudeLoc, waterShoreWaveAmplitude);
   shader.setUniform1f(waterShoreWaveNoiseScaleLoc, waterShoreWaveNoiseScale);
   shader.setUniform1f(waterShoreWaveNoiseSpeedLoc, waterShoreWaveNoiseSpeed);
-  shader.setUniform1f(waterShoreWaveNoiseAmplLoc, waterShoreWaveNoiseAmplitude);
+  shader.setUniform1f(waterShoreWaveNoiseAmplitudeLoc, waterShoreWaveNoiseAmplitude);
   shader.setUniform3f(bordersColorLoc, bordersColor);
   shader.setUniform3f(waterShallowColorLoc, waterShallowColor);
   shader.setUniform3f(waterDeepColorLoc, waterDeepColor);

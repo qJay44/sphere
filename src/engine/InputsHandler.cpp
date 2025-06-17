@@ -56,7 +56,7 @@ void InputsHandler::process(Camera* camera) {
 
   glm::ivec2 winSize;
   glfwGetWindowSize(global::window, &winSize.x, &winSize.y);
-  glm::dvec2 winCenter = winSize / 2;
+  glm::dvec2 winCenter = dvec2(winSize) / 2.;
 
   if (!global::guiFocused) {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);

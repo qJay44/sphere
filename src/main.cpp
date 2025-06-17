@@ -56,7 +56,7 @@ int main() {
   window = glfwCreateWindow(1200, 720, "Sphere", NULL, NULL);
   ivec2 winSize;
   glfwGetWindowSize(global::window, &winSize.x, &winSize.y);
-  dvec2 winCenter = winSize / 2;
+  dvec2 winCenter = dvec2(winSize) / 2.;
 
   if (!window) {
     printf("Failed to create GFLW window\n");

@@ -33,7 +33,7 @@ void AirplaneCamera::moveByMouse(const dvec2& mousePos) {
   // Window size and center
   ivec2 winSize;
   glfwGetWindowSize(global::window, &winSize.x, &winSize.y);
-  dvec2 winCenter = winSize / 2;
+  dvec2 winCenter = dvec2(winSize) / 2.;
 
   const vec3& pivot = airplane.getPosition();
   vec2 radRot = glm::radians(sensitivity * (mousePos - winCenter) / winCenter);

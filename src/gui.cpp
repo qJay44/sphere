@@ -119,12 +119,11 @@ void gui::draw() {
     SliderFloat("Specular smoothness", &earthGUI.ptr->waterSpecularSmoothness, 0.f, 10.f);
     SliderFloat("Wave frequency", &earthGUI.ptr->waterWaveFreq, -0.5f, 0.5f);
     SliderFloat("Wave resolution multiplier", &earthGUI.ptr->waterWaveResMult, 0.001f, 50.f);
-    SliderFloat("Shore wave frequency", &earthGUI.ptr->waterShoreWaveFreq, -20.f, 20.f);
-    SliderFloat("Shore wave distance threshold", &earthGUI.ptr->waterShoreWaveThreshold, 0.f, 50.f);
-    SliderFloat("Shore wave amplitude scale", &earthGUI.ptr->waterShoreWaveAmplitudeScale, -20.f, 20.f);
-    SliderFloat("Shore wave noise scale", &earthGUI.ptr->waterShoreWaveNoiseScale, 0.f, 10.f);
-    SliderFloat("Shore wave noise speed", &earthGUI.ptr->waterShoreWaveNoiseSpeed, 0.f, 10.f);
-    SliderFloat("Shore wave noise amplitude", &earthGUI.ptr->waterShoreWaveNoiseAmplitude, 0.f, 10.f);
+    SliderFloat("Shore wave frequency", &earthGUI.ptr->waterShoreWaveFreq, -10000.f, 10000.f);
+    SliderFloat("Shore wave distance threshold", &earthGUI.ptr->waterShoreWaveThreshold, 0.f, 1.f);
+    SliderFloat("Shore wave distance threshold start", &earthGUI.ptr->waterShoreWaveThresholdStart, 0.f, 1.f);
+    SliderFloat("Shore wave distance threshold end", &earthGUI.ptr->waterShoreWaveThresholdEnd, 0.f, 1.f);
+    SliderFloat("Shore wave amplitude scale", &earthGUI.ptr->waterShoreWaveAmplitude, -1.f, 1.f);
     ColorEdit3("Shallow color", glm::value_ptr(earthGUI.ptr->waterShallowColor));
     ColorEdit3("Deep color", glm::value_ptr(earthGUI.ptr->waterDeepColor));
 
