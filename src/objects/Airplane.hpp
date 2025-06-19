@@ -23,6 +23,9 @@ public:
   const vec3&  getRight()    const;
   const float& getSpeed()    const;
 
+  const glm::quat& getTurnQuat() const;
+  const glm::quat& getRotateQuat() const;
+
   vec3 getBack() const;
   vec3 getDown() const;
   vec3 getLeft() const;
@@ -53,5 +56,8 @@ private:
   float turnMomentumRad = 0.f;
   float tiltMomentumRad = 0.f;
   float tiltRecoverMomentumRad = 0.f;
+
+  glm::quat turnQuat;
+  glm::quat rotateQuat;
 };
 

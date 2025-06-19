@@ -37,7 +37,8 @@ void AirplaneCamera::moveByMouse(const dvec2& mousePos) {
 
   const vec3& pivot = airplane.getPosition();
   vec2 radRot = glm::radians(sensitivity * (mousePos - winCenter) / winCenter);
-  vec3 pos(airplane.getPosition() + getBack() * distance);
+  vec3 stepAwayDir = airplane.getTurnQuat() * airplane.getRotateQuat() * getBack();
+  vec3 pos(pivot + stepAwayDir * distance);
 
   // Prevent view direction to be exactly above the airplane
   float cosAngle = dot(up, getForward());

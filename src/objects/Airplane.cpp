@@ -50,6 +50,9 @@ const vec3&  Airplane::getUp()       const { return up;       }
 const vec3&  Airplane::getRight()    const { return right;    }
 const float& Airplane::getSpeed()    const { return speedRad; }
 
+const glm::quat& Airplane::getTurnQuat()   const { return turnQuat;   }
+const glm::quat& Airplane::getRotateQuat() const { return rotateQuat; }
+
 vec3 Airplane::getBack() const { return -forward; }
 vec3 Airplane::getDown() const { return -up;      }
 vec3 Airplane::getLeft() const { return -right;   }
@@ -62,9 +65,9 @@ void Airplane::turn(float dir) {
 
 void Airplane::update() {
   // Turn
-  glm::quat q = glm::angleAxis(turnMomentumRad, up);
-  Mesh::rotate(q);
-  right = q * right;
+  turnQuat = glm::angleAxis(turnMomentumRad, up);
+  Mesh::rotate(turnQuat);
+  right = turnQuat * right;
   forward = rotation[2];
 
   // Tilt
@@ -76,10 +79,12 @@ void Airplane::update() {
   vec3 newPos = normalize(position) + forward * frameSpeedRad;
   vec3 gravityUp = normalize(newPos);
   newPos = gravityUp * (planet.getRadius() + flyHeight);
-
   Mesh::translate(newPos - position);
+
+  // Rotate so that airplane's forward is perpendicular to the planet
   // Finding left since local left (-right) can be tilted up or down
-  Mesh::rotate(glm::angleAxis(frameSpeedRad, normalize(cross(up, forward))));
+  rotateQuat = glm::angleAxis(frameSpeedRad, normalize(cross(up, forward)));
+  Mesh::rotate(rotateQuat);
 
   // Recovering from tilt
   float tiltRecover = tiltRecoverMomentumRad * tiltRecoverMomentumDecreaseFactor;

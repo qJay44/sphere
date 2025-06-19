@@ -118,7 +118,7 @@ float calculateShoreWaves() {
   float dist = 1.f - float(distFromShore) / UINT16_MAX;
   float factor = smoothstep(u_waterShoreWaveThresholdStart, u_waterShoreWaveThresholdEnd, dist);
   float n = noise(vertPosOriginal.xy * u_waterShoreWaveNoiseScale + u_time * u_waterShoreWaveNoiseSpeed);
-  float wave = sin(dist * -u_waterShoreWaveFreq + u_time * 2.f + n * u_waterShoreWaveNoiseAmplitude) * u_waterShoreWaveAmplitude;
+  float wave = sin(dist * u_waterShoreWaveFreq + u_time * 2.f + n * u_waterShoreWaveNoiseAmplitude) * u_waterShoreWaveAmplitude;
 
   return abs(mix(0.f, wave, factor));
 }
