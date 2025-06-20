@@ -16,5 +16,10 @@ struct VertexPT {
   vec2 texture;
 };
 
+struct VertexPC {
+  vec3 position;
+  vec3 color;
+};
+
 typedef Vertex1 VertexP;
 typedef Vertex4 VertexPCTN;

@@ -13,7 +13,7 @@ uniform sampler2D u_diffuse0;
 
 vec3 color = texture(u_diffuse0, texCoord).rgb;
 
-vec4 directionalLight() {
+vec3 directionalLight() {
   vec3 lightDirection = normalize(u_lightPos - vertPos);
   float diffuse = max(dot(normal, lightDirection), 0.f);
   float ambient = 0.2f;
@@ -24,10 +24,10 @@ vec4 directionalLight() {
   float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.f), 8);
   float specular = specAmount * specularLight;
 
-  return vec4(color, 1.f) * (diffuse + ambient + specular) * vec4(u_lightColor, 1.f);
+  return color * (diffuse + ambient + specular) * u_lightColor;
 }
 
 void main() {
-  FragColor = directionalLight();
+  FragColor = vec4(directionalLight(), 1.f);
 }
 

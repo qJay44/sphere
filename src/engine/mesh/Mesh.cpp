@@ -1,4 +1,5 @@
 #include "Mesh.hpp"
+#include "vertex.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
@@ -29,9 +30,31 @@ Mesh<Vertex4>::Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLui
   vao.linkAttrib(2, 2, GL_FLOAT, stride, (void*)(6 * typeSize));
   vao.linkAttrib(3, 3, GL_FLOAT, stride, (void*)(8 * typeSize));
 
-  vao.unbind();
-  vbo.unbind();
-  ebo.unbind();
+  VAO::unbind();
+  VBO::unbind();
+  EBO::unbind();
+}
+
+template<>
+Mesh<Vertex1>::Mesh(const std::vector<Vertex1>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool clearable)
+  : MeshBase(indices, mode, clearable),
+    vertices(vertices),
+    vao(VAO(1)),
+    vbo(VBO(1, vertices.data(), sizeof(Vertex1) * vertices.size())),
+    ebo(1, indices.data(), sizeof(GLuint) * indices.size())
+{
+  this->vertices.resize(vertices.size());
+  this->vertices.reserve(vertices.size());
+
+  vao.bind();
+  vbo.bind();
+  ebo.bind();
+
+  vao.linkAttrib(0, 3, GL_FLOAT, 3 * sizeof(float), (void*)(0));
+
+  VAO::unbind();
+  VBO::unbind();
+  EBO::unbind();
 }
 
 template<>
@@ -55,18 +78,17 @@ Mesh<VertexPT>::Mesh(const std::vector<VertexPT>& vertices, const std::vector<GL
   vao.linkAttrib(0, 3, GL_FLOAT, stride, (void*)(0 * typeSize));
   vao.linkAttrib(1, 2, GL_FLOAT, stride, (void*)(3 * typeSize));
 
-  vao.unbind();
-  vbo.unbind();
-  ebo.unbind();
+  VAO::unbind();
+  VBO::unbind();
+  EBO::unbind();
 }
 
-
 template<>
-Mesh<Vertex1>::Mesh(const std::vector<Vertex1>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool clearable)
+Mesh<VertexPC>::Mesh(const std::vector<VertexPC>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool clearable)
   : MeshBase(indices, mode, clearable),
     vertices(vertices),
     vao(VAO(1)),
-    vbo(VBO(1, vertices.data(), sizeof(Vertex1) * vertices.size())),
+    vbo(VBO(1, vertices.data(), sizeof(VertexPC) * vertices.size())),
     ebo(1, indices.data(), sizeof(GLuint) * indices.size())
 {
   this->vertices.resize(vertices.size());
@@ -76,11 +98,15 @@ Mesh<Vertex1>::Mesh(const std::vector<Vertex1>& vertices, const std::vector<GLui
   vbo.bind();
   ebo.bind();
 
-  vao.linkAttrib(0, 3, GL_FLOAT, 3 * sizeof(float), (void*)(0));
+  size_t typeSize = sizeof(float);
+  GLsizei stride = static_cast<GLsizei>((3 + 3) * typeSize);
 
-  vao.unbind();
-  vbo.unbind();
-  ebo.unbind();
+  vao.linkAttrib(0, 3, GL_FLOAT, stride, (void*)(0 * typeSize));
+  vao.linkAttrib(1, 3, GL_FLOAT, stride, (void*)(3 * typeSize));
+
+  VAO::unbind();
+  VBO::unbind();
+  EBO::unbind();
 }
 
 template<>
@@ -103,8 +129,8 @@ Mesh<Vertex4>::Mesh(const std::vector<Vertex4>& vertices, GLenum mode, bool clea
   vao.linkAttrib(2, 2, GL_FLOAT, stride, (void*)(6 * typeSize));
   vao.linkAttrib(3, 3, GL_FLOAT, stride, (void*)(8 * typeSize));
 
-  vao.unbind();
-  vbo.unbind();
+  VAO::unbind();
+  VBO::unbind();
 }
 
 template<>
@@ -121,8 +147,8 @@ Mesh<Vertex1>::Mesh(const std::vector<Vertex1>& vertices, GLenum mode, bool clea
 
   vao.linkAttrib(0, 3, GL_FLOAT, 3 * sizeof(float), (void*)(0));
 
-  vao.unbind();
-  vbo.unbind();
+  VAO::unbind();
+  VBO::unbind();
 }
 
 template<>
@@ -219,5 +245,60 @@ Mesh<Vertex4> Mesh<Vertex4>::loadObj(const fspath& file, bool printInfo) {
   status::end(true);
 
   return Mesh<Vertex4>(vertices, GL_TRIANGLES, false);
+}
+
+template<>
+Mesh<VertexPC>::Mesh(const std::vector<VertexPC>& vertices, GLenum mode, bool clearable)
+  : MeshBase(std::vector<GLuint>(), mode, clearable),
+    vertices(vertices),
+    vao(VAO(1)),
+    vbo(VBO(1, vertices.data(), sizeof(VertexPC) * vertices.size()))
+{
+  this->vertices.resize(vertices.size());
+  this->vertices.reserve(vertices.size());
+  vao.bind();
+  vbo.bind();
+
+  size_t typeSize = sizeof(float);
+  GLsizei stride = static_cast<GLsizei>((3 + 3) * typeSize);
+
+  vao.linkAttrib(0, 3, GL_FLOAT, stride, (void*)(0 * typeSize));
+  vao.linkAttrib(1, 3, GL_FLOAT, stride, (void*)(3 * typeSize));
+
+  VAO::unbind();
+  VBO::unbind();
+}
+
+template<>
+Mesh<VertexPC>::Mesh(const std::vector<VertexPC>& vertices, const std::vector<mat4>& mats, GLenum mode, bool clearable)
+  : MeshBase(std::vector<GLuint>(), mode, clearable),
+    vertices(vertices),
+    vao(VAO(1)),
+    vbo(VBO(1, vertices.data(), sizeof(VertexPC) * vertices.size())),
+    instancingVBO(1, mats.data(), sizeof(mat4) * mats.size()),
+    instancingCount(mats.size())
+{
+  this->vertices.resize(vertices.size());
+  this->vertices.reserve(vertices.size());
+  vao.bind();
+  vbo.bind();
+
+  vao.linkAttrib(0, 3, GL_FLOAT, sizeof(VertexPC), (void*)(0));
+  vao.linkAttrib(1, 3, GL_FLOAT, sizeof(VertexPC), (void*)(sizeof(vec3)));
+
+  instancingVBO.bind();
+
+  vao.linkAttrib(2, 4, GL_FLOAT, sizeof(mat4), (void*)(0 * sizeof(vec4)));
+  vao.linkAttrib(3, 4, GL_FLOAT, sizeof(mat4), (void*)(1 * sizeof(vec4)));
+  vao.linkAttrib(4, 4, GL_FLOAT, sizeof(mat4), (void*)(2 * sizeof(vec4)));
+  vao.linkAttrib(5, 4, GL_FLOAT, sizeof(mat4), (void*)(3 * sizeof(vec4)));
+
+  glVertexAttribDivisor(2, 1);
+  glVertexAttribDivisor(3, 1);
+  glVertexAttribDivisor(4, 1);
+  glVertexAttribDivisor(5, 1);
+
+  VAO::unbind();
+  VBO::unbind();
 }
 

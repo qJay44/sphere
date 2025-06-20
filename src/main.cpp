@@ -31,12 +31,14 @@ void GLAPIENTRY MessageCallback(
   const GLchar* message,
   const void* userParam
 ) {
+  if (source == GL_DEBUG_SOURCE_SHADER_COMPILER) return; // Shader error (have other message callback)
+
   clrp::clrp_t clrpError;
   clrpError.attr = clrp::ATTRIBUTE::BOLD;
   clrpError.fg = clrp::FG::RED;
   fprintf(
-    stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
-    (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, clrp::format(message, clrpError).c_str()
+    stderr, "GL CALLBACK: %s source = 0x%x, id = 0x%x type = 0x%x, severity = 0x%x, message = %s\n",
+    (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), source, id, type, severity, clrp::format(message, clrpError).c_str()
   );
   exit(1);
 }
@@ -95,6 +97,7 @@ int main() {
   const Shader& colorShader = Shader::getDefaultShader(SHADER_DEFAULT_TYPE_COLOR_SHADER);
   Shader earthShader("earth.vert", "earth.frag", "earth.geom");
   Shader airplaneShader("airplane.vert", "airplane.frag");
+  Shader trailShader("trail.vert", "trail.frag");
   Shader planetBordersShader("borders.vert", "borders.frag");
 
   const GLint earthShaderLightPosLoc      = earthShader.getUniformLoc("u_lightPos");
@@ -141,6 +144,9 @@ int main() {
   gui::link(&cameraFree);
   gui::link(&airplane);
   gui::link(&light);
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
@@ -195,6 +201,7 @@ int main() {
     earth.draw(camera, earthShader);
 
     airplane.draw(camera, airplaneShader);
+    airplane.drawTrail(camera, trailShader);
 
     glDisable(GL_CULL_FACE);
 

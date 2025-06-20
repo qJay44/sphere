@@ -11,8 +11,9 @@ struct VAO {
     glGenVertexArrays(size, &id);
   }
 
+  static void unbind() { glBindVertexArray(0); }
+
   void bind()   const { glBindVertexArray(id); }
-  void unbind() const { glBindVertexArray(0); }
   void clear()        { glDeleteVertexArrays(size, &id); size = 0; }
 
   void linkAttrib(GLuint layout, GLuint numComponents, GLenum type, GLsizei stride, void* offset) const {

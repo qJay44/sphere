@@ -21,7 +21,8 @@ Airplane::Airplane(
   position(position),
   speedRad(speedRad),
   flyHeight(flyHeight),
-  turnSpeedRad(turnSpeedRad) {
+  turnSpeedRad(turnSpeedRad),
+  meshScale(meshScale) {
   // NOTE: The obj must face -Z initially
   // Model's initial directions
   forward = {-1.f, 0.f, 0.f};
@@ -64,6 +65,9 @@ void Airplane::turn(float dir) {
 }
 
 void Airplane::update() {
+  trailLeft.update();
+  trailRight.update();
+
   // Turn
   turnQuat = glm::angleAxis(turnMomentumRad, up);
   Mesh::rotate(turnQuat);
@@ -97,10 +101,22 @@ void Airplane::update() {
   position = newPos;
   turnMomentumRad *= turnMomentumDecreaseFactor;
   tiltMomentumRad *= tiltMomentumDecreaseFactor;
+
+  vec3 trailLeftPos = position;
+
+  trailLeftPos +=  up      * trailOffset.y * meshScale;
+  trailLeftPos +=  forward * trailOffset.z * meshScale;
+
+  vec3 trailRightPos = trailLeftPos;
+
+  trailLeftPos += -right * trailOffset.x * meshScale;
+  trailRightPos += right * trailOffset.x * meshScale;
+
+  trailLeft.add(trailLeftPos, trailDuration);
+  trailRight.add(trailRightPos, trailDuration);
 }
 
-
-void Airplane::draw(const Camera* camera, const Shader& shader, u32 flags) {
+void Airplane::draw(const Camera* camera, const Shader& shader, u32 flags) const {
   static const GLint diffuseLoc = shader.getUniformLoc(Airplane::texDiffuse->getUniformName());
 
   shader.setUniformTexture(diffuseLoc, *Airplane::texDiffuse);
@@ -120,5 +136,14 @@ void Airplane::draw(const Camera* camera, const Shader& shader, u32 flags) {
   Mesh::draw(camera, shader);
 
   Airplane::texDiffuse->unbind();
+}
+
+void Airplane::drawTrail(const Camera* camera, const Shader& shader) const {
+  static const GLint alphaFactorLoc = shader.getUniformLoc("u_alphaFactor");
+
+  shader.setUniform1f(alphaFactorLoc, trailAlphaFactor);
+
+  trailLeft.draw(camera, shader);
+  trailRight.draw(camera, shader);
 }
 

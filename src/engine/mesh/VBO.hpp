@@ -13,8 +13,9 @@ struct VBO {
     glBufferData(GL_ARRAY_BUFFER, dataSize, data, GL_STATIC_DRAW);
   }
 
+  static void unbind() { glBindBuffer(GL_ARRAY_BUFFER, 0); }
+
   void bind()   const { glBindBuffer(GL_ARRAY_BUFFER, id); }
-  void unbind() const { glBindBuffer(GL_ARRAY_BUFFER, 0); }
   void clear()        { glDeleteBuffers(size, &id); size = 0; }
 };
 

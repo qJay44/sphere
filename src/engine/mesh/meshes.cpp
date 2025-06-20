@@ -7,13 +7,13 @@
 
 namespace meshes {
 
-Mesh<Vertex4> line(vec3 p1, vec3 p2, vec3 color, bool clearable) {
-  std::vector<Vertex4> vertices{
+Mesh<VertexPC> line(vec3 p1, vec3 p2, vec3 color, bool clearable) {
+  std::vector<VertexPC> vertices{
     {p1, color},
     {p2, color}
   };
 
-  return Mesh<Vertex4>(vertices, GL_LINES, clearable);
+  return Mesh<VertexPC>(vertices, GL_LINES, clearable);
 }
 
 Mesh<Vertex4> axis(float size, bool clearable) {

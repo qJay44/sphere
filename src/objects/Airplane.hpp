@@ -3,6 +3,7 @@
 #include "../engine/mesh/Mesh.hpp"
 
 #include "Earth.hpp"
+#include "Trail.hpp"
 
 #define AIRPLANE_FLAG_DRAW_RIGHT    1
 #define AIRPLANE_FLAG_DRAW_UP       1 << 2
@@ -32,7 +33,8 @@ public:
 
   void turn(float dir);
   void update();
-  void draw(const Camera* camera, const Shader& shader, u32 flags = 0);
+  void draw(const Camera* camera, const Shader& shader, u32 flags = 0) const;
+  void drawTrail(const Camera* camera, const Shader& shader) const;
 
 private:
   friend struct gui;
@@ -44,6 +46,7 @@ private:
   float speedRad;
   float flyHeight;
   float turnSpeedRad;
+  float meshScale;
 
   vec3 forward;
   vec3 up;
@@ -59,5 +62,12 @@ private:
 
   glm::quat turnQuat;
   glm::quat rotateQuat;
+
+  Trail trailLeft;
+  Trail trailRight;
+  vec3 trailOffset = vec3(540.f, 190.f, -50.f);
+
+  float trailDuration = 2.f;
+  float trailAlphaFactor = 0.3f;
 };
 

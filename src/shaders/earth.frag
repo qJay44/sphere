@@ -98,7 +98,7 @@ vec3 triplanarNormal(sampler2D normalmap, float timeStep) {
 
 float calculateSpecular(vec3 normal) {
   vec3 lightDirection = normalize(lightPos - vertPos);
-  float specularAngle = max(acos(dot(lightDirection, normal)), 0.f);
+  float specularAngle = acos(dot(lightDirection, normal));
   float specularExponent = specularAngle / u_waterSpecularSmoothness;
   float specularHighlight = exp(-specularExponent * specularExponent);
 
