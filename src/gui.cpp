@@ -158,18 +158,24 @@ void gui::draw() {
     SliderFloat("Tilt recover momementum decrease factor", &airplaneGUI.ptr->tiltRecoverMomentumDecreaseFactor, 0.1f, 0.99f);
     SetItemTooltip("How long the momementum is decreasing");
 
+    static float prevScale = airplaneGUI.scale;
+    if (SliderFloat("Scale", &airplaneGUI.scale, 0.01f, 10.f)) {
+      float scaleFactor = airplaneGUI.scale / prevScale;
+      airplaneGUI.ptr->scale(scaleFactor);
+      airplaneGUI.ptr->meshScale *= scaleFactor;
+      prevScale = airplaneGUI.scale;
+    }
+
     SeparatorText("Trail");
     SliderFloat3("Trails offset", glm::value_ptr(airplaneGUI.ptr->trailOffset), -10000.f, 10000.f);
     SliderFloat("Duration", &airplaneGUI.ptr->trailDuration, 0.f, 30.f);
     SliderFloat("Alpha factor", &airplaneGUI.ptr->trailAlphaFactor, 0.f, 1.f);
     ColorEdit3("Color", glm::value_ptr(airplaneGUI.ptr->trailLeft.color));
 
-    static float prevScale = airplaneGUI.scale;
-    if (SliderFloat("Scale", &airplaneGUI.scale, 0.01f, 10.f)) {
-      float scaleFactor = airplaneGUI.scale / prevScale;
-      airplaneGUI.ptr->scale(scaleFactor);
-      prevScale = airplaneGUI.scale;
-    }
+    SeparatorText("Flags");
+    Checkbox("Show right", &airplaneGUI.ptr->showRight);
+    Checkbox("Show up", &airplaneGUI.ptr->showUp);
+    Checkbox("Show forward", &airplaneGUI.ptr->showForward);
 
     TreePop();
   }

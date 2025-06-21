@@ -13,7 +13,7 @@ AirplaneCamera::AirplaneCamera(Airplane& airplane, float distance, float sensiti
   farPlane = 50.f;
 
   // Adjust view direction so it is not exactly above the airplane
-  glm::quat quat = glm::angleAxis(PI / 3.f, airplane.getRight());
+  glm::quat quat = glm::angleAxis(PI / 3.f, getRight());
   position = quat * (position - airplane.getPosition()) + airplane.getPosition();
   calcView();
 }

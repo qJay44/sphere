@@ -5,12 +5,6 @@
 #include "Earth.hpp"
 #include "Trail.hpp"
 
-#define AIRPLANE_FLAG_DRAW_RIGHT    1
-#define AIRPLANE_FLAG_DRAW_UP       1 << 2
-#define AIRPLANE_FLAG_DRAW_FORWARD  1 << 3
-
-#define AIRPLANE_FLAG_DRAW_DIRECTIONS (AIRPLANE_FLAG_DRAW_RIGHT | AIRPLANE_FLAG_DRAW_UP | AIRPLANE_FLAG_DRAW_FORWARD)
-
 class Airplane : public Mesh<Vertex4> {
 public:
   static void loadTextures();
@@ -33,7 +27,7 @@ public:
 
   void turn(float dir);
   void update();
-  void draw(const Camera* camera, const Shader& shader, u32 flags = 0) const;
+  void draw(const Camera* camera, const Shader& shader) const;
   void drawTrail(const Camera* camera, const Shader& shader) const;
 
 private:
@@ -60,8 +54,8 @@ private:
   float tiltMomentumRad = 0.f;
   float tiltRecoverMomentumRad = 0.f;
 
-  glm::quat turnQuat;
-  glm::quat rotateQuat;
+  glm::quat turnQuat   = glm::identity<glm::quat>();
+  glm::quat rotateQuat = glm::identity<glm::quat>();
 
   Trail trailLeft;
   Trail trailRight;
@@ -69,5 +63,9 @@ private:
 
   float trailDuration = 2.f;
   float trailAlphaFactor = 0.3f;
+
+  bool showRight = false;
+  bool showUp = false;
+  bool showForward = false;
 };
 

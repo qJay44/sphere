@@ -104,19 +104,19 @@ void Airplane::update() {
 
   vec3 trailLeftPos = position;
 
-  trailLeftPos +=  up      * trailOffset.y * meshScale;
-  trailLeftPos +=  forward * trailOffset.z * meshScale;
+  trailLeftPos += normalize(cross(forward, -right))  * trailOffset.y * meshScale;
+  trailLeftPos += forward * trailOffset.z * meshScale;
 
   vec3 trailRightPos = trailLeftPos;
 
-  trailLeftPos += -right * trailOffset.x * meshScale;
-  trailRightPos += right * trailOffset.x * meshScale;
+  trailLeftPos += right * trailOffset.x * meshScale;
+  trailRightPos += -right * trailOffset.x * meshScale;
 
   trailLeft.add(trailLeftPos, trailDuration);
   trailRight.add(trailRightPos, trailDuration);
 }
 
-void Airplane::draw(const Camera* camera, const Shader& shader, u32 flags) const {
+void Airplane::draw(const Camera* camera, const Shader& shader) const {
   static const GLint diffuseLoc = shader.getUniformLoc(Airplane::texDiffuse->getUniformName());
 
   shader.setUniformTexture(diffuseLoc, *Airplane::texDiffuse);
@@ -124,13 +124,13 @@ void Airplane::draw(const Camera* camera, const Shader& shader, u32 flags) const
 
   const Shader& colorShader = Shader::getDefaultShader(SHADER_DEFAULT_TYPE_COLOR_SHADER);
 
-  if (flags & AIRPLANE_FLAG_DRAW_RIGHT)
+  if (showRight)
     meshes::line(position, position + right, global::red).draw(camera, colorShader);
 
-  if (flags & AIRPLANE_FLAG_DRAW_UP)
+  if (showUp)
     meshes::line(position, position + up, global::green).draw(camera, colorShader);
 
-  if (flags & AIRPLANE_FLAG_DRAW_FORWARD)
+  if (showForward)
     meshes::line(position, position + forward, global::blue).draw(camera, colorShader);
 
   Mesh::draw(camera, shader);

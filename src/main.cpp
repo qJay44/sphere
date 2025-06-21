@@ -129,7 +129,7 @@ int main() {
   cameraFree.setFarPlane(300.f);
   AirplaneCamera cameraAirplane(airplane, 8.f, 200.f);
   CameraStorage::cameraFreePtr = &cameraFree;
-  CameraStorage::cameraAirplanePtr= &cameraAirplane;
+  CameraStorage::cameraAirplanePtr = &cameraAirplane;
   cameraFree.setSpeed(earth.getRadius() * 0.1f);
 
   // ===== Inputs Handler ======================================= //
