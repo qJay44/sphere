@@ -10,6 +10,7 @@ Mesh<Vertex4> plane(vec3 position, vec2 size, vec3 color = {1.f, 1.f, 1.f}, bool
 Mesh<Vertex1> plane1(vec3 position, vec2 size, bool clearable = true);
 Mesh<Vertex4> cube(vec3 position, float size = 1.f, vec3 color = {1.f, 1.f, 1.f}, bool clearable = true);
 Mesh<Vertex4> frustum(const Camera& cam, vec3 color = {1.f, 1.f, 1.f}, bool clearable = true);
+Mesh<VertexPT> screen(bool clearable = true);
 
 } // namespace meshes
 

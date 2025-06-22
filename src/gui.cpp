@@ -171,6 +171,7 @@ void gui::draw() {
     SliderFloat("Duration", &airplaneGUI.ptr->trailDuration, 0.f, 30.f);
     SliderFloat("Alpha factor", &airplaneGUI.ptr->trailAlphaFactor, 0.f, 1.f);
     ColorEdit3("Color", glm::value_ptr(airplaneGUI.ptr->trailLeft.color));
+    airplaneGUI.ptr->trailRight.color = airplaneGUI.ptr->trailLeft.color;
 
     SeparatorText("Flags");
     Checkbox("Show right", &airplaneGUI.ptr->showRight);

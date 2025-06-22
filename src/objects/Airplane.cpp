@@ -102,6 +102,8 @@ void Airplane::update() {
   turnMomentumRad *= turnMomentumDecreaseFactor;
   tiltMomentumRad *= tiltMomentumDecreaseFactor;
 
+  // ========== Add left and right trails ========== //
+
   vec3 trailLeftPos = position;
 
   trailLeftPos += normalize(cross(forward, -right))  * trailOffset.y * meshScale;
@@ -114,6 +116,8 @@ void Airplane::update() {
 
   trailLeft.add(trailLeftPos, trailDuration);
   trailRight.add(trailRightPos, trailDuration);
+
+  // =============================================== //
 }
 
 void Airplane::draw(const Camera* camera, const Shader& shader) const {

@@ -218,5 +218,21 @@ Mesh<Vertex4> frustum(const Camera& cam, vec3 color, bool clearable) {
   return Mesh<Vertex4>(vertices, indices, GL_LINES, clearable);
 }
 
+Mesh<VertexPT> screen(bool clearable) {
+  std::vector<VertexPT> vertices{
+    {{-1.f, -1.f, 0.f}, {0.f, 0.f}},
+    {{-1.f,  1.f, 0.f}, {0.f, 1.f}},
+    {{ 1.f,  1.f, 0.f}, {1.f, 1.f}},
+    {{ 1.f, -1.f, 0.f}, {1.f, 0.f}},
+  };
+
+  std::vector<GLuint> indices{
+    0, 1, 2,
+    2, 3, 0
+  };
+
+  return Mesh<VertexPT>(vertices, indices, GL_TRIANGLES, clearable);
+}
+
 } // namespace meshes
 

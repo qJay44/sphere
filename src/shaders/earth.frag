@@ -93,7 +93,7 @@ vec3 triplanarNormal(sampler2D normalmap, float timeStep) {
   weights = pow(weights, vec3(u_triplanarBlendSharpness));
   weights /= (weights.x + weights.y + weights.z);
 
-  return colorX * weights.x + colorY * weights.y + colorZ * weights.z;
+  return normalize(colorX * weights.x + colorY * weights.y + colorZ * weights.z);
 }
 
 float calculateSpecular(vec3 normal) {

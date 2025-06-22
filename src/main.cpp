@@ -8,7 +8,10 @@
 #include "engine/CameraStorage.hpp"
 #include "engine/Shader.hpp"
 #include "engine/InputsHandler.hpp"
+#include "engine/mesh/FBO.hpp"
+#include "engine/mesh/RBO.hpp"
 #include "engine/mesh/meshes.hpp"
+#include "engine/mesh/texture/Texture.hpp"
 #include "global.hpp"
 #include "gui.hpp"
 #include "imgui.h"
@@ -19,6 +22,7 @@
 #include "objects/Earth.hpp"
 #include "objects/Light.hpp"
 #include "utils/clrp.hpp"
+#include "utils/utils.hpp"
 
 using global::window;
 
@@ -99,6 +103,7 @@ int main() {
   Shader airplaneShader("airplane.vert", "airplane.frag");
   Shader trailShader("trail.vert", "trail.frag");
   Shader planetBordersShader("borders.vert", "borders.frag");
+  Shader screenShader("screen.vert", "screen.frag");
 
   const GLint earthShaderLightPosLoc      = earthShader.getUniformLoc("u_lightPos");
   const GLint earthShaderLightColorLoc    = earthShader.getUniformLoc("u_lightColor");
@@ -153,6 +158,22 @@ int main() {
   glCullFace(GL_FRONT);
   glFrontFace(GL_CW);
 
+  FBO fboScreen(1);
+  Texture screenTexture(winSize, GL_RGB, GL_RGB, "u_screenTex");
+  RBO rboScreen(1);
+  fboScreen.attach2D(GL_COLOR_ATTACHMENT0, screenTexture);
+  fboScreen.bind();
+  rboScreen.storage(GL_DEPTH24_STENCIL8, winSize);
+
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboScreen.id);
+  if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    error("Framebuffer is not complete");
+
+  FBO::unbind();
+
+  screenShader.setUniformTexture(screenTexture);
+  Mesh<VertexPT> screenMesh = meshes::screen();
+
   // Render loop
   while (!glfwWindowShouldClose(window)) {
     static Camera* camera = &cameraAirplane;
@@ -195,8 +216,11 @@ int main() {
 
     airplane.update();
 
+    fboScreen.bind();
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
 
     earth.draw(camera, earthShader);
 
@@ -211,7 +235,14 @@ int main() {
     if (global::drawGlobalAxis)
       meshes::axis(earth.getRadius() * 2.f).draw(camera, colorShader);
 
-    glEnable(GL_CULL_FACE);
+    FBO::unbind();
+    glClearColor(0.f, 0.f, 0.f, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+    screenTexture.bind();
+    screenMesh.draw(camera, screenShader);
+
+    screenTexture.unbind();
 
     gui::draw();
     ImGui::Render();
