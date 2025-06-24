@@ -22,7 +22,6 @@
 #include "objects/Earth.hpp"
 #include "objects/Light.hpp"
 #include "utils/clrp.hpp"
-#include "utils/utils.hpp"
 
 using global::window;
 
@@ -110,11 +109,12 @@ int main() {
   const GLint earthShaderTimeLoc          = earthShader.getUniformLoc("u_time");
   const GLint airplaneShaderLightPosLoc   = airplaneShader.getUniformLoc("u_lightPos");
   const GLint airplaneShaderLightColorLoc = airplaneShader.getUniformLoc("u_lightColor");
+  const GLint screenAtmosphereRaidusLoc   = screenShader.getUniformLoc("u_atmosphereRadius");
 
   // ===== Earth =============================================== //
 
-  Earth::loadTextures();
   Earth earth(512u, 256u, 80.f);
+  earth.loadTextures(earthShader);
 
   // ===== Light ================================================ //
 
@@ -159,19 +159,19 @@ int main() {
   glFrontFace(GL_CW);
 
   FBO fboScreen(1);
-  Texture screenTexture(winSize, GL_RGB, GL_RGB, "u_screenTex");
+  Texture screenColorTexture(winSize, GL_RGB, GL_RGB, "u_screenColorTex", 0);
+  Texture screenDepthTexture(winSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, "u_screenDepthTex", 1);
   RBO rboScreen(1);
-  fboScreen.attach2D(GL_COLOR_ATTACHMENT0, screenTexture);
+  fboScreen.attach2D(GL_COLOR_ATTACHMENT0, screenColorTexture);
+  fboScreen.attach2D(GL_DEPTH_ATTACHMENT, screenDepthTexture);
   fboScreen.bind();
   rboScreen.storage(GL_DEPTH24_STENCIL8, winSize);
-
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboScreen.id);
-  if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    error("Framebuffer is not complete");
 
   FBO::unbind();
 
-  screenShader.setUniformTexture(screenTexture);
+  screenShader.setUniformTexture(screenColorTexture);
+  screenShader.setUniformTexture(screenDepthTexture);
   Mesh<VertexPT> screenMesh = meshes::screen();
 
   // Render loop
@@ -239,10 +239,14 @@ int main() {
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
-    screenTexture.bind();
-    screenMesh.draw(camera, screenShader);
+    screenColorTexture.bind();
+    screenDepthTexture.bind();
 
-    screenTexture.unbind();
+    screenShader.setUniform1f(screenAtmosphereRaidusLoc, earth.getAtmosphereRadius());
+    screenMesh.draw(camera, screenShader, true);
+
+    screenColorTexture.unbind();
+    screenDepthTexture.unbind();
 
     gui::draw();
     ImGui::Render();

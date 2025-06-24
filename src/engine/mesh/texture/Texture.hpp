@@ -17,8 +17,8 @@ public:
   );
 
   Texture(
-    const fspath& path = "",
-    const std::string& uniform = "",
+    const fspath& path,
+    const std::string& uniform,
     const GLuint& unit = 0,
     const GLenum& target = GL_TEXTURE_2D,
     const GLint& internalFormat = 0,
@@ -39,7 +39,9 @@ public:
     const TexParams& params = TexParams{}  // Texture parameters (glTexParameteri)
   );
 
-  Texture operator=(const Texture& other);
+  Texture(const Texture& other);
+
+  void operator=(const Texture& other);
 
   void bind() const;
   void unbind() const;
@@ -50,17 +52,18 @@ public:
   const std::string& getUniformName() const;
   const uvec3& getSize() const;
 
+  void setUnit(GLuint unit);
+  void setUniformName(const std::string& name);
+
 private:
-  const std::string uniformName;
-  const GLuint unit;
-  const GLenum target;
+  GLenum target;
+  std::string uniformName;
+  GLuint unit;
 
   GLuint id;
   uvec3 size;
 
 private:
   friend struct FBO;
-
-  Texture(const Texture& other);
 };
 

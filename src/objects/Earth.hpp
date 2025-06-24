@@ -8,12 +8,12 @@ public:
   Earth(u32 resolution, u32 chunksPerFace, float radius);
   ~Earth();
 
-  static void loadTextures();
+  const u32&   getResolution()       const;
+  const float& getRadius()           const;
+  const float& getAtmosphereRadius() const;
+  const float& getHeightmapScale()   const;
 
-  const u32&   getResolution()     const;
-  const float& getRadius()         const;
-  const float& getHeightmapScale() const;
-
+  void loadTextures(const Shader& shader);
   void rebuild();
   void rebuild(int resolution, float radius);
   void draw(const Camera* camera, const Shader& shader) const;
@@ -22,13 +22,13 @@ private:
   friend struct gui;
   friend struct TerrainFace;
 
-  static Texture* texHeightmapsWater;
-  static Texture* texDistanceFieldWater;
-  static Texture* texNormalheightmapsLand;
-  static Texture* texWorldColors;
-  static Texture* texBorders;
-  static Texture* texNormalmapWave0;
-  static Texture* texNormalmapWave1;
+  Texture texHeightmapsWater;
+  Texture texDistanceFieldWater;
+  Texture texNormalheightmapsLand;
+  Texture texWorldColors;
+  Texture texBorders;
+  Texture texNormalmapWave0;
+  Texture texNormalmapWave1;
 
   struct TerrainFace* terrainFaces = nullptr;
 
@@ -36,6 +36,7 @@ private:
   u32 chunks;
 
   float radius;
+  float atmosphereRadius;
   float heightmapScale = 2.f;
   float seaLevel = 0.f;
   float lightMultiplier = 1.5f;

@@ -30,16 +30,19 @@ public:
 
   u32 getVerticesSize() const { return vertices.size(); }
 
-  void draw(const Camera* camera, const Shader& shader) const {
+  void draw(const Camera* camera, const Shader& shader, bool forceNoWireframe = false) const {
     vao.bind();
 
     mat4 model = translation * rotation * scaleMat;
 
+    shader.setUniform1f("u_camNear", camera->getNearPlane());
+    shader.setUniform1f("u_camFar", camera->getFarPlane());
     shader.setUniform3f("u_camPos", camera->getPosition());
+    shader.setUniform3f("u_camDir", camera->getForward());
     shader.setUniformMatrix4f("u_cam", camera->getMatrix());
     shader.setUniformMatrix4f("u_model", model);
 
-    if (global::drawWireframe)
+    if (global::drawWireframe & !forceNoWireframe)
       glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     if (instancingCount) {

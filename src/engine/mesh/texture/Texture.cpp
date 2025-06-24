@@ -9,9 +9,9 @@
 constexpr GLenum GL_STANDARD_CHANNELS[4] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
 
 Texture::Texture()
-  : uniformName(),
+  : target(GL_TEXTURE_2D),
+    uniformName(),
     unit(),
-    target(),
     id(0) {}
 
 Texture::Texture(
@@ -23,9 +23,9 @@ Texture::Texture(
   const GLenum& target,
   const TexParams& params
 )
-  : uniformName(uniform),
-    unit(unit),
-    target(target)
+  : target(target),
+    uniformName(uniform),
+    unit(unit)
 {
   switch (target) {
     case GL_TEXTURE_2D: {
@@ -55,9 +55,9 @@ Texture::Texture(
   const GLenum& type,
   const TexParams& params
 )
-  : uniformName(uniform),
-    unit(unit),
-    target(target)
+  : target(target),
+    uniformName(uniform),
+    unit(unit)
 {
   switch (target) {
     case GL_TEXTURE_2D: {
@@ -152,9 +152,9 @@ Texture::Texture(
   const GLenum& type,
   const TexParams& params
 )
-  : uniformName(uniform),
-    unit(unit),
-    target(target)
+  : target(target),
+    uniformName(uniform),
+    unit(unit)
 {
   switch (target) {
     case GL_TEXTURE_2D_ARRAY: {
@@ -186,14 +186,18 @@ Texture::Texture(
 }
 
 Texture::Texture(const Texture& other) :
+  target(other.target),
   uniformName(other.uniformName),
   unit(other.unit),
-  target(other.target),
   id(other.id),
   size(other.size) {}
 
-Texture Texture::operator=(const Texture& other) {
-  return Texture(other);
+void Texture::operator=(const Texture& other) {
+  target = other.target;
+  uniformName = other.uniformName;
+  unit = other.unit;
+  id = other.id;
+  size = other.size;
 }
 
 void Texture::bind() const {
@@ -213,4 +217,12 @@ const GLenum& Texture::getTarget() const { return target; }
 const GLuint& Texture::getUnit() const { return unit; }
 const std::string& Texture::getUniformName() const { return uniformName; }
 const uvec3& Texture::getSize() const { return size; }
+
+void Texture::setUnit(GLuint unit) {
+  this->unit = unit;
+}
+
+void Texture::setUniformName(const std::string& name) {
+  uniformName = name;
+}
 

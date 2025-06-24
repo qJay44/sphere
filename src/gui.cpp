@@ -106,10 +106,11 @@ void gui::draw() {
 
     // ++++++++++++++++++++++++++++++++++++++++++ //
 
-    SliderFloat("Radius", &earthGUI.ptr->radius, 1.f, 100.f);
+    SliderFloat("Radius", &earthGUI.ptr->radius, 1.f, 500.f);
     SliderFloat("Heightmap scale", &earthGUI.ptr->heightmapScale, 0.01f, 100.f);
     SliderFloat("Sea level", &earthGUI.ptr->seaLevel, -5.f, 0.f);
     SliderFloat("Triplanar blend sharpness", &earthGUI.ptr->triplanarBlendSharpness, 1.f, 10.f);
+    SliderFloat("Atmosphere radius", &earthGUI.ptr->atmosphereRadius, 1.f, 500.f);
     ColorEdit3("Border color", glm::value_ptr(earthGUI.ptr->bordersColor));
 
     SeparatorText("Water");
