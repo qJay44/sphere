@@ -1,6 +1,7 @@
 #include "Earth.hpp"
 
 #include "TerrainFace.hpp"
+#include "glm/exponential.hpp"
 
 // #define USE_DEGUG_LOAD
 
@@ -91,13 +92,15 @@ void Earth::loadTextures(const Shader& shader) {
   #endif
 }
 
-Earth::Earth(u32 resolution, u32 chunksPerFace, float radius)
+Earth::Earth(u32 resolution, u32 chunksPerFace, float radius, float atmosphereRadius, const Light* light)
   : resolution(resolution),
+    chunks(chunksPerFace),
     radius(radius),
-    atmosphereRadius(radius * 1.5f) {
+    atmosphereRadius(atmosphereRadius),
+    light(light) {
 
-  chunks = chunksPerFace;
   terrainFaces = new TerrainFace[6];
+  updateScatteringCoefficients();
 
   build();
 }
@@ -113,6 +116,10 @@ const u32&   Earth::getResolution()       const { return resolution;       }
 const float& Earth::getRadius()           const { return radius;           }
 const float& Earth::getAtmosphereRadius() const { return atmosphereRadius; }
 const float& Earth::getHeightmapScale()   const { return heightmapScale;   }
+
+void Earth::updateScatteringCoefficients() {
+  atmosphereScatteringCoefficients = glm::pow(400.f / light->getWaveLengths(), vec3(4.f)) * atmosphereScatteringStrength;
+}
 
 void Earth::rebuild() {
   rebuild(resolution, radius);
@@ -189,6 +196,26 @@ void Earth::draw(const Camera* camera, const Shader& shader) const {
   texBorders.unbind();
   texNormalmapWave0.unbind();
   texNormalmapWave1.unbind();
+}
+
+void Earth::drawAtmosphere(const Mesh<VertexPT>& screenMesh, const Camera* camera, const Shader& shader) const {
+  static const GLint planetCenterLoc           = shader.getUniformLoc("u_planetCenter");
+  static const GLint scatteringCoefficientsLoc = shader.getUniformLoc("u_scatteringCoefficients");
+  static const GLint scatteringPointsLoc       = shader.getUniformLoc("u_scatteringPoints");
+  static const GLint opticalDepthPointsLoc     = shader.getUniformLoc("u_opticalDepthPoints");
+  static const GLint planetRadiusLoc           = shader.getUniformLoc("u_planetRadius");
+  static const GLint atmosphereRaidusLoc       = shader.getUniformLoc("u_atmosphereRadius");
+  static const GLint densityFalloffLoc         = shader.getUniformLoc("u_densityFalloff");
+
+  shader.setUniform3f(planetCenterLoc, vec3(0.f));
+  shader.setUniform3f(scatteringCoefficientsLoc, atmosphereScatteringCoefficients);
+  shader.setUniform1i(scatteringPointsLoc, atmosphereScatteringPoints);
+  shader.setUniform1i(opticalDepthPointsLoc, atmosphereOpticalDepthPoints);
+  shader.setUniform1f(planetRadiusLoc, radius);
+  shader.setUniform1f(atmosphereRaidusLoc, atmosphereRadius);
+  shader.setUniform1f(densityFalloffLoc, atmosphereDensityFalloff);
+
+  screenMesh.draw(camera, shader, true);
 }
 
 void Earth::build() {

@@ -8,11 +8,13 @@ public:
 
   const vec3& getPosition() const;
   const vec3& getColor() const;
+  const vec3& getWaveLengths() const;
 
 private:
   friend struct gui;
 
   vec3 position;
   vec3 color;
+  vec3 waveLengths{700.f, 530.f, 440.f};
 };
 

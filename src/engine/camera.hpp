@@ -17,14 +17,15 @@ public:
   Camera(Camera&&) = delete;
   Camera(vec3 pos, vec3 orientation, double sensitivity);
 
-  const float& getNearPlane()   const;
-  const float& getFarPlane()    const;
-  const float& getSpeed()       const;
-  const float& getFov()         const;
-  const vec3&  getOrientation() const;
-  const vec3&  getPosition()    const;
-  const vec3&  getUp()          const;
-  const mat4&  getMatrix()      const;
+  const float& getNearPlane()     const;
+  const float& getFarPlane()      const;
+  const float& getSpeed()         const;
+  const float& getFov()           const;
+  const vec3&  getOrientation()   const;
+  const vec3&  getPosition()      const;
+  const vec3&  getUp()            const;
+  const mat4&  getMatrix()        const;
+  const mat4&  getMatrixInverse() const;
 
   vec3 getBack()    const;
   vec3 getLeft()    const;
@@ -57,8 +58,9 @@ protected:
   vec3 up{0.f, 1.f, 0.f};
   float speed = 5.f;
 
-  mat4 mat  = mat4(1.f);
-  mat4 view = mat4(1.f);
+  mat4 view   = mat4(1.f);
+  mat4 mat    = mat4(1.f);
+  mat4 matInv = mat4(1.f);
 
 protected:
   virtual void moveByMouse(const dvec2& mousePos);

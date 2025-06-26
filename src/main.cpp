@@ -11,6 +11,7 @@
 #include "engine/mesh/FBO.hpp"
 #include "engine/mesh/RBO.hpp"
 #include "engine/mesh/meshes.hpp"
+#include "engine/mesh/texture/TexParams.hpp"
 #include "engine/mesh/texture/Texture.hpp"
 #include "global.hpp"
 #include "gui.hpp"
@@ -102,23 +103,25 @@ int main() {
   Shader airplaneShader("airplane.vert", "airplane.frag");
   Shader trailShader("trail.vert", "trail.frag");
   Shader planetBordersShader("borders.vert", "borders.frag");
-  Shader screenShader("screen.vert", "screen.frag");
+  Shader atmosphereShader("atmosphere.vert", "atmosphere.frag");
 
   const GLint earthShaderLightPosLoc      = earthShader.getUniformLoc("u_lightPos");
   const GLint earthShaderLightColorLoc    = earthShader.getUniformLoc("u_lightColor");
   const GLint earthShaderTimeLoc          = earthShader.getUniformLoc("u_time");
   const GLint airplaneShaderLightPosLoc   = airplaneShader.getUniformLoc("u_lightPos");
   const GLint airplaneShaderLightColorLoc = airplaneShader.getUniformLoc("u_lightColor");
-  const GLint screenAtmosphereRaidusLoc   = screenShader.getUniformLoc("u_atmosphereRadius");
+  const GLint atmosphereShaderLightPosLoc = atmosphereShader.getUniformLoc("u_lightPos");
 
-  // ===== Earth =============================================== //
-
-  Earth earth(512u, 256u, 80.f);
-  earth.loadTextures(earthShader);
+  const float earthRadius = 80.f;
 
   // ===== Light ================================================ //
 
-  Light light(earth.getRadius() + vec3{16.3f, 24.f, 26.6f}, 1.5f);
+  Light light(earthRadius + vec3{16.3f, 24.f, 26.6f}, 1.5f);
+
+  // ===== Earth =============================================== //
+
+  Earth earth(512u, 256u, earthRadius, earthRadius + earthRadius * 0.2f, &light);
+  earth.loadTextures(earthShader);
 
   // ===== Airplane ============================================= //
 
@@ -158,20 +161,27 @@ int main() {
   glCullFace(GL_FRONT);
   glFrontFace(GL_CW);
 
+  TexParams depthTexParams{
+    GL_NEAREST,
+    GL_NEAREST,
+    GL_CLAMP_TO_EDGE,
+    GL_CLAMP_TO_EDGE,
+  };
+
   FBO fboScreen(1);
   Texture screenColorTexture(winSize, GL_RGB, GL_RGB, "u_screenColorTex", 0);
-  Texture screenDepthTexture(winSize, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, "u_screenDepthTex", 1);
+  Texture screenDepthTexture(winSize, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, "u_screenDepthTex", 1, GL_TEXTURE_2D, depthTexParams);
   RBO rboScreen(1);
   fboScreen.attach2D(GL_COLOR_ATTACHMENT0, screenColorTexture);
   fboScreen.attach2D(GL_DEPTH_ATTACHMENT, screenDepthTexture);
   fboScreen.bind();
   rboScreen.storage(GL_DEPTH24_STENCIL8, winSize);
-  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboScreen.id);
 
   FBO::unbind();
 
-  screenShader.setUniformTexture(screenColorTexture);
-  screenShader.setUniformTexture(screenDepthTexture);
+  atmosphereShader.setUniformTexture(screenColorTexture);
+  atmosphereShader.setUniformTexture(screenDepthTexture);
+
   Mesh<VertexPT> screenMesh = meshes::screen();
 
   // Render loop
@@ -242,8 +252,8 @@ int main() {
     screenColorTexture.bind();
     screenDepthTexture.bind();
 
-    screenShader.setUniform1f(screenAtmosphereRaidusLoc, earth.getAtmosphereRadius());
-    screenMesh.draw(camera, screenShader, true);
+    atmosphereShader.setUniform3f(atmosphereShaderLightPosLoc, light.getPosition());
+    earth.drawAtmosphere(screenMesh, camera, atmosphereShader);
 
     screenColorTexture.unbind();
     screenDepthTexture.unbind();

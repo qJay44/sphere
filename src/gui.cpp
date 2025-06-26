@@ -110,8 +110,16 @@ void gui::draw() {
     SliderFloat("Heightmap scale", &earthGUI.ptr->heightmapScale, 0.01f, 100.f);
     SliderFloat("Sea level", &earthGUI.ptr->seaLevel, -5.f, 0.f);
     SliderFloat("Triplanar blend sharpness", &earthGUI.ptr->triplanarBlendSharpness, 1.f, 10.f);
-    SliderFloat("Atmosphere radius", &earthGUI.ptr->atmosphereRadius, 1.f, 500.f);
     ColorEdit3("Border color", glm::value_ptr(earthGUI.ptr->bordersColor));
+
+    SeparatorText("Atmosphere");
+    SliderFloat("Radius##2", &earthGUI.ptr->atmosphereRadius, 1.f, 500.f);
+    SliderInt("Scattering points", &earthGUI.ptr->atmosphereScatteringPoints, 2, 50);
+    SliderInt("Optical depth points", &earthGUI.ptr->atmosphereOpticalDepthPoints, 2, 50);
+    SliderFloat("Density falloff", &earthGUI.ptr->atmosphereDensityFalloff, -20.f, 20.f);
+
+    if (SliderFloat("Scattering strenth", &earthGUI.ptr->atmosphereScatteringStrength, 0.f, 20.f))
+      earthGUI.ptr->updateScatteringCoefficients();
 
     SeparatorText("Water");
     SliderFloat("Deep factor", &earthGUI.ptr->waterDeepFactor, -50.f, 50.f);

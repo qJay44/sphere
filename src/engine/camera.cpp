@@ -21,14 +21,15 @@ Camera::Camera(vec3 pos, vec3 orientation, double sensitivity)
   calcView();
 };
 
-const float& Camera::getNearPlane()   const { return nearPlane;   }
-const float& Camera::getFarPlane()    const { return farPlane;    }
-const float& Camera::getSpeed()       const { return speed;       }
-const float& Camera::getFov()         const { return fov;         }
-const vec3&  Camera::getOrientation() const { return orientation; }
-const vec3&  Camera::getPosition()    const { return position;    }
-const vec3&  Camera::getUp()          const { return up;          }
-const mat4&  Camera::getMatrix()      const { return mat;         }
+const float& Camera::getNearPlane()     const { return nearPlane;   }
+const float& Camera::getFarPlane()      const { return farPlane;    }
+const float& Camera::getSpeed()         const { return speed;       }
+const float& Camera::getFov()           const { return fov;         }
+const vec3&  Camera::getOrientation()   const { return orientation; }
+const vec3&  Camera::getPosition()      const { return position;    }
+const vec3&  Camera::getUp()            const { return up;          }
+const mat4&  Camera::getMatrix()        const { return mat;         }
+const mat4&  Camera::getMatrixInverse() const { return matInv;      }
 
 vec3 Camera::getBack()    const { return  transpose(view)[2]; }
 vec3 Camera::getLeft()    const { return -transpose(view)[0]; }
@@ -59,6 +60,7 @@ void Camera::update(bool ignoreMousePos) {
   mat4 proj = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
 
   mat = proj * view;
+  matInv = glm::inverse(mat);
 }
 
 void Camera::draw(Camera& camToDraw, const Shader& shader, u32 flags) const {
