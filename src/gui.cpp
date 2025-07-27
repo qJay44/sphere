@@ -116,7 +116,7 @@ void gui::draw() {
     SliderFloat("Radius##2", &earthGUI.ptr->atmosphereRadius, 1.f, 500.f);
     SliderInt("Scattering points", &earthGUI.ptr->atmosphereScatteringPoints, 2, 50);
     SliderInt("Optical depth points", &earthGUI.ptr->atmosphereOpticalDepthPoints, 2, 50);
-    SliderFloat("Density falloff", &earthGUI.ptr->atmosphereDensityFalloff, -20.f, 20.f);
+    SliderFloat("Density falloff", &earthGUI.ptr->atmosphereDensityFalloff, -20.f, 50.f);
 
     if (SliderFloat("Scattering strenth", &earthGUI.ptr->atmosphereScatteringStrength, 0.f, 20.f))
       earthGUI.ptr->updateScatteringCoefficients();
@@ -195,7 +195,7 @@ void gui::draw() {
   if (!cameraGUI.arcball) error("The arcball camera is not linked to gui");
   if (TreeNode("Airplane Camera")) {
     SliderFloat("Near",     &cameraGUI.arcball->nearPlane, 0.01f, 1.f);
-    SliderFloat("Far",      &cameraGUI.arcball->farPlane,  10.f , 100.f);
+    SliderFloat("Far",      &cameraGUI.arcball->farPlane,  10.f , 1000.f);
     SliderFloat("Distance", &cameraGUI.arcball->distance,  1.f  , 50.f);
     SliderFloat("FOV",      &cameraGUI.arcball->fov,       45.f , 179.f);
 
@@ -207,7 +207,7 @@ void gui::draw() {
   if (!cameraGUI.free) error("The free camera is not linked to gui");
   if (TreeNode("Free camera")) {
     SliderFloat("Near##2",  &cameraGUI.free->nearPlane, 0.01f, 1.f);
-    SliderFloat("Far##2",   &cameraGUI.free->farPlane,  10.f , 100.f);
+    SliderFloat("Far##2",   &cameraGUI.free->farPlane,  10.f , 1000.f);
     SliderFloat("Speed##2", &cameraGUI.free->speed,     1.f  , 50.f);
     SliderFloat("FOV##2",   &cameraGUI.free->fov,       45.f , 179.f);
 

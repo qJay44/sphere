@@ -70,7 +70,7 @@ private:
   int atmosphereScatteringPoints = 11;
   int atmosphereOpticalDepthPoints = 11;
   float atmosphereDensityFalloff = 11.f;
-  float atmosphereScatteringStrength = 11.f;
+  float atmosphereScatteringStrength = 21.f;
   vec3 atmosphereScatteringCoefficients = vec3(1.f);
 
   bool printBuildInfo = false;

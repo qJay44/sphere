@@ -1,7 +1,11 @@
 #include <cstdio>
 #include <cstdlib>
 #include <format>
-#include <windows.h>
+#include <direct.h>
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 #include "engine/Camera.hpp"
 #include "GLFW/glfw3.h"
@@ -15,9 +19,6 @@
 #include "engine/mesh/texture/Texture.hpp"
 #include "global.hpp"
 #include "gui.hpp"
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
 #include "objects/Airplane.hpp"
 #include "objects/AirplaneCamera.hpp"
 #include "objects/Earth.hpp"
@@ -49,19 +50,19 @@ void GLAPIENTRY MessageCallback(
 
 int main() {
   // Assuming the executable is launching from its own directory
-  SetCurrentDirectory("../../../src");
+  _chdir("../../../src");
 
   // GLFW init
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, TRUE);
+  glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
   // Window init
   window = glfwCreateWindow(1200, 720, "Sphere", NULL, NULL);
   ivec2 winSize;
-  glfwGetWindowSize(global::window, &winSize.x, &winSize.y);
+  glfwGetWindowSize(window, &winSize.x, &winSize.y);
   dvec2 winCenter = dvec2(winSize) / 2.;
 
   if (!window) {
@@ -112,7 +113,7 @@ int main() {
   const GLint airplaneShaderLightColorLoc = airplaneShader.getUniformLoc("u_lightColor");
   const GLint atmosphereShaderLightPosLoc = atmosphereShader.getUniformLoc("u_lightPos");
 
-  const float earthRadius = 80.f;
+  const float earthRadius = 200.f;
 
   // ===== Light ================================================ //
 
@@ -120,7 +121,7 @@ int main() {
 
   // ===== Earth =============================================== //
 
-  Earth earth(512u, 256u, earthRadius, earthRadius + earthRadius * 0.2f, &light);
+  Earth earth(512u, 256u, earthRadius, earthRadius + earthRadius * 0.15f, &light);
   earth.loadTextures(earthShader);
 
   // ===== Airplane ============================================= //
@@ -135,10 +136,13 @@ int main() {
 
   Camera cameraFree({0.f, 0.f, earth.getRadius() + 3.f}, {0.f, 0.f, -1.f}, 100.f);
   cameraFree.setFarPlane(300.f);
+  cameraFree.setSpeed(earth.getRadius() * 0.1f);
+
   AirplaneCamera cameraAirplane(airplane, 8.f, 200.f);
+  cameraAirplane.setFarPlane(300.f);
+
   CameraStorage::cameraFreePtr = &cameraFree;
   CameraStorage::cameraAirplanePtr = &cameraAirplane;
-  cameraFree.setSpeed(earth.getRadius() * 0.1f);
 
   // ===== Inputs Handler ======================================= //
 

@@ -5,7 +5,7 @@
 
 // #define USE_DEGUG_LOAD
 
-constexpr vec3 directions[6]{
+constexpr vec3 directions[6] {
   {1.f,  0.f,  0.f},  // Right
   {-1.f, 0.f,  0.f},  // Left
   {0.f,  1.f,  0.f},  // Top

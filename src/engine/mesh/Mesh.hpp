@@ -37,6 +37,7 @@ public:
 
     shader.setUniform1f("u_camNear", camera->getNearPlane());
     shader.setUniform1f("u_camFar", camera->getFarPlane());
+    shader.setUniform1f("u_camFov", camera->getFov());
     shader.setUniform3f("u_camPos", camera->getPosition());
     shader.setUniform3f("u_camRight", camera->getRight());
     shader.setUniform3f("u_camUp", camera->getUp());
