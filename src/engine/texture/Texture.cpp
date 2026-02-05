@@ -116,7 +116,7 @@ void Texture::create2DArray(const fspath& folder) {
 
   std::ranges::sort(paths);
 
-  image2D img0(paths[0]);
+  image2D img0(paths[0], desc.internalFormat);
 
   glGenTextures(1, &id);
   bind();
@@ -128,7 +128,7 @@ void Texture::create2DArray(const fspath& folder) {
   glTexSubImage3D(desc.target, 0, 0, 0, 0, img0.width, img0.height, 1, desc.format, desc.type, img0.pixels);
 
   for (size_t i = 1; i < paths.size(); i++) {
-    image2D img(paths[i]);
+    image2D img(paths[i], desc.internalFormat);
     assert(img0.width == img.width);
     assert(img0.height == img.height);
     assert(img0.channels == img.channels);
@@ -176,7 +176,7 @@ void Texture::createCubemap(const fspath& folder) {
 
   for (int i = 0; i < 6; i++) {
     fspath filePath = std::format("{}/{}{}", folder.string().c_str(), texNames[i], extension.c_str());
-    image2D img(filePath);
+    image2D img(filePath, desc.internalFormat);
 
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, desc.internalFormat, img.width, img.height, 0, desc.format, desc.type, img.pixels);
   }

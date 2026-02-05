@@ -8,7 +8,7 @@ out DATA {
   vec2 texCoord;
 } data_out;
 
-layout(binding = 0) uniform samplerCube u_normalheightmapsLand;
+layout(binding = 2) uniform samplerCube u_normalheightmapsLand;
 
 uniform mat4 u_model;
 uniform vec3 u_camPos;

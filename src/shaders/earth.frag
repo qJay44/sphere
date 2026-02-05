@@ -16,9 +16,9 @@ in vec2 texCoord;
 uniform vec3 u_debug_terrainFaceColor;
 uniform vec3 u_debug_terrainFaceChunkColor;
 
-layout(binding = 0) uniform samplerCube u_normalheightmapsLand;
-layout(binding = 1) uniform isamplerCube u_heightmapsWater;
-layout(binding = 2) uniform usamplerCube u_distanceFieldsWater;
+layout(binding = 0) uniform isamplerCube u_heightmapsWater;
+layout(binding = 1) uniform usamplerCube u_distanceFieldsWater;
+layout(binding = 2) uniform samplerCube u_normalheightmapsLand;
 layout(binding = 3) uniform samplerCube u_worldColors;
 layout(binding = 4) uniform samplerCube u_borders;
 layout(binding = 5) uniform sampler2D u_normalmapWave0;
@@ -132,6 +132,7 @@ void main() {
   vec3 normalWaves = normalize(normalWave0 + normalWave1);
   vec3 dirLight = directionalLight(normal);
   int deepness = texture(u_heightmapsWater, defaultNormal).r; // [-32768, 32767]
+
   float border = texture(u_borders, defaultNormal).r;
   float isWater = 1.f - (sign(deepness) * 0.5f + 0.5f);
   float isLand = 1.f - isWater;

@@ -1,9 +1,6 @@
 #include "image2D.hpp"
 
-#include <cstdio>
 #include <format>
-
-#include "tiffio.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
@@ -12,6 +9,7 @@
 #include "stb/stb_image_write.h"
 
 #include "utils/status.hpp"
+#include "utils/loadTif.hpp"
 
 void image2D::write(const std::string& path, uvec2 size, u8 channels, byte* buf) {
   stbi_flip_vertically_on_write(true);
@@ -20,70 +18,84 @@ void image2D::write(const std::string& path, uvec2 size, u8 channels, byte* buf)
 
 image2D::image2D(int width, int height) : width(width), height(height) {}
 
-image2D::image2D(const fspath& path, bool flipVertically) { load(path, flipVertically); }
+image2D::image2D(const fspath& path, GLenum loadType, bool flipVertically) {
+  load(path, loadType, flipVertically);
+}
 
 image2D::~image2D() {
-  if (stbiLoad)
-    stbi_image_free(pixels);
-  else if(tifInt16Load)
-    delete[] (s16*)pixels;
-  else if (pixels)
-    error("[image2D::~image2D] pixels is not nullptr");
+  clear();
 }
 
-void image2D::load(const fspath& path, bool flipVertically) {
+void image2D::load(const fspath& path, GLenum loadType, bool flipVertically) {
+  clear();
+
+  this->path = path;
+  this->loadType = loadType;
+  this->flipVertically = flipVertically;
+
   status::start("Loading", path.string());
 
-  if (path.extension() == ".tif")
-    loadTifInt16Single(path, flipVertically);
-  else {
-    stbi_set_flip_vertically_on_load(flipVertically);
-    pixels = stbi_load(path.string().c_str(), &width, &height, &channels, 0);
-    if (!pixels) {
-      status::end(false);
-      error(std::format("stb can't load the image: {}", path.string()));
-    }
-
-    name = path.string();
-    stbiLoad = true;
+  switch (loadType) {
+    case IMAGE2D_LOAD_NO:
+      error("[image2D::load] What?");
+      break;
+    case IMAGE2D_LOAD_R16I:
+      loadTif_R16I();
+      break;
+    case IMAGE2D_LOAD_R16UI:
+      loadTif_R16UI();
+      break;
+    default:
+      load_STB();
+      this->loadType = IMAGE2D_LOAD_STB;
   }
 
-  status::end(true);
+  status::end(pixels);
+
+  if (!pixels)
+    error(std::format("[image2D::load] Didn't load image [{}]", path.string()));
 }
 
-void image2D::loadTifInt16Single(const fspath& path, bool flipVertically) {
-  TIFF* tif = TIFFOpen(path.string().c_str(), "r");
-  if (!tif) {
-    status::end(false);
-    error(std::format("tif can't load the image: {}", path.string()));
-  }
+void image2D::load_STB() {
+  stbi_set_flip_vertically_on_load(flipVertically);
+  pixels = stbi_load(path.string().c_str(), &width, &height, &channels, 0);
+}
 
+void image2D::loadTif_R16I() {
   u32 w, h;
-  TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &w);
-  TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &h);
-  s16* buf = new s16[w * h];
-
-  for (u32 row = 0; row < h; row++) {
-    s16* bufRow = buf + row * w;
-    if (TIFFReadScanline(tif, bufRow, row) < 0)
-      error("tif scanline read error");
-  }
-
-  if (flipVertically) {
-    for (u32 y = 0; y < h / 2; ++y) {
-      short* rowTop = buf + y * w;
-      short* rowBottom = buf + (h - y - 1) * w;
-      std::swap_ranges(rowTop, rowTop + w, rowBottom);
-    }
-  }
-
+  pixels = ::loadTif_R16I(path.string().c_str(), &w, &h, flipVertically);
   width = w;
   height = h;
-  channels = 1u;
-  name = path.string();
-  pixels = (void*)buf;
-  tifInt16Load = true;
+  channels = 1;
+}
 
-  TIFFClose(tif);
+void image2D::loadTif_R16UI() {
+  u32 w, h;
+  pixels = ::loadTif_R16UI(path.string().c_str(), &w, &h, flipVertically);
+  width = w;
+  height = h;
+  channels = 1;
+}
+
+void image2D::clear() {
+  switch (loadType) {
+    case IMAGE2D_LOAD_NO:
+      if (pixels)
+        error("[image2D::clear] pixels is not nullptr");
+      break;
+    case IMAGE2D_LOAD_STB:
+      stbi_image_free(pixels);
+      break;
+    case IMAGE2D_LOAD_R16I:
+      delete[] (s16*)pixels;
+      break;
+    case IMAGE2D_LOAD_R16UI:
+      delete[] (u16*)pixels;
+      break;
+    default:
+      error("[image2D::clear] Should never happen [{}]", loadType);
+  }
+  pixels = nullptr;
+  loadType = IMAGE2D_LOAD_NO;
 }
 

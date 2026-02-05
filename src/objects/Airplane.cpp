@@ -1,6 +1,7 @@
 #include "Airplane.hpp"
 
 #include "../engine/mesh/meshes.hpp"
+#include "glm/common.hpp"
 
 Texture Airplane::texDiffuse;
 
@@ -32,6 +33,14 @@ Airplane::~Airplane() {
   Mesh::clear();
 }
 
+void Airplane::moveLeft() {
+  turn(1.f);
+}
+
+void Airplane::moveRight() {
+  turn(-1.f);
+}
+
 void Airplane::onMouseMove(dvec2 mousePos) {
   dvec2 winSize = global::getWinSize();
   dvec2 winCenter = winSize * 0.5;
@@ -52,6 +61,11 @@ void Airplane::onMouseMove(dvec2 mousePos) {
 
   camera.setOrientation(camOrientation);
   updateCamera();
+}
+
+void Airplane::onMouseScroll(dvec2 offset) {
+  camDistance -= offset.y;
+  camDistance = glm::clamp(camDistance, 1.f, 15.f);
 }
 
 Camera& Airplane::getCamera() {

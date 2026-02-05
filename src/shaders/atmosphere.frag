@@ -94,23 +94,23 @@ vec3 calcLight(vec3 rayOrigin, vec3 rayDir, float rayLength, vec3 originalColor)
 }
 
 void main() {
-  float viewVecLength = length(viewVec);
-  vec3 rayDir = viewVec / viewVecLength;
+  // float viewVecLength = length(viewVec);
+  // vec3 rayDir = viewVec / viewVecLength;
   vec3 color = texture(u_screenColorTex, texCoord).rgb;
-  vec2 hitInfo = raySphere(u_planetCenter, u_atmosphereRadius, u_camPos, rayDir);
+  // vec2 hitInfo = raySphere(u_planetCenter, u_atmosphereRadius, u_camPos, rayDir);
 
-  float sceneDepthNonLinear = texture(u_screenDepthTex, texCoord).r;
-  float sceneDepth = linearizeDepth(sceneDepthNonLinear) / viewVecLength;
+  // float sceneDepthNonLinear = texture(u_screenDepthTex, texCoord).r;
+  // float sceneDepth = linearizeDepth(sceneDepthNonLinear) / viewVecLength;
 
-  float dstToAtmosphere = hitInfo.x;
-  float dstThroughAtmosphere = min(hitInfo.y, sceneDepth - dstToAtmosphere);
+  // float dstToAtmosphere = hitInfo.x;
+  // float dstThroughAtmosphere = min(hitInfo.y, sceneDepthNonLinear - dstToAtmosphere);
 
-  if (dstThroughAtmosphere > 0.f) {
-    vec3 pointInAtmosphere = u_camPos + rayDir * dstToAtmosphere;
-    vec3 light = calcLight(pointInAtmosphere, rayDir, dstThroughAtmosphere, color);
+  // if (dstThroughAtmosphere > 0.f) {
+  //   vec3 pointInAtmosphere = u_camPos + rayDir * dstToAtmosphere;
+  //   vec3 light = calcLight(pointInAtmosphere, rayDir, dstThroughAtmosphere, color);
 
-    color = light;
-  }
+  //   color = light;
+  // }
 
   FragColor = vec4(color, 1.f);
 }

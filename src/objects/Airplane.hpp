@@ -11,7 +11,10 @@ public:
   Airplane(vec3 position, float flyHeight, float meshScale = 1.f);
   ~Airplane();
 
+  void moveLeft() override;
+  void moveRight() override;
   void onMouseMove(dvec2 mousePos) override;
+  void onMouseScroll(dvec2 offset) override;
 
   Camera& getCamera();
 

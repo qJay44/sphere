@@ -3,7 +3,7 @@
 #include "TerrainFace.hpp"
 #include "glm/exponential.hpp"
 
-#define USE_DEGUG_LOAD
+//#define USE_DEGUG_LOAD
 
 constexpr vec3 directions[6] {
   {1.f,  0.f,  0.f},  // Right
@@ -40,14 +40,17 @@ void Earth::loadTextures(const Shader& shader) {
   #else
 
   texHeightmapsWater = Texture(
-    "res/tex/earth/faces/bathymetry21600",
+    "res/tex/earth/faces/bathymetry21600", // TODO: Check this image (noise around country borders)
     {
       .uniformName    = "u_heightmapsWater",
       .unit           = 0,
       .target         = GL_TEXTURE_CUBE_MAP,
       .internalFormat = GL_R16I,
       .format         = GL_RED_INTEGER,
-      .type           = GL_SHORT
+      .type           = GL_SHORT,
+      .minFilter      = GL_NEAREST,
+      .magFilter      = GL_NEAREST,
+      .genMipMap      = false,
     }
   );
 
@@ -59,7 +62,10 @@ void Earth::loadTextures(const Shader& shader) {
       .target         = GL_TEXTURE_CUBE_MAP,
       .internalFormat = GL_R16UI,
       .format         = GL_RED_INTEGER,
-      .type           = GL_UNSIGNED_SHORT
+      .type           = GL_UNSIGNED_SHORT,
+      .minFilter      = GL_NEAREST,
+      .magFilter      = GL_NEAREST,
+      .genMipMap      = false,
     }
   );
 
@@ -71,6 +77,9 @@ void Earth::loadTextures(const Shader& shader) {
       .target         = GL_TEXTURE_CUBE_MAP,
       .internalFormat = GL_RGBA,
       .format         = GL_RGBA,
+      .minFilter      = GL_LINEAR,
+      .magFilter      = GL_LINEAR,
+      .genMipMap      = false,
     }
   );
 
@@ -79,7 +88,10 @@ void Earth::loadTextures(const Shader& shader) {
     {
       .uniformName    = "u_worldColors",
       .unit           = 3,
-      .target         = GL_TEXTURE_CUBE_MAP
+      .target         = GL_TEXTURE_CUBE_MAP,
+      .minFilter      = GL_LINEAR,
+      .magFilter      = GL_LINEAR,
+      .genMipMap      = false,
     }
   );
 
@@ -91,6 +103,9 @@ void Earth::loadTextures(const Shader& shader) {
       .target         = GL_TEXTURE_CUBE_MAP,
       .internalFormat = GL_RED,
       .format         = GL_RED,
+      .minFilter      = GL_LINEAR,
+      .magFilter      = GL_LINEAR,
+      .genMipMap      = false,
     }
   );
 
