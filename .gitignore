@@ -1,4 +1,5 @@
 Build/
 .cache/
-src/res/tex/
-src/res/shapefile/
+res/tex/
+res/shapefile/
+compile_commands.json

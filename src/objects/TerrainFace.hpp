@@ -5,9 +5,7 @@
 #include <list>
 
 #include "TerrainFaceChunk.hpp"
-#include "../engine/frustum/Frustum.hpp"
 #include "../engine/frustum/volumes/Sphere.hpp"
-#include "../engine/CameraStorage.hpp"
 
 struct TerrainFace {
   std::list<TerrainFaceChunk> chunks;
@@ -38,22 +36,20 @@ struct TerrainFace {
       chunk.clear();
   }
 
-  void draw(const Camera* camera, const Shader& shader, const vec3& tfColor) const {
+  void draw(const Camera* camera, Shader& shader, frustum::Frustum frustum, const vec3& tfColor) const {
     static const GLint tfColorLoc = shader.getUniformLoc("u_debug_terrainFaceColor");
     static const GLint tfChunkColorLoc = shader.getUniformLoc("u_debug_terrainFaceChunkColor");
 
     shader.setUniform3f(tfColorLoc, tfColor);
 
-    frustum::Frustum tfFrustum(*CameraStorage::cameraAirplanePtr);
-
     for (const TerrainFaceChunk& chunk : chunks) {
-      shader.setUniform3f(tfChunkColorLoc, chunk.debug_color);
+      shader.setUniform3f(tfChunkColorLoc, chunk._debugColor);
 
       vec3 center = (chunk.lastVertex + chunk.firstVertex) * 0.5f;
       float radius = glm::length(chunk.lastVertex - chunk.firstVertex) * 2.f; // Additionally multipling by 2 to keep some chunks when camera is to close to the earth
-      frustum::Sphere<VertexPT> frustumSphere(center, radius);
+      frustum::Sphere frustumSphere(center, radius);
 
-      if (frustumSphere.isOnFrustum(tfFrustum, chunk))
+      if (frustumSphere.isOnFrustum(frustum, chunk))
         chunk.draw(camera, shader);
     }
   }

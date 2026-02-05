@@ -16,7 +16,7 @@ in DATA {
 } data_in[];
 
 uniform mat4 u_model;
-uniform mat4 u_cam;
+uniform mat4 u_camPV;
 uniform vec3 u_camPos;
 uniform vec3 u_lightPos;
 
@@ -42,7 +42,7 @@ void main() {
   vec4 vertPos4;
 
   vertPos4 = gl_in[0].gl_Position;
-  gl_Position = u_cam * vertPos4;
+  gl_Position = u_camPV * vertPos4;
   vertPos = vertPos4.xyz;
   vertPosOriginal = vertPos;
   defaultNormal = data_in[0].defaultNormal;
@@ -54,7 +54,7 @@ void main() {
   EmitVertex();
 
   vertPos4 = gl_in[1].gl_Position;
-  gl_Position = u_cam * vertPos4;
+  gl_Position = u_camPV * vertPos4;
   vertPos = vertPos4.xyz;
   vertPosOriginal = vertPos;
   defaultNormal = data_in[1].defaultNormal;
@@ -66,7 +66,7 @@ void main() {
   EmitVertex();
 
   vertPos4 = gl_in[2].gl_Position;
-  gl_Position = u_cam * vertPos4;
+  gl_Position = u_camPV * vertPos4;
   vertPos = vertPos4.xyz;
   vertPosOriginal = vertPos;
   defaultNormal = data_in[2].defaultNormal;

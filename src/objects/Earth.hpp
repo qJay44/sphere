@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../engine/Camera.hpp"
-#include "../engine/mesh/texture/Texture.hpp"
-#include "../engine/mesh/Mesh.hpp"
+#include "../engine/texture/Texture.hpp"
+#include "../engine/frustum/Frustum.hpp"
 #include "Light.hpp"
 
 class Earth {
@@ -20,8 +20,8 @@ public:
   void loadTextures(const Shader& shader);
   void rebuild();
   void rebuild(int resolution, float radius);
-  void draw(const Camera* camera, const Shader& shader) const;
-  void drawAtmosphere(const Mesh<VertexPT>& screenMesh, const Camera* camera, const Shader& shader) const;
+  void draw(const Camera* camera, const frustum::Frustum& frustum, Shader& shader) const;
+  void drawAtmosphere(const Camera* camera, Shader& shader) const;
 
 private:
   friend struct gui;
@@ -44,7 +44,6 @@ private:
   const Light* light;
 
   float heightmapScale = 2.f;
-  float seaLevel = 0.f;
   float lightMultiplier = 1.5f;
   float ambient = 0.2f;
   float specularLight = 0.5f;

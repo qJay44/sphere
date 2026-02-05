@@ -1,7 +1,13 @@
 #include <cstdio>
 #include <cstdlib>
-#include <format>
-#include <direct.h>
+
+#ifdef _WIN32
+  #include <direct.h>
+  #define CHDIR(p) _chdir(p);
+#else
+  #include <unistd.h>
+  #define CHDIR(p) chdir(p);
+#endif
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -9,18 +15,14 @@
 
 #include "engine/Camera.hpp"
 #include "GLFW/glfw3.h"
-#include "engine/CameraStorage.hpp"
 #include "engine/Shader.hpp"
 #include "engine/InputsHandler.hpp"
-#include "engine/mesh/FBO.hpp"
-#include "engine/mesh/RBO.hpp"
+#include "engine/FBO.hpp"
 #include "engine/mesh/meshes.hpp"
-#include "engine/mesh/texture/TexParams.hpp"
-#include "engine/mesh/texture/Texture.hpp"
+#include "engine/texture/Texture.hpp"
 #include "global.hpp"
 #include "gui.hpp"
 #include "objects/Airplane.hpp"
-#include "objects/AirplaneCamera.hpp"
 #include "objects/Earth.hpp"
 #include "objects/Light.hpp"
 #include "utils/clrp.hpp"
@@ -36,7 +38,12 @@ void GLAPIENTRY MessageCallback(
   const GLchar* message,
   const void* userParam
 ) {
-  if (source == GL_DEBUG_SOURCE_SHADER_COMPILER) return; // Shader error (have other message callback)
+  switch (source) {
+    case GL_DEBUG_SOURCE_SHADER_COMPILER:
+      return; // Handled by the Shader class itself
+    case GL_DEBUG_SOURCE_API:
+      return; // "SIMD32 shader inefficient", skipping since occurs only on my laptop
+  }
 
   clrp::clrp_t clrpError;
   clrpError.attr = clrp::ATTRIBUTE::BOLD;
@@ -50,7 +57,7 @@ void GLAPIENTRY MessageCallback(
 
 int main() {
   // Assuming the executable is launching from its own directory
-  _chdir("../../../src");
+  CHDIR("../../..");
 
   // GLFW init
   glfwInit();
@@ -60,9 +67,8 @@ int main() {
   glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
   // Window init
-  window = glfwCreateWindow(1200, 720, "Sphere", NULL, NULL);
-  ivec2 winSize;
-  glfwGetWindowSize(window, &winSize.x, &winSize.y);
+  window = glfwCreateWindow(1200, 720, "MyProgram", NULL, NULL);
+  ivec2 winSize = global::getWinSize();
   dvec2 winCenter = dvec2(winSize) / 2.;
 
   if (!window) {
@@ -71,11 +77,11 @@ int main() {
     return EXIT_FAILURE;
   }
   glfwMakeContextCurrent(window);
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-  glfwSetCursorPos(window, winCenter.x, winSize.y * 0.5f);
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL + 2 * !global::guiFocused);
+  glfwSetCursorPos(window, winCenter.x, winCenter.y);
 
   // GLAD init
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+  if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress)) {
     printf("Failed to initialize GLAD\n");
     return EXIT_FAILURE;
   }
@@ -94,103 +100,93 @@ int main() {
 
   // ===== Shaders ============================================== //
 
-  Shader::setDirectoryLocation("shaders");
-  Shader::setDefaultShader(SHADER_DEFAULT_TYPE_COLOR_SHADER, "default/color.vert", "default/color.frag");
-  Shader::setDefaultShader(SHADER_DEFAULT_TYPE_NORMALS_SHADER, "default/normal.vert", "default/normal.frag", "default/normal.geom");
-  Shader::setDefaultShader(SHADER_DEFAULT_TYPE_TEXTURE_SHADER, "default/texture.vert", "default/texture.frag");
+  Shader::setDirectoryLocation("src/shaders");
 
-  const Shader& colorShader = Shader::getDefaultShader(SHADER_DEFAULT_TYPE_COLOR_SHADER);
   Shader earthShader("earth.vert", "earth.frag", "earth.geom");
   Shader airplaneShader("airplane.vert", "airplane.frag");
   Shader trailShader("trail.vert", "trail.frag");
   Shader planetBordersShader("borders.vert", "borders.frag");
   Shader atmosphereShader("atmosphere.vert", "atmosphere.frag");
+  Shader lightShader("light.vert", "light.frag");
+  Shader linesShader("lines.vert", "lines.frag");
 
-  const GLint earthShaderLightPosLoc      = earthShader.getUniformLoc("u_lightPos");
-  const GLint earthShaderLightColorLoc    = earthShader.getUniformLoc("u_lightColor");
-  const GLint earthShaderTimeLoc          = earthShader.getUniformLoc("u_time");
-  const GLint airplaneShaderLightPosLoc   = airplaneShader.getUniformLoc("u_lightPos");
-  const GLint airplaneShaderLightColorLoc = airplaneShader.getUniformLoc("u_lightColor");
-  const GLint atmosphereShaderLightPosLoc = atmosphereShader.getUniformLoc("u_lightPos");
-
-  const float earthRadius = 200.f;
+  const float earthInitRadius = 200.f;
 
   // ===== Light ================================================ //
 
-  Light light(earthRadius + vec3{16.3f, 24.f, 26.6f}, 1.5f);
+  Light light(earthInitRadius + vec3{16.3f, 24.f, 26.6f}, 50.f);
 
   // ===== Earth =============================================== //
 
-  Earth earth(512u, 256u, earthRadius, earthRadius + earthRadius * 0.15f, &light);
+  Earth earth(512u, 256u, earthInitRadius, earthInitRadius + earthInitRadius * 0.15f, &light);
   earth.loadTextures(earthShader);
 
   // ===== Airplane ============================================= //
 
-  Airplane::loadTextures();
   vec3 airplanePosInit(0.f);
   float airplaneFlyHeight = 10.f;
-  airplanePosInit.z = earth.getRadius() + airplaneFlyHeight;
-  Airplane airplane(earth, airplanePosInit, PI / 100.f, airplaneFlyHeight, PI / 10.f, 0.001f);
+  airplanePosInit.z = earthInitRadius + airplaneFlyHeight;
+  Airplane airplane(airplanePosInit, airplaneFlyHeight, 0.001f);
+  airplane.setSpeedDefault(PI / 100.f);
+  airplane.setTurnSpeed(PI / 10.f);
 
   // ===== Cameras ============================================== //
 
-  Camera cameraFree({0.f, 0.f, earth.getRadius() + 3.f}, {0.f, 0.f, -1.f}, 100.f);
-  cameraFree.setFarPlane(300.f);
-  cameraFree.setSpeed(earth.getRadius() * 0.1f);
+  Camera cameraSpectate({earth.getRadius() * 1.2f, 0.f, earth.getRadius() * 1.2f}, PI);
+  cameraSpectate.setFarPlane(1000.f);
+  cameraSpectate.setSpeedDefault(earth.getRadius() * 0.1f);
 
-  AirplaneCamera cameraAirplane(airplane, 8.f, 200.f);
+  Camera& cameraAirplane = airplane.getCamera();
   cameraAirplane.setFarPlane(300.f);
+  cameraAirplane.setSensitivity(50.f);
 
-  CameraStorage::cameraFreePtr = &cameraFree;
-  CameraStorage::cameraAirplanePtr = &cameraAirplane;
+  Camera* cameraATM = global::controllingAirplane ? &cameraAirplane : &cameraSpectate;
 
   // ===== Inputs Handler ======================================= //
 
   glfwSetScrollCallback(window, InputsHandler::scrollCallback);
   glfwSetKeyCallback(window, InputsHandler::keyCallback);
+  glfwSetCursorPosCallback(window, InputsHandler::cursorPosCallback);
+
+  InputsHandler::airplanePtr = &airplane;
 
   // ============================================================ //
 
-  gui::link(&earth);
-  gui::link(&cameraAirplane);
-  gui::link(&cameraFree);
-  gui::link(&airplane);
-  gui::link(&light);
+  gui::earthPtr = &earth;
+  gui::camSpecatePtr = &cameraSpectate;
+  gui::airplanePtr = &airplane;
+  gui::lightPtr = &light;
 
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_CULL_FACE);
   glCullFace(GL_FRONT);
   glFrontFace(GL_CW);
 
-  TexParams depthTexParams{
-    GL_NEAREST,
-    GL_NEAREST,
-    GL_CLAMP_TO_EDGE,
-    GL_CLAMP_TO_EDGE,
-  };
+  TextureDescriptor fboTexDesc{};
+  fboTexDesc.uniformName = "u_screenColorTex";
+  fboTexDesc.unit = 0;
+  fboTexDesc.minFilter = GL_NEAREST;
+  fboTexDesc.magFilter = GL_NEAREST;
+  fboTexDesc.wrapS = GL_CLAMP_TO_EDGE;
+  fboTexDesc.wrapT = GL_CLAMP_TO_EDGE;
+  fboTexDesc.genMipMap = false;
 
-  FBO fboScreen(1);
-  Texture screenColorTexture(winSize, GL_RGB, GL_RGB, "u_screenColorTex", 0);
-  Texture screenDepthTexture(winSize, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, "u_screenDepthTex", 1, GL_TEXTURE_2D, depthTexParams);
-  RBO rboScreen(1);
+  FBO fboScreen;
+  Texture screenColorTexture(winSize, fboTexDesc);
+
+  fboTexDesc.uniformName = "u_screenDepthTex";
+  fboTexDesc.unit = 1;
+  fboTexDesc.internalFormat = GL_DEPTH_COMPONENT;
+  fboTexDesc.format = GL_DEPTH_COMPONENT;
+
+  Texture screenDepthTexture(winSize, fboTexDesc);
+
   fboScreen.attach2D(GL_COLOR_ATTACHMENT0, screenColorTexture);
   fboScreen.attach2D(GL_DEPTH_ATTACHMENT, screenDepthTexture);
-  fboScreen.bind();
-  rboScreen.storage(GL_DEPTH24_STENCIL8, winSize);
 
-  FBO::unbind();
-
-  atmosphereShader.setUniformTexture(screenColorTexture);
-  atmosphereShader.setUniformTexture(screenDepthTexture);
-
-  Mesh<VertexPT> screenMesh = meshes::screen();
+  Mesh axis = meshes::axis(false);
+  axis.scale(1e4f);
 
   // Render loop
   while (!glfwWindowShouldClose(window)) {
-    static Camera* camera = &cameraAirplane;
     static double titleTimer = glfwGetTime();
     static double prevTime = titleTimer;
     static double currTime = prevTime;
@@ -203,12 +199,13 @@ int main() {
     if (global::dt < fpsLimit) continue;
     else prevTime = currTime;
 
-    camera = global::camIsArcball ? &cameraAirplane : &cameraFree;
+    cameraATM = global::controllingAirplane ? &cameraAirplane : &cameraSpectate;
     global::time += global::dt;
 
-    if (glfwGetWindowAttrib(window, GLFW_FOCUSED))
-      InputsHandler::process(camera);
-    else
+    if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
+      InputsHandler::process(global::controllingAirplane ? (Moveable&)airplane : cameraSpectate);
+      cameraATM->update();
+    } else
       glfwSetCursorPos(window, winCenter.x, winCenter.y);
 
     ImGui_ImplOpenGL3_NewFrame();
@@ -217,18 +214,18 @@ int main() {
 
     // Update window title every 0.3 seconds
     if (currTime - titleTimer >= 0.3) {
-      u16 fps = static_cast<u16>(1.f / global::dt);
-      glfwSetWindowTitle(window, std::format("FPS: {} / {:.5f} ms", fps, global::dt).c_str());
+      gui::fps = static_cast<u16>(1.f / global::dt);
       titleTimer = currTime;
     }
 
-    earthShader.setUniform3f(earthShaderLightPosLoc, light.getPosition());
-    earthShader.setUniform3f(earthShaderLightColorLoc, light.getColor());
-    earthShader.setUniform1f(earthShaderTimeLoc, global::time);
-    airplaneShader.setUniform3f(airplaneShaderLightPosLoc, light.getPosition());
-    airplaneShader.setUniform3f(airplaneShaderLightColorLoc, light.getColor());
+    light.update();
+    airplane.update(earth);
 
-    airplane.update();
+    earthShader.setUniform3f("u_lightPos", light.getPosition());
+    earthShader.setUniform3f("u_lightColor", light.getColor());
+    earthShader.setUniform1f("u_time", global::time);
+    airplaneShader.setUniform3f("u_lightPos", light.getPosition());
+    airplaneShader.setUniform3f("u_lightColor", light.getColor());
 
     fboScreen.bind();
     glClearColor(0.f, 0.f, 0.f, 1.f);
@@ -236,31 +233,35 @@ int main() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    earth.draw(camera, earthShader);
+    earth.draw(cameraATM, frustum::Frustum(cameraAirplane), earthShader);
 
-    airplane.draw(camera, airplaneShader);
-    airplane.drawTrail(camera, trailShader);
+    airplane.draw(cameraATM, airplaneShader);
 
     glDisable(GL_CULL_FACE);
 
-    light.draw(camera, colorShader);
-    camera->draw(cameraAirplane, colorShader, CAMERA_FLAG_DRAW_FRUSTUM);
-
-    if (global::drawGlobalAxis)
-      meshes::axis(earth.getRadius() * 2.f).draw(camera, colorShader);
+    cameraATM->draw(cameraAirplane, linesShader, CAMERA_FLAG_DRAW_FRUSTUM);
 
     FBO::unbind();
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
+
     screenColorTexture.bind();
     screenDepthTexture.bind();
 
-    atmosphereShader.setUniform3f(atmosphereShaderLightPosLoc, light.getPosition());
-    earth.drawAtmosphere(screenMesh, camera, atmosphereShader);
+    atmosphereShader.setUniform3f("u_lightPos", light.getPosition());
+    earth.drawAtmosphere(cameraATM, atmosphereShader);
 
     screenColorTexture.unbind();
     screenDepthTexture.unbind();
+
+    airplane.drawTrail(cameraATM, trailShader);
+    airplane.drawDirections(cameraATM, linesShader);
+
+    if (global::drawGlobalAxis)
+      axis.draw(cameraATM, linesShader);
+
+    light.draw(cameraATM, lightShader);
 
     gui::draw();
     ImGui::Render();

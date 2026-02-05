@@ -1,13 +1,17 @@
 #pragma once
 
-#include "Camera.hpp"
+#include "Moveable.hpp"
+#include "../objects/Airplane.hpp"
 
 struct InputsHandler {
   InputsHandler() = delete;
 
+  static Airplane* airplanePtr;
+
   static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
   static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+  static void cursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 
-  static void process(Camera* camera);
+  static void process(Moveable& entity);
 };
 

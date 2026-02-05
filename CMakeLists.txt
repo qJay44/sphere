@@ -13,65 +13,64 @@ file(GLOB_RECURSE SOURCES
   ${PROJECT_SOURCE_DIR}/src/*.cpp
   ${UTILS_PATH}/src/*.cpp)
 
-# Using mannually built imgui with GLFW (copying dll)
-set(GLFW_IMGUI_LIB_FILE libGLFW_IMGUI.dll)
+if (WIN32)
+  set(LIB_EXT "dll")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(LIB_EXT "so")
+# elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+#   set(LIB_EXT "dylib")
+else()
+  message(FATAL_ERROR "Unknown platform")
+endif()
+
+# Using mannually built imgui with GLFW (copying lib file)
+set(GLFW_IMGUI_LIB_FILE libGLFW_IMGUI.${LIB_EXT})
 add_custom_command(
   OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${GLFW_IMGUI_LIB_FILE}
   COMMAND ${CMAKE_COMMAND} -E copy
-    ${IMGUI_PATH}/Build/Release/${GLFW_IMGUI_LIB_FILE}
+    ${IMGUI_PATH}/build/${GLFW_IMGUI_LIB_FILE}
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${GLFW_IMGUI_LIB_FILE}
-  DEPENDS ${IMGUI_PATH}/Build/Release/${GLFW_IMGUI_LIB_FILE}
+  DEPENDS ${IMGUI_PATH}/build/${GLFW_IMGUI_LIB_FILE}
 )
 
-# Using mannually built GLAD (copying dll)
-set(GLAD_LIB_FILE libGLAD.dll)
+# Using mannually built GLAD (copying lib file)
+set(GLAD_LIB_FILE libGLAD.${LIB_EXT})
 add_custom_command(
   OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${GLAD_LIB_FILE}
   COMMAND ${CMAKE_COMMAND} -E copy
-    ${GLAD_PATH}/Build/Release/${GLAD_LIB_FILE}
+    ${GLAD_PATH}/build/${GLAD_LIB_FILE}
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${GLAD_LIB_FILE}
-  DEPENDS ${GLAD_PATH}/Build/Release/${GLAD_LIB_FILE}
+  DEPENDS ${GLAD_PATH}/build/${GLAD_LIB_FILE}
 )
 
-# Using mannually built libtiff (copying dll)
-set(LIBTIFF_LIB_FILE libtiff.dll)
-add_custom_command(
-  OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${LIBTIFF_LIB_FILE}
-  COMMAND ${CMAKE_COMMAND} -E copy
-    ${LIBTIFF_PATH}/bin/${LIBTIFF_LIB_FILE}
-    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${LIBTIFF_LIB_FILE}
-  DEPENDS ${LIBTIFF_PATH}/bin/${LIBTIFF_LIB_FILE}
-)
+find_package(glfw3 REQUIRED)
+find_package(TIFF REQUIRED)
 
 add_executable(${PROJECT_NAME}
   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${GLFW_IMGUI_LIB_FILE}
   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${GLAD_LIB_FILE}
-  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${LIBTIFF_LIB_FILE}
   ${SOURCES})
 
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
 target_compile_options(${PROJECT_NAME} PRIVATE -isystem ${GENERAL_INCLUDES}/stb)
 
 target_precompile_headers(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src/pch.hpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
-  ${GENERAL_INCLUDES}
-  ${GLAD_PATH}/include
-  ${GLFW_PATH}/include
+  ${STB_PATH}/include
   ${GLM_PATH}/include
-  ${IMGUI_PATH}/include
+  ${GLAD_PATH}/include
+  ${IMGUI_PATH}
+  ${IMGUI_PATH}/backends
+  ${TOL_PATH}/include
   ${UTILS_PATH}/include
-  ${LIBTIFF_PATH}/include
 )
 
 target_link_directories(${PROJECT_NAME} PUBLIC
   ${GLM_PATH}/bin
-  ${GLFW_PATH}/lib-mingw-w64
-  ${GLM_PATH}/lib
-  ${IMGUI_PATH}/Build/Release
-  ${GLAD_PATH}/Build/Release
-  ${LIBTIFF_PATH}/lib
+  ${IMGUI_PATH}/build
+  ${GLAD_PATH}/build
 )
 
-target_link_libraries(${PROJECT_NAME} libGLFW_IMGUI libGLAD libtiff glm)
+target_link_libraries(${PROJECT_NAME} GLFW_IMGUI GLAD TIFF::TIFF glfw)
 

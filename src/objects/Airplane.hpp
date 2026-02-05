@@ -4,47 +4,35 @@
 
 #include "Earth.hpp"
 #include "Trail.hpp"
+#include "glm/gtc/quaternion.hpp"
 
-class Airplane : public Mesh<Vertex4> {
+class Airplane : public Moveable, public Mesh {
 public:
-  static void loadTextures();
-
-  Airplane(const Earth& planet, vec3 position, float speedRad, float flyHeight, float turnSpeedRad, float meshScale = 1.f);
+  Airplane(vec3 position, float flyHeight, float meshScale = 1.f);
   ~Airplane();
 
-  const vec3&  getPosition() const;
-  const vec3&  getForward()  const;
-  const vec3&  getUp()       const;
-  const vec3&  getRight()    const;
-  const float& getSpeed()    const;
+  void onMouseMove(dvec2 mousePos) override;
 
-  const glm::quat& getTurnQuat() const;
-  const glm::quat& getRotateQuat() const;
+  Camera& getCamera();
 
-  vec3 getBack() const;
-  vec3 getDown() const;
-  vec3 getLeft() const;
+  void setTurnSpeed(float speedRad);
 
   void turn(float dir);
-  void update();
-  void draw(const Camera* camera, const Shader& shader) const;
-  void drawTrail(const Camera* camera, const Shader& shader) const;
+  void update(const Earth& earth);
+  void draw(const Camera* cam, Shader& shader) const;
+  void drawTrail(const Camera* cam, Shader& shader) const;
+  void drawDirections(const Camera* cam, Shader& shader) const;
 
 private:
   friend struct gui;
 
-  static Texture* texDiffuse;
+  static Texture texDiffuse;
 
-  const Earth& planet;
-  vec3 position;
-  float speedRad;
+  Camera camera;
   float flyHeight;
   float turnSpeedRad;
   float meshScale;
-
-  vec3 forward;
-  vec3 up;
-  vec3 right;
+  float camDistance = 10.f;
 
   float turnMomentumDecreaseFactor = 0.45f;
   float tiltMomentumDecreaseFactor = 0.91f;
@@ -67,5 +55,8 @@ private:
   bool showRight = false;
   bool showUp = false;
   bool showForward = false;
+
+private:
+  void updateCamera();
 };
 

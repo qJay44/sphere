@@ -16,17 +16,18 @@ in vec2 texCoord;
 uniform vec3 u_debug_terrainFaceColor;
 uniform vec3 u_debug_terrainFaceChunkColor;
 
+layout(binding = 0) uniform samplerCube u_normalheightmapsLand;
+layout(binding = 1) uniform isamplerCube u_heightmapsWater;
+layout(binding = 2) uniform usamplerCube u_distanceFieldsWater;
+layout(binding = 3) uniform samplerCube u_worldColors;
+layout(binding = 4) uniform samplerCube u_borders;
+layout(binding = 5) uniform sampler2D u_normalmapWave0;
+layout(binding = 6) uniform sampler2D u_normalmapWave1;
+
 uniform vec3 u_lightColor;
 uniform vec3 u_bordersColor;
 uniform vec3 u_waterShallowColor;
 uniform vec3 u_waterDeepColor;
-uniform isamplerCube u_heightmapsWater;
-uniform usamplerCube u_distanceFieldsWater;
-uniform samplerCube u_normalheightmapsLand;
-uniform samplerCube u_worldColors;
-uniform samplerCube u_borders;
-uniform sampler2D u_normalmapWave0;
-uniform sampler2D u_normalmapWave1;
 uniform float u_lightMultiplier;
 uniform float u_ambient;
 uniform float u_specularLight;

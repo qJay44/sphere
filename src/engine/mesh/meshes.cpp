@@ -7,72 +7,130 @@
 
 namespace meshes {
 
-Mesh<VertexPC> line(vec3 p1, vec3 p2, vec3 color, bool clearable) {
+Mesh line(vec3 p1, vec3 p2, vec3 color, bool autoClear) {
   std::vector<VertexPC> vertices{
     {p1, color},
     {p2, color}
   };
 
-  return Mesh<VertexPC>(vertices, GL_LINES, clearable);
-}
-
-Mesh<Vertex4> axis(float size, bool clearable) {
-  std::vector<Vertex4> vertices{
-    {{0.f, 0.f, 0.f}, {1.f, 0.f, 0.f}},
-    {{size, 0.f, 0.f}, {1.f, 0.f, 0.f}},
-    {{0.f, 0.f, 0.f}, {0.f, 1.f, 0.f}},
-    {{0.f, size, 0.f}, {0.f, 1.f, 0.f}},
-    {{0.f, 0.f, 0.f}, {0.f, 0.f, 1.f}},
-    {{0.f, 0.f, size}, {0.f, 0.f, 1.f}},
+  std::vector<GLuint> indices{
+    0, 1
   };
 
-  return Mesh<Vertex4>(vertices, GL_LINES, clearable);
+  return Mesh(vertices, indices, GL_LINES, autoClear);
 }
 
-Mesh<Vertex4> plane(vec3 pos, vec2 size, vec3 color, bool clearable) {
-  std::vector<Vertex4> vertices{
-    {{-0.1f, -0.1f, 0.f}, color, {0.f, 0.f}},
-    {{-0.1f,  0.1f, 0.f}, color, {0.f, 1.f}},
-    {{ 0.1f,  0.1f, 0.f}, color, {1.f, 1.f}},
-    {{ 0.1f, -0.1f, 0.f}, color, {1.f, 0.f}},
+Mesh axis(bool autoClear) {
+  std::vector<VertexPC> vertices{
+    {{0.f, 0.f, 0.f}, global::red},
+    {{1.f, 0.f, 0.f}, global::red},
+    {{0.f, 0.f, 0.f}, global::green},
+    {{0.f, 1.f, 0.f}, global::green},
+    {{0.f, 0.f, 0.f}, global::blue},
+    {{0.f, 0.f, 1.f}, global::blue},
   };
 
   std::vector<GLuint> indices{
-    0, 1, 2,
-    2, 3, 0
+    0, 1,
+    2, 3,
+    4, 5
   };
 
-
-  Mesh m = Mesh<Vertex4>(vertices, indices, GL_TRIANGLES, clearable);
-  m.translate(pos);
-  m.scale(size);
-
-  return m;
+  return Mesh(vertices, indices, GL_LINES, autoClear);
 }
 
-Mesh<Vertex1> plane1(vec3 pos, vec2 size, bool clearable) {
-  std::vector<Vertex1> vertices{
-    {{-0.1f, -0.1f, 0.f}},
-    {{-0.1f,  0.1f, 0.f}},
-    {{ 0.1f,  0.1f, 0.f}},
-    {{ 0.1f, -0.1f, 0.f}},
+Mesh plane(vec3 color, GLenum mode, bool autoClear) {
+  std::vector<Vertex4> vertices{
+    {{-1.f, -1.f, 0.f}, color, {0.f, 0.f}, {1.f, 0.f, 0.f}},
+    {{-1.f,  1.f, 0.f}, color, {0.f, 1.f}, {1.f, 0.f, 0.f}},
+    {{ 1.f,  1.f, 0.f}, color, {1.f, 1.f}, {1.f, 0.f, 0.f}},
+    {{ 1.f, -1.f, 0.f}, color, {1.f, 0.f}, {1.f, 0.f, 0.f}},
   };
 
-  std::vector<GLuint> indices{
-    0, 1, 2,
-    2, 3, 0
-  };
+  std::vector<GLuint> indices;
 
+  switch (mode) {
+    case GL_TRIANGLES: {
+      indices = {
+        0, 1, 2,
+        2, 3, 0
+      };
+      break;
+    }
+    case GL_PATCHES: {
+      indices = {
+        0, 1,
+        2, 3,
+      };
+      break;
+    }
+    default:
+      error("[meshes::plane] Unhandled mode [{}]", mode);
+  }
 
-  Mesh m = Mesh<Vertex1>(vertices, indices, GL_TRIANGLES, clearable);
-  m.translate(pos);
-  m.scale(size);
-
-  return m;
+  return Mesh(vertices, indices, mode, autoClear);
 }
 
+Mesh plane(size_t resolution, GLenum mode, vec3 up, bool autoClear) {
+  size_t indicesPerQuad = 0;
+  if      (mode == GL_TRIANGLES) indicesPerQuad = 6;
+  else if (mode == GL_PATCHES)   indicesPerQuad = 4;
+  else error("[meshes::plane] Unexpected mode [{}]", mode);
 
-Mesh<Vertex4> cube(vec3 pos, float size, vec3 color, bool clearable) {
+  std::vector<VertexPT> vertices(resolution * resolution);
+  std::vector<GLuint> indices((resolution - 1) * (resolution - 1) * indicesPerQuad);
+
+  vec3 axisA = vec3(up.y, up.z, up.x);
+  vec3 axisB = cross(up, axisA);
+  size_t triIndex = 0;
+
+  for (size_t y = 0; y < resolution; y++) {
+    float percentY = y / (resolution - 1.f);
+    vec3 pY = (percentY - 0.5f) * 2.f * axisB;
+
+    for (size_t x = 0; x < resolution; x++) {
+      size_t idx = x + y * resolution;
+      float percentX = x / (resolution - 1.f);
+      vec3 pX = (percentX - 0.5f) * 2.f * axisA;
+
+      VertexPT& vert = vertices[idx];
+      vert.position = up + pX + pY;
+      vert.texture = {percentX, percentY};
+
+      switch (mode) {
+        case GL_TRIANGLES: {
+          if (x != resolution - 1 && y != resolution - 1) {
+            indices[triIndex + 0] = idx + resolution;     // 2       0 -------- 1
+            indices[triIndex + 1] = idx;                  // 0       |          |
+            indices[triIndex + 2] = idx + 1;              // 1       |          |
+            //                                                       |          |
+            indices[triIndex + 3] = idx + 1;              // 1       |          |
+            indices[triIndex + 4] = idx + resolution + 1; // 3       |          |
+            indices[triIndex + 5] = idx + resolution;     // 2       2 -------- 3
+
+            triIndex += 6;
+          }
+          break;
+        }
+        case GL_PATCHES: {
+          if (x != resolution - 1 && y != resolution - 1) {
+            indices[triIndex + 0] = idx;                  // 0
+            indices[triIndex + 1] = idx + 1;              // 1
+            indices[triIndex + 2] = idx + resolution + 1; // 3
+            indices[triIndex + 3] = idx + resolution;     // 2
+
+            triIndex += 4;
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  return Mesh(vertices, indices, mode, autoClear);
+}
+
+Mesh cube(vec3 color, bool autoClear) {
   //        5--------6
   //       /|       /|
   //      1--------2 |
@@ -112,14 +170,10 @@ Mesh<Vertex4> cube(vec3 pos, float size, vec3 color, bool clearable) {
     7, 3, 0, //
   };
 
-  Mesh m = Mesh<Vertex4>(vertices, indices, GL_TRIANGLES, clearable);
-  m.translate(pos);
-  m.scale(size);
-
-  return m;
+  return Mesh(vertices, indices, GL_TRIANGLES, autoClear);
 }
 
-Mesh<Vertex4> frustum(const Camera& cam, vec3 color, bool clearable) {
+Mesh frustum(const Camera& cam, vec3 color, bool autoClear) {
   frustum::Frustum frustum(cam);
 
   ivec2 winSize;
@@ -164,7 +218,7 @@ Mesh<Vertex4> frustum(const Camera& cam, vec3 color, bool clearable) {
   vec3 centerRight  = (centerTR + centerBR) * 0.5f;
   vec3 centerLeft   = (centerTL + centerBL) * 0.5f;
 
-  std::vector<Vertex4> vertices {
+  std::vector<VertexPC> vertices {
     // Near plane
     {nearTR, color},
     {nearTL, color},
@@ -215,23 +269,7 @@ Mesh<Vertex4> frustum(const Camera& cam, vec3 color, bool clearable) {
     18, 19
   };
 
-  return Mesh<Vertex4>(vertices, indices, GL_LINES, clearable);
-}
-
-Mesh<VertexPT> screen(bool clearable) {
-  std::vector<VertexPT> vertices{
-    {{-1.f, -1.f, 0.f}, {0.f, 0.f}},
-    {{-1.f,  1.f, 0.f}, {0.f, 1.f}},
-    {{ 1.f,  1.f, 0.f}, {1.f, 1.f}},
-    {{ 1.f, -1.f, 0.f}, {1.f, 0.f}},
-  };
-
-  std::vector<GLuint> indices{
-    0, 1, 2,
-    2, 3, 0
-  };
-
-  return Mesh<VertexPT>(vertices, indices, GL_TRIANGLES, clearable);
+  return Mesh(vertices, indices, GL_LINES, autoClear);
 }
 
 } // namespace meshes

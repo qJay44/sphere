@@ -6,10 +6,10 @@
 #include <cmath>
 #include <cstdlib>
 
-struct TerrainFaceChunk : public Mesh<VertexPT> {
+struct TerrainFaceChunk : public Mesh {
   vec3 firstVertex;
   vec3 lastVertex;
-  vec3 debug_color;
+  vec3 _debugColor;
 
   static TerrainFaceChunk build(
     const vec3& up,
@@ -66,8 +66,6 @@ struct TerrainFaceChunk : public Mesh<VertexPT> {
     return TerrainFaceChunk(vertices, indices, resolutionX);
   }
 
-  TerrainFaceChunk() {}
-
   TerrainFaceChunk(
     const std::vector<VertexPT>& vertices,
     const std::vector<GLuint>& indices,
@@ -75,7 +73,7 @@ struct TerrainFaceChunk : public Mesh<VertexPT> {
   ) : Mesh(vertices, indices, GL_TRIANGLES, false) {
     firstVertex = vertices.front().position;
     lastVertex = vertices.back().position;
-    debug_color = {
+    _debugColor = {
       (rand() % 255) / 255.f,
       (rand() % 255) / 255.f,
       (rand() % 255) / 255.f

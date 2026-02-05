@@ -8,8 +8,8 @@ in vec3 dirToSun;
 
 out vec4 FragColor;
 
-uniform sampler2D u_screenColorTex;
-uniform sampler2D u_screenDepthTex;
+layout(binding = 0) uniform sampler2D u_screenColorTex;
+layout(binding = 1) uniform sampler2D u_screenDepthTex;
 
 uniform vec3 u_camPos;
 uniform float u_camNear;
@@ -25,10 +25,8 @@ uniform float u_atmosphereViewScale;
 uniform float u_densityFalloff;
 
 float linearizeDepth(float depth) {
-  // Assuming perspective projection
-  float z = depth * 2.f - 1.f; // Convert [0,1] to NDC [-1,1]
+  float z = depth * 2.f - 1.f;
 
-  // Convert NDC z to eye space z
   return (2.f * u_camNear * u_camFar) / (u_camFar + u_camNear - z * (u_camFar - u_camNear));
 }
 
@@ -102,7 +100,7 @@ void main() {
   vec2 hitInfo = raySphere(u_planetCenter, u_atmosphereRadius, u_camPos, rayDir);
 
   float sceneDepthNonLinear = texture(u_screenDepthTex, texCoord).r;
-  float sceneDepth = linearizeDepth(sceneDepthNonLinear) * viewVecLength;
+  float sceneDepth = linearizeDepth(sceneDepthNonLinear) / viewVecLength;
 
   float dstToAtmosphere = hitInfo.x;
   float dstThroughAtmosphere = min(hitInfo.y, sceneDepth - dstToAtmosphere);

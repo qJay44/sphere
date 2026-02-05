@@ -2,87 +2,91 @@
 
 #include "../engine/mesh/meshes.hpp"
 
-Texture* Airplane::texDiffuse = nullptr;
+Texture Airplane::texDiffuse;
 
-void Airplane::loadTextures() {
-  Airplane::texDiffuse = new Texture("res/tex/airplane/11804_Airplane_diff.jpg", "diffuse0", 0);
-}
-
-Airplane::Airplane(
-  const Earth& planet,
-  vec3 position,
-  float speedRad,
-  float flyHeight,
-  float turnSpeedRad,
-  float meshScale
-) :
-  Mesh(Mesh::loadObj("res/obj/11804_Airplane_v2_l2.obj")),
-  planet(planet),
-  position(position),
-  speedRad(speedRad),
-  flyHeight(flyHeight),
-  turnSpeedRad(turnSpeedRad),
-  meshScale(meshScale) {
-  // NOTE: The obj must face -Z initially
-  // Model's initial directions
-  forward = {-1.f, 0.f, 0.f};
-  up      = { 0.f, 0.f, 1.f};
-  right   = { 0.f, 1.f, 0.f};
+Airplane::Airplane(vec3 position, float flyHeight, float meshScale)
+  : Moveable(position, 0.f, 0.f),
+  // TODO Pass path instead
+    Mesh(Mesh::loadObj("res/obj/11804_Airplane_v2_l2.obj")),
+    camera(position),
+    flyHeight(flyHeight),
+    meshScale(meshScale)
+{
+  if (texDiffuse.getUniformName().empty())
+    texDiffuse = Texture("res/tex/airplane/11804_Airplane_diff.jpg", {"diffuse0", 0});
 
   // Facing +Y
   Mesh::translate(position);
   Mesh::rotate(PI, {0.f, 1.f, 0.f});
   Mesh::rotate(PI_2, {-1.f, 0.f, 0.f});
   Mesh::scale(meshScale);
+  setOrientation({0.f, 1.f, 0.f});
+  up = {0.f, 0.f, 1.f};
 
-  // Model's after rotation directions
-  forward = { 0.f, 1.f, 0.f};
-  up      = { 0.f, 0.f, 1.f};
-  right   = { 1.f, 0.f, 0.f};
+  camera.setPosition(position + getBack() * camDistance);
+  camera.setView(this);
+  camera.update();
 }
 
 Airplane::~Airplane() {
   Mesh::clear();
 }
 
-const vec3&  Airplane::getPosition() const { return position; }
-const vec3&  Airplane::getForward()  const { return forward;  }
-const vec3&  Airplane::getUp()       const { return up;       }
-const vec3&  Airplane::getRight()    const { return right;    }
-const float& Airplane::getSpeed()    const { return speedRad; }
+void Airplane::onMouseMove(dvec2 mousePos) {
+  dvec2 winSize = global::getWinSize();
+  dvec2 winCenter = winSize * 0.5;
+  dvec2 distFromCenter = mousePos - winCenter;
 
-const glm::quat& Airplane::getTurnQuat()   const { return turnQuat;   }
-const glm::quat& Airplane::getRotateQuat() const { return rotateQuat; }
+  vec2 delta = glm::radians(dvec2(camera.getSensitivity()) * distFromCenter / winCenter);
+  vec3 camOrientation = camera.getOrientation();
 
-vec3 Airplane::getBack() const { return -forward; }
-vec3 Airplane::getDown() const { return -up;      }
-vec3 Airplane::getLeft() const { return -right;   }
+  float cosAngle = dot(camera.getUp(), camOrientation);
+  if (cosAngle * glm::sign(delta.y) > 0.99f)
+    delta.y = 0.f;
+
+  glm::quat q = glm::angleAxis(delta.x, camera.getUp());
+  camOrientation = q * camOrientation;
+
+  q = glm::angleAxis(delta.y, camera.getRight());
+  camOrientation = q * camOrientation;
+
+  camera.setOrientation(camOrientation);
+  updateCamera();
+}
+
+Camera& Airplane::getCamera() {
+  return camera;
+}
+
+void Airplane::setTurnSpeed(float speedRad) {
+  turnSpeedRad = speedRad;
+}
 
 void Airplane::turn(float dir) {
   turnMomentumRad += turnSpeedRad * dir * global::dt;
-  if (abs(tiltRecoverMomentumRad) < PI_3)
+  if (fabs(tiltRecoverMomentumRad) < PI_3)
     tiltMomentumRad += turnMomentumRad;
 }
 
-void Airplane::update() {
+void Airplane::update(const Earth& earth) {
   trailLeft.update();
   trailRight.update();
 
   // Turn
   turnQuat = glm::angleAxis(turnMomentumRad, up);
   Mesh::rotate(turnQuat);
-  right = turnQuat * right;
-  forward = rotation[2];
+  vec3 right = turnQuat * getRight();
+  vec3& forward = orientation;
 
   // Tilt
   Mesh::rotate(glm::angleAxis(tiltMomentumRad, -forward));
   tiltRecoverMomentumRad += tiltMomentumRad;
 
   // Move forward
-  float frameSpeedRad = speedRad * global::dt;
+  float frameSpeedRad = speedDefault * global::dt;
   vec3 newPos = normalize(position) + forward * frameSpeedRad;
   vec3 gravityUp = normalize(newPos);
-  newPos = gravityUp * (planet.getRadius() + flyHeight);
+  newPos = gravityUp * (earth.getRadius() + flyHeight);
   Mesh::translate(newPos - position);
 
   // Rotate so that airplane's forward is perpendicular to the planet
@@ -96,7 +100,7 @@ void Airplane::update() {
   tiltRecoverMomentumRad -= tiltRecover;
 
   up = gravityUp;
-  right = -rotation[0];
+  right = -rotMat[0];
   forward = normalize(cross(up, right));
   position = newPos;
   turnMomentumRad *= turnMomentumDecreaseFactor;
@@ -118,36 +122,44 @@ void Airplane::update() {
   trailRight.add(trailRightPos, trailDuration);
 
   // =============================================== //
+
+  updateCamera();
 }
 
-void Airplane::draw(const Camera* camera, const Shader& shader) const {
-  static const GLint diffuseLoc = shader.getUniformLoc(Airplane::texDiffuse->getUniformName());
+void Airplane::draw(const Camera* cam, Shader& shader) const {
+  Airplane::texDiffuse.bind();
 
-  shader.setUniformTexture(diffuseLoc, *Airplane::texDiffuse);
-  Airplane::texDiffuse->bind();
+  Mesh::draw(cam, shader);
 
-  const Shader& colorShader = Shader::getDefaultShader(SHADER_DEFAULT_TYPE_COLOR_SHADER);
-
-  if (showRight)
-    meshes::line(position, position + right, global::red).draw(camera, colorShader);
-
-  if (showUp)
-    meshes::line(position, position + up, global::green).draw(camera, colorShader);
-
-  if (showForward)
-    meshes::line(position, position + forward, global::blue).draw(camera, colorShader);
-
-  Mesh::draw(camera, shader);
-
-  Airplane::texDiffuse->unbind();
+  Airplane::texDiffuse.unbind();
 }
 
-void Airplane::drawTrail(const Camera* camera, const Shader& shader) const {
-  static const GLint alphaFactorLoc = shader.getUniformLoc("u_alphaFactor");
-
-  shader.setUniform1f(alphaFactorLoc, trailAlphaFactor);
+void Airplane::drawTrail(const Camera* camera, Shader& shader) const {
+  shader.setUniform1f("u_alphaFactor", trailAlphaFactor);
 
   trailLeft.draw(camera, shader);
   trailRight.draw(camera, shader);
+}
+
+void Airplane::drawDirections(const Camera* cam, Shader& shader) const {
+  if (showRight)
+    meshes::line(position, position + getRight(), global::red).draw(cam, shader);
+
+  if (showUp)
+    meshes::line(position, position + up, global::green).draw(cam, shader);
+
+  if (showForward)
+    meshes::line(position, position + orientation, global::blue).draw(cam, shader);
+}
+
+void Airplane::updateCamera() {
+  const vec3& pivot = position;
+  vec3 actualBack = turnQuat * rotateQuat * camera.getBack();
+  vec3 pos = pivot + actualBack * camDistance;
+
+  camera.setUp(up);
+  camera.setOrientation(-actualBack);
+  camera.setPosition(pos);
+  camera.update();
 }
 

@@ -22,7 +22,8 @@ using glm::dvec4;
 using glm::mat4;
 
 
-#include "glad/glad.h"
+// #include "glad/glad.h" // Windows version?
+#include "glad/gl.h"
 #include "GLFW/glfw3.h"
 
 #define UTILS_ENABLE_GLM

@@ -12,7 +12,7 @@ public:
   void add(const vec3& pos, const float& duration);
   void update();
 
-  void draw(const Camera* cam, const Shader& shader) const;
+  void draw(const Camera* cam, Shader& shader) const;
 
 private:
   friend struct gui;

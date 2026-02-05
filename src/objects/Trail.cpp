@@ -14,11 +14,7 @@ void Trail::update() {
     trailPoints.erase(trailPoints.begin());
 }
 
-void Trail::draw(const Camera* cam, const Shader& shader) const {
-  static const GLint closestPosLoc = shader.getUniformLoc("u_closestPos");
-
-  shader.setUniform3f(closestPosLoc, trailPoints.back().position);
-
+void Trail::draw(const Camera* cam, Shader& shader) const {
   const size_t count = trailPoints.size();
 
   if (count > 1) {
@@ -34,7 +30,9 @@ void Trail::draw(const Camera* cam, const Shader& shader) const {
       }
     }
 
-    Mesh<VertexPC>(vertices, indices, GL_LINES).draw(cam, shader);
+    shader.setUniform3f("u_closestPos", trailPoints.back().position);
+
+    Mesh(vertices, indices, GL_LINES, true).draw(cam, shader);
   }
 }
 
