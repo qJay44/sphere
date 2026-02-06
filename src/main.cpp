@@ -111,7 +111,7 @@ int main() {
   Shader lightShader("light.vert", "light.frag");
   Shader linesShader("lines.vert", "lines.frag");
 
-  const float earthInitRadius = 2000.f;
+  const float earthInitRadius = 500.f;
 
   // ===== Light ================================================ //
 
@@ -133,7 +133,7 @@ int main() {
 
   // ===== Cameras ============================================== //
 
-  Camera cameraSpectate({earth.getRadius() * 1.2f, 0.f, earth.getRadius() * 1.2f}, PI);
+  Camera cameraSpectate({earth.getRadius(), 0.f, earth.getRadius()}, PI);
   cameraSpectate.setFarPlane(1000.f);
   cameraSpectate.setSpeedDefault(earth.getRadius() * 0.1f);
 
@@ -259,10 +259,10 @@ int main() {
     airplane.drawTrail(cameraATM, trailShader);
     airplane.drawDirections(cameraATM, linesShader);
 
+    light.draw(cameraATM, lightShader);
+
     if (global::drawGlobalAxis)
       axis.draw(cameraATM, linesShader);
-
-    light.draw(cameraATM, lightShader);
 
     gui::draw();
     ImGui::Render();

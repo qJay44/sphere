@@ -11,6 +11,7 @@ struct TerrainFaceChunk : public Mesh {
   vec3 lastVertex;
   vec3 _debugColor;
 
+  // TODO: All this additional column and row calculations seems useless
   static TerrainFaceChunk build(
     const vec3& up,
     const Earth* earth,
@@ -87,11 +88,12 @@ private:
     float x2 = v.x * v.x;
     float y2 = v.y * v.y;
     float z2 = v.z * v.z;
-    float x = v.x * sqrtf(1.f - (y2 + z2) * 0.5f + (y2 * z2) / 3.f);
-    float y = v.y * sqrtf(1.f - (z2 + x2) * 0.5f + (z2 * x2) / 3.f);
-    float z = v.z * sqrtf(1.f - (x2 + y2) * 0.5f + (x2 * y2) / 3.f);
 
-    return vec3(x, y, z);
+    return {
+      v.x * sqrtf(1.f - (y2 + z2) * 0.5f + (y2 * z2) / 3.f),
+      v.y * sqrtf(1.f - (z2 + x2) * 0.5f + (z2 * x2) / 3.f),
+      v.z * sqrtf(1.f - (x2 + y2) * 0.5f + (x2 * y2) / 3.f),
+    };
   }
 };
 

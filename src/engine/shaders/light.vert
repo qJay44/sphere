@@ -18,6 +18,8 @@ void main() {
 
   viewPos.xy += inPos.xy * u_radius;
 
-  gl_Position = u_camProj * viewPos;
+  vec4 clipSpace = u_camProj * viewPos;
+
+  gl_Position = clipSpace.xyww;
 }
 

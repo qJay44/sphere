@@ -43,7 +43,7 @@ void gui::draw() {
 
   ImGui::Text("FPS: %d / %f.5 ms", fps, global::dt);
 
-  // ================== Planet ========================= //
+  // ===== Planet ======================================================================================== //
 
   if (!earthPtr) error("The earth object is not linked to gui");
   if (CollapsingHeader("Planet")) {
@@ -111,11 +111,11 @@ void gui::draw() {
       earthPtr->rebuild();
   }
 
-  // ================== Atmosphere ===================== //
+  // ===== Atmosphere ==================================================================================== //
 
   if (CollapsingHeader("Atmosphere")) {
     SeparatorText("Atmosphere");
-    SliderFloat("Radius##2", &earthPtr->atmosphereRadius, 1.f, 500.f);
+    SliderFloat("Radius##2", &earthPtr->atmosphereRadius, earthPtr->radius, 500.f);
     SliderInt("Scattering points", &earthPtr->atmosphereScatteringPoints, 2, 50);
     SliderInt("Optical depth points", &earthPtr->atmosphereOpticalDepthPoints, 2, 50);
 
@@ -166,7 +166,7 @@ void gui::draw() {
     }
   }
 
-  // ================== Airplane ======================= //
+  // ===== Airplane ====================================================================================== //
 
   if (!airplanePtr) error("The airplane is not linked to gui");
   if (CollapsingHeader("Airplane")) {
@@ -200,7 +200,7 @@ void gui::draw() {
     Checkbox("Show forward", &airplanePtr->showForward);
   }
 
-  // ================== Airplane Camera ================ //
+  // ===== Airplane Camera =============================================================================== //
 
   Camera& camAirplane = airplanePtr->getCamera();
 
@@ -211,7 +211,7 @@ void gui::draw() {
     SliderFloat("FOV",      &camAirplane.fov,       45.f , 179.f);
   }
 
-  // ================== Spectate camera ================ //
+  // ===== Spectate camera =============================================================================== //
 
   if (!camSpecatePtr) error("The spectate camera is not linked to gui");
   if (CollapsingHeader("Spectate camera")) {
@@ -224,7 +224,7 @@ void gui::draw() {
     DragFloat3("Position", glm::value_ptr(camSpecatePtr->position));
   }
 
-  // ================== Light ========================== //
+  // ===== Light ========================================================================================= //
 
   if (!lightPtr) error("The light is not linked to gui");
   if (CollapsingHeader("Light")) {
@@ -233,7 +233,7 @@ void gui::draw() {
     ColorEdit3("Color", glm::value_ptr(lightPtr->color));
   };
 
-  // ================== Other ========================== //
+  // ===== Other ========================================================================================= //
 
   if (CollapsingHeader("Other")) {
     Checkbox("Show global axis", &global::drawGlobalAxis);

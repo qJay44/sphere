@@ -51,7 +51,6 @@ void Camera::draw(Camera& camToDraw, Shader& shader, u32 flags) const {
     const vec3& camToDrawPos = camToDraw.position;
 
     camMesh.translate(camToDrawPos);
-    camMesh.scale(0.1f);
 
     Mesh frustumMesh = meshes::frustum(camToDraw);
 
