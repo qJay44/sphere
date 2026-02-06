@@ -33,5 +33,5 @@ inline dvec2 getMousePos() {
   return res;
 }
 
-}// global
+} // namespace global
 

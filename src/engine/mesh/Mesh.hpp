@@ -5,7 +5,7 @@
 #include "Vertex.hpp"
 #include "Transformable.hpp"
 #include "VAO.hpp"
-#include "../BufferObject.hpp"
+#include "BufferObject.hpp"
 #include "../Camera.hpp"
 #include "../Shader.hpp"
 

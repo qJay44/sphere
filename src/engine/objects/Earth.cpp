@@ -48,8 +48,8 @@ void Earth::loadTextures(const Shader& shader) {
       .internalFormat = GL_R16I,
       .format         = GL_RED_INTEGER,
       .type           = GL_SHORT,
-      .minFilter      = GL_NEAREST,
-      .magFilter      = GL_NEAREST,
+      .minFilter      = GL_NEAREST, // NOTE: Required for isampler
+      .magFilter      = GL_NEAREST, // NOTE: Required for isampler
       .genMipMap      = false,
     }
   );
@@ -63,8 +63,8 @@ void Earth::loadTextures(const Shader& shader) {
       .internalFormat = GL_R16UI,
       .format         = GL_RED_INTEGER,
       .type           = GL_UNSIGNED_SHORT,
-      .minFilter      = GL_NEAREST,
-      .magFilter      = GL_NEAREST,
+      .minFilter      = GL_NEAREST, // NOTE: Required for usampler
+      .magFilter      = GL_NEAREST, // NOTE: Required for usampler
       .genMipMap      = false,
     }
   );

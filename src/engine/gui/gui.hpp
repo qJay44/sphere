@@ -1,8 +1,8 @@
 #pragma once
 
-#include "objects/Airplane.hpp"
-#include "objects/Earth.hpp"
-#include "objects/Light.hpp"
+#include "../objects/Airplane.hpp"
+#include "../objects/Earth.hpp"
+#include "../objects/Light.hpp"
 
 struct gui {
   static Earth* earthPtr;

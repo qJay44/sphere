@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Moveable.hpp"
-#include "../objects/Airplane.hpp"
+#include "objects/Airplane.hpp"
 
 struct InputsHandler {
   InputsHandler() = delete;

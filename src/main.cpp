@@ -12,19 +12,19 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "implot.h"
 
+#include "global.hpp"
+#include "engine/gui/gui.hpp"
 #include "engine/Camera.hpp"
-#include "GLFW/glfw3.h"
 #include "engine/Shader.hpp"
 #include "engine/InputsHandler.hpp"
 #include "engine/FBO.hpp"
 #include "engine/mesh/meshes.hpp"
 #include "engine/texture/Texture.hpp"
-#include "global.hpp"
-#include "gui.hpp"
-#include "objects/Airplane.hpp"
-#include "objects/Earth.hpp"
-#include "objects/Light.hpp"
+#include "engine/objects/Airplane.hpp"
+#include "engine/objects/Earth.hpp"
+#include "engine/objects/Light.hpp"
 #include "utils/clrp.hpp"
 
 using global::window;
@@ -92,6 +92,7 @@ int main() {
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
+  ImPlot::CreateContext();
   ImGuiIO& io = ImGui::GetIO();
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
   io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
@@ -100,7 +101,7 @@ int main() {
 
   // ===== Shaders ============================================== //
 
-  Shader::setDirectoryLocation("src/shaders");
+  Shader::setDirectoryLocation("src/engine/shaders");
 
   Shader earthShader("earth.vert", "earth.frag", "earth.geom");
   Shader airplaneShader("airplane.vert", "airplane.frag");
@@ -110,7 +111,7 @@ int main() {
   Shader lightShader("light.vert", "light.frag");
   Shader linesShader("lines.vert", "lines.frag");
 
-  const float earthInitRadius = 200.f;
+  const float earthInitRadius = 2000.f;
 
   // ===== Light ================================================ //
 
@@ -137,7 +138,7 @@ int main() {
   cameraSpectate.setSpeedDefault(earth.getRadius() * 0.1f);
 
   Camera& cameraAirplane = airplane.getCamera();
-  cameraAirplane.setFarPlane(300.f);
+  cameraAirplane.setFarPlane(100.f);
   cameraAirplane.setSensitivity(50.f);
 
   Camera* cameraATM = global::controllingAirplane ? &cameraAirplane : &cameraSpectate;
@@ -156,9 +157,6 @@ int main() {
   gui::camSpecatePtr = &cameraSpectate;
   gui::airplanePtr = &airplane;
   gui::lightPtr = &light;
-
-  glCullFace(GL_FRONT);
-  glFrontFace(GL_CW);
 
   TextureDescriptor fboTexDesc{};
   fboTexDesc.uniformName = "u_screenColorTex";
@@ -184,6 +182,9 @@ int main() {
 
   Mesh axis = meshes::axis(false);
   axis.scale(1e4f);
+
+  glCullFace(GL_FRONT);
+  glFrontFace(GL_CW);
 
   // Render loop
   while (!glfwWindowShouldClose(window)) {
@@ -273,6 +274,7 @@ int main() {
 
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
+  ImPlot::DestroyContext();
   ImGui::DestroyContext();
   glfwTerminate();
 

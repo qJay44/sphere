@@ -1,6 +1,6 @@
 #include "Airplane.hpp"
 
-#include "../engine/mesh/meshes.hpp"
+#include "../mesh/meshes.hpp"
 #include "glm/common.hpp"
 
 Texture Airplane::texDiffuse;
@@ -33,13 +33,11 @@ Airplane::~Airplane() {
   Mesh::clear();
 }
 
-void Airplane::moveLeft() {
-  turn(1.f);
-}
+void Airplane::moveLeft()  { turn( 1.f); }
+void Airplane::moveRight() { turn(-1.f); }
 
-void Airplane::moveRight() {
-  turn(-1.f);
-}
+void Airplane::moveUp()   { speedDefault = 0.f;   }
+void Airplane::moveDown() { speedDefault = 0.01f; }
 
 void Airplane::onMouseMove(dvec2 mousePos) {
   dvec2 winSize = global::getWinSize();
@@ -97,7 +95,7 @@ void Airplane::update(const Earth& earth) {
   tiltRecoverMomentumRad += tiltMomentumRad;
 
   // Move forward
-  float frameSpeedRad = speedDefault * global::dt;
+  float frameSpeedRad = speed * global::dt;
   vec3 newPos = normalize(position) + forward * frameSpeedRad;
   vec3 gravityUp = normalize(newPos);
   newPos = gravityUp * (earth.getRadius() + flyHeight);
@@ -156,14 +154,9 @@ void Airplane::drawTrail(const Camera* camera, Shader& shader) const {
 }
 
 void Airplane::drawDirections(const Camera* cam, Shader& shader) const {
-  if (showRight)
-    meshes::line(position, position + getRight(), global::red).draw(cam, shader);
-
-  if (showUp)
-    meshes::line(position, position + up, global::green).draw(cam, shader);
-
-  if (showForward)
-    meshes::line(position, position + orientation, global::blue).draw(cam, shader);
+  if (showRight)   meshes::line(position, position + getRight() , global::red).draw(cam, shader);
+  if (showUp)      meshes::line(position, position + up         , global::green).draw(cam, shader);
+  if (showForward) meshes::line(position, position + orientation, global::blue).draw(cam, shader);
 }
 
 void Airplane::updateCamera() {

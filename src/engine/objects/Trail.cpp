@@ -1,6 +1,6 @@
 #include "Trail.hpp"
 
-#include "../engine/mesh/Mesh.hpp"
+#include "../mesh/Mesh.hpp"
 
 Trail::Trail(vec3 color)
   : color(color) {}

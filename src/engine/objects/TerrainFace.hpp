@@ -5,7 +5,7 @@
 #include <list>
 
 #include "TerrainFaceChunk.hpp"
-#include "../engine/frustum/volumes/Sphere.hpp"
+#include "../frustum/volumes/Sphere.hpp"
 
 struct TerrainFace {
   std::list<TerrainFaceChunk> chunks;

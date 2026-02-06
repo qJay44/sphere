@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "../engine/Camera.hpp"
+#include "../Camera.hpp"
 
 class Trail {
 public:

@@ -2,8 +2,7 @@
 
 #include <cassert>
 
-#include "../gui.hpp"
-#include "imgui.h"
+#include "gui/gui.hpp"
 #include "imgui_impl_glfw.h"
 
 using global::window;
@@ -41,17 +40,18 @@ void InputsHandler::keyCallback(GLFWwindow* window, int key, int scancode, int a
         global::drawNormals = !global::drawNormals;
       break;
     case GLFW_KEY_F:
-      if (action == GLFW_PRESS) {
+      if (action == GLFW_PRESS)
         global::controllingAirplane = !global::controllingAirplane;
-      }
       break;
   }
+
+  if (global::guiFocused)
+    ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
 }
 
 void InputsHandler::scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
   if (global::guiFocused) {
-    ImGuiIO& io = ImGui::GetIO();
-    io.AddMouseWheelEvent(xoffset, yoffset);
+    ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
   } else {
     assert(InputsHandler::airplanePtr);
     InputsHandler::airplanePtr->onMouseScroll({xoffset, yoffset});

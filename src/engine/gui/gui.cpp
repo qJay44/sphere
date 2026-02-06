@@ -3,12 +3,26 @@
 #include <algorithm>
 #include <cmath>
 
-#include "glm/gtc/type_ptr.hpp"
 #include "imgui.h"
+#include "implot.h"
+#include "glm/gtc/type_ptr.hpp"
+#include "PlotLine.hpp"
 
 using namespace ImGui;
 
 static bool collapsed = true;
+
+constexpr ImPlotAxisFlags flagsPlot =
+  ImPlotFlags_NoInputs    |
+  ImPlotFlags_NoMenus     |
+  ImPlotFlags_NoBoxSelect |
+  ImPlotFlags_NoFrame;
+
+constexpr ImPlotAxisFlags flagsAxis =
+  ImPlotAxisFlags_NoTickMarks  |
+  ImPlotAxisFlags_NoMenus      |
+  ImPlotAxisFlags_NoSideSwitch |
+  ImPlotAxisFlags_Lock;
 
 Earth* gui::earthPtr = nullptr;
 Camera* gui::camSpecatePtr = nullptr;
@@ -29,10 +43,10 @@ void gui::draw() {
 
   ImGui::Text("FPS: %d / %f.5 ms", fps, global::dt);
 
-  // ================== Planet =========================
+  // ================== Planet ========================= //
 
   if (!earthPtr) error("The earth object is not linked to gui");
-  if (TreeNode("Planet")) {
+  if (CollapsingHeader("Planet")) {
 
     // +++++++++++++++ Resolution +++++++++++++++ //
 
@@ -71,15 +85,6 @@ void gui::draw() {
     SliderFloat("Triplanar blend sharpness", &earthPtr->triplanarBlendSharpness, 1.f, 10.f);
     ColorEdit3("Border color", glm::value_ptr(earthPtr->bordersColor));
 
-    SeparatorText("Atmosphere");
-    SliderFloat("Radius##2", &earthPtr->atmosphereRadius, 1.f, 500.f);
-    SliderInt("Scattering points", &earthPtr->atmosphereScatteringPoints, 2, 50);
-    SliderInt("Optical depth points", &earthPtr->atmosphereOpticalDepthPoints, 2, 50);
-    SliderFloat("Density falloff", &earthPtr->atmosphereDensityFalloff, -20.f, 50.f);
-
-    if (SliderFloat("Scattering strenth", &earthPtr->atmosphereScatteringStrength, 0.f, 20.f))
-      earthPtr->updateScatteringCoefficients();
-
     SeparatorText("Water");
     SliderFloat("Deep factor", &earthPtr->waterDeepFactor, -50.f, 50.f);
     SliderFloat("Deep edge start", &earthPtr->waterDeepEdgeStart, 0.f, 1.f);
@@ -104,14 +109,67 @@ void gui::draw() {
 
     if (Button("Rebuild"))
       earthPtr->rebuild();
-
-    TreePop();
   }
 
-  // ================== Airplane =======================
+  // ================== Atmosphere ===================== //
+
+  if (CollapsingHeader("Atmosphere")) {
+    SeparatorText("Atmosphere");
+    SliderFloat("Radius##2", &earthPtr->atmosphereRadius, 1.f, 500.f);
+    SliderInt("Scattering points", &earthPtr->atmosphereScatteringPoints, 2, 50);
+    SliderInt("Optical depth points", &earthPtr->atmosphereOpticalDepthPoints, 2, 50);
+
+    // Density over height
+    {
+      static PlotLine plotDensity("densityFalloff", [](float x) { return std::exp(-x * earthPtr->atmosphereDensityFalloff); });
+
+      if (SliderFloat("Density falloff", &earthPtr->atmosphereDensityFalloff, 0.f, 20.f)) {
+        plotDensity.update(0.f, 1.f);
+      }
+
+      if (ImPlot::BeginPlot("Density", {400.f, 200.f}, flagsPlot)) {
+        ImPlot::SetupAxes("Height", "##EmptyTitle", flagsAxis, flagsAxis);
+        ImPlot::SetupLegend(ImPlotLocation_NorthEast);
+
+        plotDensity.render(global::red, 2.f);
+
+        ImPlot::EndPlot();
+      }
+    }
+
+    // Transmittance over scattering strength
+    {
+      const float& sstrength = earthPtr->atmosphereScatteringStrength;
+      const vec3& scoeffs = earthPtr->atmosphereScatteringCoefficients;
+
+      static PlotLine plotTransmittanceRed  ("Red"  , [&sstrength, &scoeffs](float x) { return std::exp(-x * sstrength * scoeffs.r); });
+      static PlotLine plotTransmittanceGreen("Green", [&sstrength, &scoeffs](float x) { return std::exp(-x * sstrength * scoeffs.g); });
+      static PlotLine plotTransmittanceBlue ("Blue" , [&sstrength, &scoeffs](float x) { return std::exp(-x * sstrength * scoeffs.b); });
+
+      if (SliderFloat("Scattering strenth", &earthPtr->atmosphereScatteringStrength, 0.f, 20.f)) {
+        earthPtr->updateScatteringCoefficients();
+        plotTransmittanceRed.update(0.f, 5.f);
+        plotTransmittanceGreen.update(0.f, 5.f);
+        plotTransmittanceBlue.update(0.f, 5.f);
+      }
+
+      if (ImPlot::BeginPlot("Transmittance", {400.f, 200.f}, flagsPlot)) {
+        ImPlot::SetupAxes("Optical depth", "##EmptyTitle", flagsAxis, flagsAxis);
+        ImPlot::SetupLegend(ImPlotLocation_NorthEast);
+
+        plotTransmittanceRed.render(global::red, 2.f);
+        plotTransmittanceGreen.render(global::green, 2.f);
+        plotTransmittanceBlue.render(global::blue, 2.f);
+
+        ImPlot::EndPlot();
+      }
+    }
+  }
+
+  // ================== Airplane ======================= //
 
   if (!airplanePtr) error("The airplane is not linked to gui");
-  if (TreeNode("Airplane")) {
+  if (CollapsingHeader("Airplane")) {
     SliderFloat("Speed", &airplanePtr->speedDefault, 0.f, PI * 2.f);
     SetItemTooltip("Radians");
 
@@ -140,27 +198,23 @@ void gui::draw() {
     Checkbox("Show right", &airplanePtr->showRight);
     Checkbox("Show up", &airplanePtr->showUp);
     Checkbox("Show forward", &airplanePtr->showForward);
-
-    TreePop();
   }
 
-  // ================== Airplane Camera ================
+  // ================== Airplane Camera ================ //
 
   Camera& camAirplane = airplanePtr->getCamera();
 
-  if (TreeNode("Airplane Camera")) {
+  if (CollapsingHeader("Airplane Camera")) {
     SliderFloat("Near",     &camAirplane.nearPlane, 0.01f, 1.f);
     SliderFloat("Far",      &camAirplane.farPlane,  10.f , 1000.f);
     SliderFloat("Distance", &airplanePtr->camDistance,  1.f  , 50.f);
     SliderFloat("FOV",      &camAirplane.fov,       45.f , 179.f);
-
-    TreePop();
   }
 
-  // ================== Spectate camera ================
+  // ================== Spectate camera ================ //
 
   if (!camSpecatePtr) error("The spectate camera is not linked to gui");
-  if (TreeNode("Spectate camera")) {
+  if (CollapsingHeader("Spectate camera")) {
     SliderFloat("Near##2",  &camSpecatePtr->nearPlane, 0.01f, 1.f);
     SliderFloat("Far##2",   &camSpecatePtr->farPlane,  10.f , 1000.f);
     SliderFloat("Speed##2", &camSpecatePtr->speed,     1.f  , 50.f);
@@ -168,28 +222,22 @@ void gui::draw() {
     DragFloat("Yaw##2", &camSpecatePtr->yaw);
     DragFloat("Pitch##2", &camSpecatePtr->pitch);
     DragFloat3("Position", glm::value_ptr(camSpecatePtr->position));
-
-    TreePop();
   }
 
-  // ================== Light ==========================
+  // ================== Light ========================== //
 
   if (!lightPtr) error("The light is not linked to gui");
-  if (TreeNode("Light")) {
+  if (CollapsingHeader("Light")) {
     DragFloat3("Position", glm::value_ptr(lightPtr->position));
     DragFloat("Radius", &lightPtr->radius, 1.f, 0.f);
     ColorEdit3("Color", glm::value_ptr(lightPtr->color));
-
-    TreePop();
   };
 
-  // ================== Other ==========================
+  // ================== Other ========================== //
 
-  if (TreeNode("Other")) {
+  if (CollapsingHeader("Other")) {
     Checkbox("Show global axis", &global::drawGlobalAxis);
     Checkbox("Planet print build info", &earthPtr->printBuildInfo);
-
-    TreePop();
   }
 
   End();

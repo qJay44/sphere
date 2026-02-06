@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../engine/Camera.hpp"
-#include "../engine/texture/Texture.hpp"
-#include "../engine/frustum/Frustum.hpp"
+#include "../Camera.hpp"
+#include "../texture/Texture.hpp"
+#include "../frustum/Frustum.hpp"
 #include "Light.hpp"
 
 class Earth {
@@ -69,7 +69,7 @@ private:
   int atmosphereScatteringPoints = 11;
   int atmosphereOpticalDepthPoints = 11;
   float atmosphereDensityFalloff = 11.f;
-  float atmosphereScatteringStrength = 21.f;
+  float atmosphereScatteringStrength = 0.02f;
   vec3 atmosphereScatteringCoefficients = vec3(1.f);
 
   bool printBuildInfo = false;

@@ -9,10 +9,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Run)
 
 project(MyProject VERSION 1.0)
 
-file(GLOB_RECURSE SOURCES
-  ${PROJECT_SOURCE_DIR}/src/*.cpp
-  ${UTILS_PATH}/src/*.cpp)
-
 if (WIN32)
   set(LIB_EXT "dll")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -46,17 +42,30 @@ add_custom_command(
 find_package(glfw3 REQUIRED)
 find_package(TIFF REQUIRED)
 
+file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 add_executable(${PROJECT_NAME}
   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${GLFW_IMGUI_LIB_FILE}
   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${GLAD_LIB_FILE}
   ${SOURCES})
 
+file(GLOB_RECURSE UTILS_SOURCES ${UTILS_PATH}/src/*.cpp)
+add_library(Statics STATIC
+  ${IMPLOT_PATH}/implot.cpp
+  ${IMPLOT_PATH}/implot_items.cpp
+  ${UTILS_SOURCES} # Keep it separate?
+)
+
+target_include_directories(Statics PUBLIC
+  ${IMGUI_PATH}
+  ${IMPLOT_PATH}
+)
+
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
 target_compile_options(${PROJECT_NAME} PRIVATE -isystem ${GENERAL_INCLUDES}/stb)
 
-target_precompile_headers(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src/pch.hpp)
+target_precompile_headers(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/src/pch.hpp)
 
-target_include_directories(${PROJECT_NAME} PUBLIC
+target_include_directories(${PROJECT_NAME} PRIVATE
   ${STB_PATH}/include
   ${GLM_PATH}/include
   ${GLAD_PATH}/include
@@ -66,11 +75,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${UTILS_PATH}/include
 )
 
-target_link_directories(${PROJECT_NAME} PUBLIC
+target_link_directories(${PROJECT_NAME} PRIVATE
   ${GLM_PATH}/bin
   ${IMGUI_PATH}/build
   ${GLAD_PATH}/build
 )
 
-target_link_libraries(${PROJECT_NAME} GLFW_IMGUI GLAD TIFF::TIFF glfw)
+target_link_libraries(${PROJECT_NAME} PRIVATE GLFW_IMGUI GLAD TIFF::TIFF glfw Statics)
 
