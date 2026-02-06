@@ -1,7 +1,6 @@
 #include "Earth.hpp"
 
 #include "TerrainFace.hpp"
-#include "glm/exponential.hpp"
 
 //#define USE_DEGUG_LOAD
 
@@ -115,15 +114,12 @@ void Earth::loadTextures(const Shader& shader) {
   #endif
 }
 
-Earth::Earth(u32 resolution, u32 chunksPerFace, float radius, float atmosphereRadius, const Light* light)
+Earth::Earth(u32 resolution, u32 chunksPerFace, float radius)
   : resolution(resolution),
     chunks(chunksPerFace),
     radius(radius),
-    atmosphereRadius(atmosphereRadius),
-    light(light) {
-
+    atmosphere(radius * 1.15f) {
   terrainFaces = new TerrainFace[6];
-  updateScatteringCoefficients();
 
   build();
 }
@@ -137,12 +133,7 @@ Earth::~Earth() {
 
 const u32&   Earth::getResolution()       const { return resolution;       }
 const float& Earth::getRadius()           const { return radius;           }
-const float& Earth::getAtmosphereRadius() const { return atmosphereRadius; }
 const float& Earth::getHeightmapScale()   const { return heightmapScale;   }
-
-void Earth::updateScatteringCoefficients() {
-  atmosphereScatteringCoefficients = glm::pow(400.f / light->getWaveLengths(), vec3(4.f)) * atmosphereScatteringStrength;
-}
 
 void Earth::rebuild() {
   rebuild(resolution, radius);
@@ -152,6 +143,10 @@ void Earth::rebuild(int resolution, float radius) {
   this->resolution = resolution;
   this->radius = radius;
   build();
+}
+
+void Earth::update(const Light& light) {
+  atmosphere.update(light);
 }
 
 void Earth::draw(const Camera* camera, const frustum::Frustum& frustum, Shader& shader) const {
@@ -199,13 +194,9 @@ void Earth::draw(const Camera* camera, const frustum::Frustum& frustum, Shader& 
 
 void Earth::drawAtmosphere(const Camera* camera, Shader& shader) const {
   shader.setUniform3f("u_planetCenter", vec3(0.f));
-  shader.setUniform3f("u_scatteringCoefficients", atmosphereScatteringCoefficients);
-  shader.setUniform1i("u_scatteringPoints", atmosphereScatteringPoints);
-  shader.setUniform1i("u_opticalDepthPoints", atmosphereOpticalDepthPoints);
   shader.setUniform1f("u_planetRadius", radius);
-  shader.setUniform1f("u_atmosphereRadius", atmosphereRadius);
-  shader.setUniform1f("u_densityFalloff", atmosphereDensityFalloff);
   shader.setUniformMatrix4f("u_camInv", camera->getProjViewInv());
+  atmosphere.setUniforms(shader);
 
   Mesh::screenDraw(camera, shader);
 }

@@ -3,11 +3,12 @@
 #include "../Camera.hpp"
 #include "../texture/Texture.hpp"
 #include "../frustum/Frustum.hpp"
+#include "PlanetAtmosphere.hpp"
 #include "Light.hpp"
 
 class Earth {
 public:
-  Earth(u32 resolution, u32 chunksPerFace, float radius, float atmosphereRadius, const Light* light);
+  Earth(u32 resolution, u32 chunksPerFace, float radius);
   ~Earth();
 
   const u32&   getResolution()       const;
@@ -15,11 +16,10 @@ public:
   const float& getAtmosphereRadius() const;
   const float& getHeightmapScale()   const;
 
-  void updateScatteringCoefficients();
-
   void loadTextures(const Shader& shader);
   void rebuild();
   void rebuild(int resolution, float radius);
+  void update(const Light& light);
   void draw(const Camera* camera, const frustum::Frustum& frustum, Shader& shader) const;
   void drawAtmosphere(const Camera* camera, Shader& shader) const;
 
@@ -40,8 +40,6 @@ private:
   u32 resolution;
   u32 chunks;
   float radius;
-  float atmosphereRadius;
-  const Light* light;
 
   float heightmapScale = 2.f;
   float lightMultiplier = 1.5f;
@@ -66,11 +64,7 @@ private:
   float waterShoreWaveNoiseSpeed = 0.123f;
   float waterShoreWaveNoiseAmplitude = 6.843f;
 
-  int atmosphereScatteringPoints = 11;
-  int atmosphereOpticalDepthPoints = 11;
-  float atmosphereDensityFalloff = 11.f;
-  float atmosphereScatteringStrength = 0.02f;
-  vec3 atmosphereScatteringCoefficients = vec3(1.f);
+  PlanetAtmosphere atmosphere;
 
   bool printBuildInfo = false;
 

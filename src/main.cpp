@@ -117,9 +117,9 @@ int main() {
 
   Light light(earthInitRadius + vec3{16.3f, 24.f, 26.6f}, 50.f);
 
-  // ===== Earth =============================================== //
+  // ===== Planet ============================================== //
 
-  Earth earth(512u, 256u, earthInitRadius, earthInitRadius + earthInitRadius * 0.15f, &light);
+  Earth earth(512u, 256u, earthInitRadius);
   earth.loadTextures(earthShader);
 
   // ===== Airplane ============================================= //
@@ -220,6 +220,7 @@ int main() {
     }
 
     light.update();
+    earth.update(light);
     airplane.update(earth);
 
     earthShader.setUniform3f("u_lightPos", light.getPosition());

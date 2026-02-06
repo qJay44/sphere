@@ -3,26 +3,13 @@
 #include <algorithm>
 #include <cmath>
 
+#include "AtmospherePlotter.hpp"
 #include "imgui.h"
-#include "implot.h"
 #include "glm/gtc/type_ptr.hpp"
-#include "PlotLine.hpp"
 
 using namespace ImGui;
 
 static bool collapsed = true;
-
-constexpr ImPlotAxisFlags flagsPlot =
-  ImPlotFlags_NoInputs    |
-  ImPlotFlags_NoMenus     |
-  ImPlotFlags_NoBoxSelect |
-  ImPlotFlags_NoFrame;
-
-constexpr ImPlotAxisFlags flagsAxis =
-  ImPlotAxisFlags_NoTickMarks  |
-  ImPlotAxisFlags_NoMenus      |
-  ImPlotAxisFlags_NoSideSwitch |
-  ImPlotAxisFlags_Lock;
 
 Earth* gui::earthPtr = nullptr;
 Camera* gui::camSpecatePtr = nullptr;
@@ -114,56 +101,18 @@ void gui::draw() {
   // ===== Atmosphere ==================================================================================== //
 
   if (CollapsingHeader("Atmosphere")) {
+    PlanetAtmosphere& atmosphere = earthPtr->atmosphere;
+    static AtmospherePlotter atmospherePlotter(&earthPtr->atmosphere, 100); // Always valid pointer?
+
     SeparatorText("Atmosphere");
-    SliderFloat("Radius##2", &earthPtr->atmosphereRadius, earthPtr->radius, 500.f);
-    SliderInt("Scattering points", &earthPtr->atmosphereScatteringPoints, 2, 50);
-    SliderInt("Optical depth points", &earthPtr->atmosphereOpticalDepthPoints, 2, 50);
+    SliderFloat("Radius##2", &atmosphere.radius, earthPtr->radius, 500.f);
+    SliderInt("Scattering points", &atmosphere.scatteringPoints, 2, 50);
+    SliderInt("Optical depth points", &atmosphere.opticalDepthPoints, 2, 50);
+    SliderFloat("Density falloff", &atmosphere.densityFalloff, 0.f, 20.f);
+    SliderFloat("Scattering strenth", &atmosphere.scatteringStrength, 0.f, 20.f);
 
-    // Density over height
-    {
-      static PlotLine plotDensity("densityFalloff", [](float x) { return std::exp(-x * earthPtr->atmosphereDensityFalloff); });
-
-      if (SliderFloat("Density falloff", &earthPtr->atmosphereDensityFalloff, 0.f, 20.f)) {
-        plotDensity.update(0.f, 1.f);
-      }
-
-      if (ImPlot::BeginPlot("Density", {400.f, 200.f}, flagsPlot)) {
-        ImPlot::SetupAxes("Height", "##EmptyTitle", flagsAxis, flagsAxis);
-        ImPlot::SetupLegend(ImPlotLocation_NorthEast);
-
-        plotDensity.render(global::red, 2.f);
-
-        ImPlot::EndPlot();
-      }
-    }
-
-    // Transmittance over scattering strength
-    {
-      const float& sstrength = earthPtr->atmosphereScatteringStrength;
-      const vec3& scoeffs = earthPtr->atmosphereScatteringCoefficients;
-
-      static PlotLine plotTransmittanceRed  ("Red"  , [&sstrength, &scoeffs](float x) { return std::exp(-x * sstrength * scoeffs.r); });
-      static PlotLine plotTransmittanceGreen("Green", [&sstrength, &scoeffs](float x) { return std::exp(-x * sstrength * scoeffs.g); });
-      static PlotLine plotTransmittanceBlue ("Blue" , [&sstrength, &scoeffs](float x) { return std::exp(-x * sstrength * scoeffs.b); });
-
-      if (SliderFloat("Scattering strenth", &earthPtr->atmosphereScatteringStrength, 0.f, 20.f)) {
-        earthPtr->updateScatteringCoefficients();
-        plotTransmittanceRed.update(0.f, 5.f);
-        plotTransmittanceGreen.update(0.f, 5.f);
-        plotTransmittanceBlue.update(0.f, 5.f);
-      }
-
-      if (ImPlot::BeginPlot("Transmittance", {400.f, 200.f}, flagsPlot)) {
-        ImPlot::SetupAxes("Optical depth", "##EmptyTitle", flagsAxis, flagsAxis);
-        ImPlot::SetupLegend(ImPlotLocation_NorthEast);
-
-        plotTransmittanceRed.render(global::red, 2.f);
-        plotTransmittanceGreen.render(global::green, 2.f);
-        plotTransmittanceBlue.render(global::blue, 2.f);
-
-        ImPlot::EndPlot();
-      }
-    }
+    atmospherePlotter.renderDensity(1.f);
+    atmospherePlotter.renderTransmittance(5.f);
   }
 
   // ===== Airplane ====================================================================================== //

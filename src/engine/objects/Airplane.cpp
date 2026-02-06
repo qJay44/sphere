@@ -161,6 +161,7 @@ void Airplane::drawDirections(const Camera* cam, Shader& shader) const {
 
 void Airplane::updateCamera() {
   const vec3& pivot = position;
+  // TODO: Actually doesn't do anything
   vec3 actualBack = turnQuat * rotateQuat * camera.getBack();
   vec3 pos = pivot + actualBack * camDistance;
 
