@@ -16,9 +16,40 @@ void image2D::write(const std::string& path, uvec2 size, u8 channels, byte* buf)
   stbi_write_png(path.c_str(), size.x, size.y, channels, buf, size.x * channels);
 }
 
+image2D::image2D(image2D&& other) {
+  width = other.width;
+  height = other.height;
+  channels = other.channels;
+  pixels = other.pixels;
+  path = other.path;
+  flipVertically = other.flipVertically;
+  loadType = other.loadType;
+
+  other.pixels = nullptr;
+  other.loadType = IMAGE2D_LOAD_NO;
+}
+
+image2D& image2D::operator=(image2D&& other) {
+  if (this != &other) {
+    clear();
+    width = other.width;
+    height = other.height;
+    channels = other.channels;
+    pixels = other.pixels;
+    path = other.path;
+    flipVertically = other.flipVertically;
+    loadType = other.loadType;
+
+    other.pixels = nullptr;
+    other.loadType = IMAGE2D_LOAD_NO;
+  }
+
+  return *this;
+}
+
 image2D::image2D(int width, int height) : width(width), height(height) {}
 
-image2D::image2D(const fspath& path, GLenum loadType, bool flipVertically) {
+image2D::image2D(fspath path, GLenum loadType, bool flipVertically) {
   load(path, loadType, flipVertically);
 }
 
@@ -26,14 +57,15 @@ image2D::~image2D() {
   clear();
 }
 
-void image2D::load(const fspath& path, GLenum loadType, bool flipVertically) {
+void image2D::load(fspath path, GLenum loadType, bool flipVertically) {
   clear();
 
   this->path = path;
   this->loadType = loadType;
   this->flipVertically = flipVertically;
 
-  status::start("Loading", path.string());
+  // TODO: Make it scoped depended?
+  // status::start("Loading", path.string());
 
   switch (loadType) {
     case IMAGE2D_LOAD_NO:
@@ -50,7 +82,7 @@ void image2D::load(const fspath& path, GLenum loadType, bool flipVertically) {
       this->loadType = IMAGE2D_LOAD_STB;
   }
 
-  status::end(pixels);
+  // status::end(pixels);
 
   if (!pixels)
     error(std::format("[image2D::load] Didn't load image [{}]", path.string()));

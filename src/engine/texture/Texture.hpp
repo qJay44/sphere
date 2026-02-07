@@ -2,6 +2,7 @@
 
 #include "TextureDescriptor.hpp"
 #include "image2D.hpp"
+#include <future>
 
 class Texture {
 public:
@@ -9,13 +10,16 @@ public:
 
   Texture() = default;
 
+  Texture(Texture&& other);
+
+  Texture& operator=(Texture&& other);
+
   Texture(const image2D& img, const TextureDescriptor& desc);
   Texture(const ivec2& size, const TextureDescriptor& desc);
   Texture(const fspath& path, const TextureDescriptor& desc);
-  Texture(const Texture& other);
+  ~Texture();
 
-  void operator=(const Texture& other);
-
+  void update();
   void bind(GLuint customUnit) const;
   void bind() const;
   void unbind() const;
@@ -36,9 +40,18 @@ private:
   TextureDescriptor desc{};
   GLuint id = 0;
 
+  struct AsyncData {
+    image2D images[6];
+  };
+
+  std::future<AsyncData> texFuture;
+  bool loaded = false;
+
 private:
+  static AsyncData loadCubemap(fspath folder, GLenum internalFormat);
+
   void create2D(const image2D& img);
   void create2DArray(const fspath& folder);
-  void createCubemap(const fspath& folder);
+  void createCubemap(const AsyncData& data);
 };
 

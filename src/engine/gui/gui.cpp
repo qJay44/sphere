@@ -102,7 +102,7 @@ void gui::draw() {
 
   if (!airplanePtr) error("The airplane is not linked to gui");
   if (CollapsingHeader("Airplane")) {
-    SliderFloat("Speed", &airplanePtr->speed, 0.f, PI * 2.f);
+    SliderFloat("Speed", &airplanePtr->speedDefault, 0.f, PI * 2.f);
     SetItemTooltip("Radians");
 
     SliderFloat("Fly height", &airplanePtr->flyHeight, 1.f, 100.f);

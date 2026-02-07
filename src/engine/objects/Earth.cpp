@@ -13,7 +13,7 @@ constexpr vec3 terrainFaceColors[6] {
   {0.996f, 0.984f, 0.169f},
 };
 
-void Earth::loadTextures(const Shader& shader) {
+void Earth::loadTextures() {
   #ifdef USE_DEGUG_LOAD
 
   texWorldColors = Texture(
@@ -128,6 +128,13 @@ void Earth::rebuild(int resolution, float radius) {
 }
 
 void Earth::update(const Light& light) {
+  texHeightmapsWater.update();
+  texDistanceFieldWater.update();
+  texNormalheightmapsLand.update();
+  texWorldColors.update();
+  texBorders.update();
+  texNormalmapWave0.update();
+  texNormalmapWave1.update();
   atmosphere.update(light);
 }
 

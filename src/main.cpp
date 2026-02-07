@@ -120,7 +120,6 @@ int main() {
   // ===== Planet ============================================== //
 
   Earth earth(50, 20, earthInitRadius);
-  earth.loadTextures(earthShader);
 
   // ===== Airplane ============================================= //
 
@@ -135,7 +134,7 @@ int main() {
 
   Camera cameraSpectate({earth.getRadius(), 0.f, earth.getRadius()}, PI);
   cameraSpectate.setFarPlane(1000.f);
-  cameraSpectate.setSpeedDefault(earth.getRadius() * 0.1f);
+  cameraSpectate.setSpeedDefault(earth.getRadius());
 
   Camera& cameraAirplane = airplane.getCamera();
   cameraAirplane.setFarPlane(100.f);
@@ -185,6 +184,8 @@ int main() {
 
   glCullFace(GL_FRONT);
   glFrontFace(GL_CW);
+
+  earth.loadTextures();
 
   // Render loop
   while (!glfwWindowShouldClose(window)) {

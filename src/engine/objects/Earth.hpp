@@ -16,7 +16,7 @@ public:
   const float& getAtmosphereRadius() const;
   const float& getHeightmapScale()   const;
 
-  void loadTextures(const Shader& shader);
+  void loadTextures();
   void rebuild();
   void rebuild(int resolution, float radius);
   void update(const Light& light);

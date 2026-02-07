@@ -3,9 +3,12 @@
 
 #include <algorithm>
 #include <cassert>
+#include <chrono>
 #include <cstdio>
 #include <filesystem>
+#include <future>
 #include <string>
+#include <utility>
 #include <vector>
 
 Texture Texture::debug0Tex;
@@ -23,6 +26,30 @@ const Texture& Texture::getDebug0Tex() {
   return debug0Tex;
 }
 
+Texture::Texture(Texture&& other) :
+  desc(other.desc),
+  id(other.id),
+  texFuture(std::move(other.texFuture))
+  // loaded(other.loaded)
+{
+  other.id = 0;
+  other.loaded = false;
+}
+
+Texture& Texture::operator=(Texture&& other) {
+  if (this != &other) {
+    clear();
+    desc = other.desc;
+    id = other.id;
+    texFuture = std::move(other.texFuture);
+    loaded = other.loaded;
+    other.id = 0;
+    // other.loaded = false;
+  }
+
+  return *this;
+}
+
 Texture::Texture(const image2D& img, const TextureDescriptor& d) : desc(d) {
   if (desc.target != GL_TEXTURE_2D)
     error("[Texture::Texture] Unhandled texture creation type: [{}]", desc.target);
@@ -36,12 +63,14 @@ Texture::Texture(const fspath& path, const TextureDescriptor& d) : desc(d) {
   switch (desc.target) {
     case GL_TEXTURE_2D:
       create2D(image2D(path));
+      loaded = true;
       break;
     case GL_TEXTURE_2D_ARRAY:
       create2DArray(path);
+      loaded = true;
       break;
     case GL_TEXTURE_CUBE_MAP:
-      createCubemap(path);
+      texFuture = std::async(std::launch::async, loadCubemap, path, desc.internalFormat);
       break;
     default:
       error("[Texture::Texture] Unhandled texture creation type: [{}]", desc.target);
@@ -49,13 +78,25 @@ Texture::Texture(const fspath& path, const TextureDescriptor& d) : desc(d) {
   }
 }
 
-Texture::Texture(const Texture& other) :
-  desc(other.desc),
-  id(other.id) {}
+Texture::~Texture() {
+  clear();
+}
 
-void Texture::operator=(const Texture& other) {
-  desc = other.desc;
-  id = other.id;
+void Texture::update() {
+  if (!loaded && texFuture.valid()) {
+    auto status = texFuture.wait_for(std::chrono::milliseconds(0));
+    if (status == std::future_status::ready) {
+      switch (desc.target) {
+        case GL_TEXTURE_CUBE_MAP:
+          createCubemap(texFuture.get());
+          break;
+        default:
+          error("[Texture::update] Should never happen [{}]", desc.target);
+          break;
+      }
+      loaded = true;
+    }
+  }
 }
 
 void Texture::bind(GLuint customUnit) const {
@@ -142,7 +183,7 @@ void Texture::create2DArray(const fspath& folder) {
   unbind();
 }
 
-void Texture::createCubemap(const fspath& folder) {
+Texture::AsyncData Texture::loadCubemap(fspath folder, GLenum internalFormat) {
   namespace fs = std::filesystem;
 
   // NOTE: Order matters
@@ -155,14 +196,6 @@ void Texture::createCubemap(const fspath& folder) {
     "back",
   };
 
-  glGenTextures(1, &id);
-  bind();
-  glTexParameteri(desc.target, GL_TEXTURE_MIN_FILTER, desc.minFilter);
-  glTexParameteri(desc.target, GL_TEXTURE_MAG_FILTER, desc.magFilter);
-  glTexParameteri(desc.target, GL_TEXTURE_WRAP_S, desc.wrapS);
-  glTexParameteri(desc.target, GL_TEXTURE_WRAP_T, desc.wrapT);
-  glTexParameteri(desc.target, GL_TEXTURE_WRAP_R, desc.wrapR);
-
   std::string extension;
   if (fs::exists(folder) && fs::is_directory(folder)) {
     auto it = fs::directory_iterator(folder);
@@ -174,10 +207,28 @@ void Texture::createCubemap(const fspath& folder) {
     error("[Texture] Incorrect path [{}]", folder.string());
   }
 
+  AsyncData data;
+
   for (int i = 0; i < 6; i++) {
     fspath filePath = std::format("{}/{}{}", folder.string().c_str(), texNames[i], extension.c_str());
-    image2D img(filePath, desc.internalFormat);
+    data.images[i] = image2D(filePath, internalFormat);
+  }
 
+  return data;
+}
+
+void Texture::createCubemap(const AsyncData& data) {
+  glGenTextures(1, &id);
+  bind();
+  glTexParameteri(desc.target, GL_TEXTURE_MIN_FILTER, desc.minFilter);
+  glTexParameteri(desc.target, GL_TEXTURE_MAG_FILTER, desc.magFilter);
+  glTexParameteri(desc.target, GL_TEXTURE_WRAP_S, desc.wrapS);
+  glTexParameteri(desc.target, GL_TEXTURE_WRAP_T, desc.wrapT);
+  glTexParameteri(desc.target, GL_TEXTURE_WRAP_R, desc.wrapR);
+
+  for (int i = 0; i < 6; i++) {
+    const image2D& img = data.images[i];
+    assert(img.pixels);
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, desc.internalFormat, img.width, img.height, 0, desc.format, desc.type, img.pixels);
   }
 
