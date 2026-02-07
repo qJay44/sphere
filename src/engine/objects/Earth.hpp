@@ -3,15 +3,15 @@
 #include "../Camera.hpp"
 #include "../texture/Texture.hpp"
 #include "../frustum/Frustum.hpp"
+#include "TerrainFace.hpp"
 #include "PlanetAtmosphere.hpp"
 #include "Light.hpp"
 
 class Earth {
 public:
-  Earth(u32 resolution, u32 chunksPerFace, float radius);
-  ~Earth();
+  Earth(int resolution, int chunksPerSide, float radius);
 
-  const u32&   getResolution()       const;
+  const int&   getResolution()       const;
   const float& getRadius()           const;
   const float& getAtmosphereRadius() const;
   const float& getHeightmapScale()   const;
@@ -25,7 +25,10 @@ public:
 
 private:
   friend struct gui;
-  friend struct TerrainFace;
+
+  int resolution;
+  int chunksPerSide;
+  float radius;
 
   Texture texHeightmapsWater;
   Texture texDistanceFieldWater;
@@ -35,11 +38,7 @@ private:
   Texture texNormalmapWave0;
   Texture texNormalmapWave1;
 
-  struct TerrainFace* terrainFaces = nullptr;
-
-  u32 resolution;
-  u32 chunks;
-  float radius;
+  TerrainFace terrainFaces[6];
 
   float heightmapScale = 2.f;
   float lightMultiplier = 1.5f;

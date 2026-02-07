@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cassert>
-#include <cmath>
 #include <list>
 
 #include "TerrainFaceChunk.hpp"
@@ -9,31 +8,22 @@
 
 struct TerrainFace {
   std::list<TerrainFaceChunk> chunks;
-  size_t chunksAmount;
-  float heightmapScaleInv;
 
-  TerrainFace() {}
+  TerrainFace() = default;
 
-  TerrainFace(const vec3& localUp, const Earth* earth) {
+  TerrainFace(int i, int chunksPerSide, int resolution, float radius) {
+    constexpr vec3 directions[6] {
+      {1.f,  0.f,  0.f},  // Right
+      {-1.f, 0.f,  0.f},  // Left
+      {0.f,  1.f,  0.f},  // Top
+      {0.f,  -1.f, 0.f},  // Bottom
+      {0.f,  0.f,  1.f},  // Back
+      {0.f,  0.f,  -1.f}, // Front
+    };
 
-    chunksAmount = earth->chunks;
-    heightmapScaleInv = 1.f / earth->heightmapScale;
-
-    u32 chunksAmountSq = sqrt(chunksAmount);
-    u32 chunkResolution = earth->resolution / chunksAmountSq;
-
-    for (u32 y = 0; y < chunksAmountSq; y++) {
-      u32 ystart = y * chunkResolution;
-      for (u32 x = 0; x < chunksAmountSq; x++) {
-        u32 xstart = x * chunkResolution;
-        chunks.push_back(TerrainFaceChunk::build(localUp, earth, chunkResolution, {xstart, ystart}));
-      }
-    }
-  }
-
-  ~TerrainFace() {
-    for (TerrainFaceChunk& chunk : chunks)
-      chunk.clear();
+    for (int y = 0; y < chunksPerSide; y++)
+      for (int x = 0; x < chunksPerSide; x++)
+        chunks.push_back(TerrainFaceChunk::build(directions[i], {x, y}, chunksPerSide, resolution, radius));
   }
 
   void draw(const Camera* camera, Shader& shader, frustum::Frustum frustum) const {

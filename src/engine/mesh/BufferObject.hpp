@@ -13,6 +13,8 @@
 
 struct BufferObject {
 public:
+  BufferObject() = default;
+
   BufferObject(GLenum target) : target(target) {
     gen();
   }

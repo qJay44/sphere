@@ -34,36 +34,13 @@ void gui::draw() {
 
   if (!earthPtr) error("The earth object is not linked to gui");
   if (CollapsingHeader("Planet")) {
+    bool rebuild = false;
+    rebuild |= SliderInt("Chunks per side", &earthPtr->chunksPerSide, 1, 20);
+    rebuild |= SliderInt("Resolution", &earthPtr->resolution, 2, 100);
+    rebuild |= SliderFloat("Radius", &earthPtr->radius, 1.f, 500.f);
 
-    // +++++++++++++++ Resolution +++++++++++++++ //
-
-    Text("Resolution"); SameLine();
-
-    static u8 resRoot = sqrt(earthPtr->resolution);
-    if (ArrowButton("##left", ImGuiDir_Left)) {
-      resRoot--;
-      resRoot = std::max(resRoot, (u8)1);
-      earthPtr->resolution = resRoot * resRoot;
-    }
-    SameLine();
-    if (ArrowButton("##right", ImGuiDir_Right)) {
-      resRoot++;
-      earthPtr->resolution = resRoot * resRoot;
-    }
-    SameLine();
-
-    earthPtr->resolution = std::clamp(earthPtr->resolution, 2u, 2048u);
-    Text("%d", earthPtr->resolution);
-
-    // +++++++++++++++ Chunks +++++++++++++++++++ //
-
-    Text("Chunks    "); SameLine();
-
-    if (ArrowButton("##left##2", ImGuiDir_Left))   {earthPtr->chunks >>= 1;} SameLine();
-    if (ArrowButton("##right##2", ImGuiDir_Right)) {earthPtr->chunks <<= 1;} SameLine();
-
-    earthPtr->chunks = std::clamp(earthPtr->chunks, 2u, 1024u);    SameLine();
-    Text("%d", earthPtr->chunks);
+    if (rebuild)
+      earthPtr->rebuild();
 
     static int rbFaceChunk = 0;
     if (RadioButton("Default"     , rbFaceChunk == 0)) rbFaceChunk = 0;
@@ -73,9 +50,6 @@ void gui::draw() {
     earthPtr->useTerrainFaceColors = rbFaceChunk == 1;
     earthPtr->useTerrainFaceChunkColors = rbFaceChunk == 2;
 
-    // ++++++++++++++++++++++++++++++++++++++++++ //
-
-    SliderFloat("Radius", &earthPtr->radius, 1.f, 500.f);
     SliderFloat("Heightmap scale", &earthPtr->heightmapScale, 0.01f, 100.f);
     SliderFloat("Triplanar blend sharpness", &earthPtr->triplanarBlendSharpness, 1.f, 10.f);
     ColorEdit3("Border color", glm::value_ptr(earthPtr->bordersColor));

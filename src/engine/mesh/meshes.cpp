@@ -7,7 +7,7 @@
 
 namespace meshes {
 
-Mesh line(vec3 p1, vec3 p2, vec3 color, bool autoClear) {
+Mesh line(vec3 p1, vec3 p2, vec3 color) {
   std::vector<VertexPC> vertices{
     {p1, color},
     {p2, color}
@@ -17,10 +17,10 @@ Mesh line(vec3 p1, vec3 p2, vec3 color, bool autoClear) {
     0, 1
   };
 
-  return Mesh(vertices, indices, GL_LINES, autoClear);
+  return Mesh(vertices, indices, GL_LINES);
 }
 
-Mesh axis(bool autoClear) {
+Mesh axis() {
   std::vector<VertexPC> vertices{
     {{0.f, 0.f, 0.f}, global::red},
     {{1.f, 0.f, 0.f}, global::red},
@@ -36,10 +36,10 @@ Mesh axis(bool autoClear) {
     4, 5
   };
 
-  return Mesh(vertices, indices, GL_LINES, autoClear);
+  return Mesh(vertices, indices, GL_LINES);
 }
 
-Mesh plane(vec3 color, GLenum mode, bool autoClear) {
+Mesh plane(vec3 color, GLenum mode) {
   std::vector<Vertex4> vertices{
     {{-1.f, -1.f, 0.f}, color, {0.f, 0.f}, {1.f, 0.f, 0.f}},
     {{-1.f,  1.f, 0.f}, color, {0.f, 1.f}, {1.f, 0.f, 0.f}},
@@ -68,10 +68,10 @@ Mesh plane(vec3 color, GLenum mode, bool autoClear) {
       error("[meshes::plane] Unhandled mode [{}]", mode);
   }
 
-  return Mesh(vertices, indices, mode, autoClear);
+  return Mesh(vertices, indices, mode);
 }
 
-Mesh plane(size_t resolution, GLenum mode, vec3 up, bool autoClear) {
+Mesh plane(size_t resolution, GLenum mode, vec3 up) {
   size_t indicesPerQuad = 0;
   if      (mode == GL_TRIANGLES) indicesPerQuad = 6;
   else if (mode == GL_PATCHES)   indicesPerQuad = 4;
@@ -127,10 +127,10 @@ Mesh plane(size_t resolution, GLenum mode, vec3 up, bool autoClear) {
     }
   }
 
-  return Mesh(vertices, indices, mode, autoClear);
+  return Mesh(vertices, indices, mode);
 }
 
-Mesh cube(vec3 color, bool autoClear) {
+Mesh cube(vec3 color) {
   //        5--------6
   //       /|       /|
   //      1--------2 |
@@ -170,10 +170,10 @@ Mesh cube(vec3 color, bool autoClear) {
     7, 3, 0, //
   };
 
-  return Mesh(vertices, indices, GL_TRIANGLES, autoClear);
+  return Mesh(vertices, indices, GL_TRIANGLES);
 }
 
-Mesh frustum(const Camera& cam, vec3 color, bool autoClear) {
+Mesh frustum(const Camera& cam, vec3 color) {
   frustum::Frustum frustum(cam);
 
   ivec2 winSize;
@@ -269,7 +269,7 @@ Mesh frustum(const Camera& cam, vec3 color, bool autoClear) {
     18, 19
   };
 
-  return Mesh(vertices, indices, GL_LINES, autoClear);
+  return Mesh(vertices, indices, GL_LINES);
 }
 
 } // namespace meshes

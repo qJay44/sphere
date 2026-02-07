@@ -11,9 +11,14 @@
 
 class Mesh : public Transformable {
 public:
-  Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool clearable);
-  Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool clearable);
-  Mesh(const std::vector<VertexPC>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool clearable);
+  Mesh(const Mesh &) = delete;
+  Mesh &operator=(const Mesh &) = delete;
+
+  Mesh(Mesh &&other);
+
+  Mesh(const std::vector<Vertex4 > &vertices, const std::vector<GLuint>& indices, GLenum mode);
+  Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& indices, GLenum mode);
+  Mesh(const std::vector<VertexPC>& vertices, const std::vector<GLuint>& indices, GLenum mode);
   ~Mesh();
 
   static Mesh loadObj(const fspath& file, bool printInfo = false);
@@ -24,8 +29,7 @@ public:
 
 private:
   GLsizei count = 0;
-  GLenum mode;
-  bool autoClear;
+  GLenum mode = 0;
   VAO vao;
   BufferObject vbo{GL_ARRAY_BUFFER};
   BufferObject ebo{GL_ELEMENT_ARRAY_BUFFER};

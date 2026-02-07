@@ -119,7 +119,7 @@ int main() {
 
   // ===== Planet ============================================== //
 
-  Earth earth(512u, 256u, earthInitRadius);
+  Earth earth(50, 20, earthInitRadius);
   earth.loadTextures(earthShader);
 
   // ===== Airplane ============================================= //
@@ -180,7 +180,7 @@ int main() {
   fboScreen.attach2D(GL_COLOR_ATTACHMENT0, screenColorTexture);
   fboScreen.attach2D(GL_DEPTH_ATTACHMENT, screenDepthTexture);
 
-  Mesh axis = meshes::axis(false);
+  Mesh axis = meshes::axis();
   axis.scale(1e4f);
 
   glCullFace(GL_FRONT);

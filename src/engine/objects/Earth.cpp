@@ -4,15 +4,6 @@
 
 //#define USE_DEGUG_LOAD
 
-constexpr vec3 directions[6] {
-  {1.f,  0.f,  0.f},  // Right
-  {-1.f, 0.f,  0.f},  // Left
-  {0.f,  1.f,  0.f},  // Top
-  {0.f,  -1.f, 0.f},  // Bottom
-  {0.f,  0.f,  1.f},  // Back
-  {0.f,  0.f,  -1.f}, // Front
-};
-
 constexpr vec3 terrainFaceColors[6] {
   {0.f,    0.992f, 1.f   },
   {1.f,    0.149f, 0.f   },
@@ -114,26 +105,17 @@ void Earth::loadTextures(const Shader& shader) {
   #endif
 }
 
-Earth::Earth(u32 resolution, u32 chunksPerFace, float radius)
+Earth::Earth(int resolution, int chunksPerSide, float radius)
   : resolution(resolution),
-    chunks(chunksPerFace),
+    chunksPerSide(chunksPerSide),
     radius(radius),
     atmosphere(radius * 1.55f) {
-  terrainFaces = new TerrainFace[6];
-
   build();
 }
 
-Earth::~Earth() {
-  if (terrainFaces) {
-    delete[] terrainFaces;
-    terrainFaces = nullptr;
-  }
-}
-
-const u32&   Earth::getResolution()       const { return resolution;       }
-const float& Earth::getRadius()           const { return radius;           }
-const float& Earth::getHeightmapScale()   const { return heightmapScale;   }
+const int&   Earth::getResolution()     const { return resolution;       }
+const float& Earth::getRadius()         const { return radius;           }
+const float& Earth::getHeightmapScale() const { return heightmapScale;   }
 
 void Earth::rebuild() {
   rebuild(resolution, radius);
@@ -207,14 +189,7 @@ void Earth::drawAtmosphere(const Camera* camera, Shader& shader) const {
 }
 
 void Earth::build() {
-  delete[] terrainFaces;
-  terrainFaces = new TerrainFace[6] (
-    TerrainFace(directions[0], this),
-    TerrainFace(directions[1], this),
-    TerrainFace(directions[2], this),
-    TerrainFace(directions[3], this),
-    TerrainFace(directions[4], this),
-    TerrainFace(directions[5], this)
-  );
+  for (int i = 0; i < 6; i++)
+    terrainFaces[i] = TerrainFace(i, chunksPerSide, resolution, radius);
 }
 

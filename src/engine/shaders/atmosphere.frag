@@ -112,7 +112,7 @@ void main() {
     vec3 pointInAtmosphere = rayOrigin + rayDir * dstToAtmosphere;
     vec3 light = calcLight(pointInAtmosphere, rayDir, dstThroughAtmosphere, color);
 
-    color += light; // ugh.......
+    color += light; // FIXME: It is supposed to be color = light
   }
 
   FragColor = vec4(color, 1.f);

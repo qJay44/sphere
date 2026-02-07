@@ -82,6 +82,8 @@ void Airplane::update(const Earth& earth) {
   trailLeft.update();
   trailRight.update();
 
+  // TODO: The model getting some offset when holding SHIFT and turning
+
   // Turn
   turnQuat = glm::angleAxis(turnMomentumRad, up);
   Mesh::rotate(turnQuat);
@@ -115,8 +117,6 @@ void Airplane::update(const Earth& earth) {
   position = newPos;
   turnMomentumRad *= turnMomentumDecreaseFactor;
   tiltMomentumRad *= tiltMomentumDecreaseFactor;
-
-  // TODO: Trails getting some offset when holding SHIFT and turning
 
   // ========== Add left and right trails ========== //
 

@@ -129,15 +129,26 @@ Mesh Mesh::loadObj(const fspath& file, bool printInfo) {
 
   status::end(true);
 
-  return Mesh(vertices, indices, GL_TRIANGLES, false);
+  return Mesh(vertices, indices, GL_TRIANGLES);
 }
 
+Mesh::Mesh(Mesh &&other) {
+  count = other.count;
+  mode = other.mode;
+  vao = other.vao;
+  vbo = other.vbo;
+  ebo = other.ebo;
 
-Mesh::Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool autoClear)
+  other.vao = VAO();
+  other.vbo = BufferObject();
+  other.ebo = BufferObject();
+}
+
+Mesh::Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indices, GLenum mode)
   : count(indices.size()),
-    mode(mode),
-    autoClear(autoClear)
+    mode(mode)
 {
+  vao.gen();
   vbo.allocate(vertices.data(), sizeof(vertices[0]) * vertices.size(), GL_STATIC_DRAW);
   ebo.allocate(indices.data(), sizeof(GLuint) * indices.size(), GL_STATIC_DRAW);
 
@@ -158,11 +169,11 @@ Mesh::Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indi
   ebo.unbind();
 }
 
-Mesh::Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool autoClear)
+Mesh::Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& indices, GLenum mode)
   : count(indices.size()),
-    mode(mode),
-    autoClear(autoClear)
+    mode(mode)
 {
+  vao.gen();
   vbo.allocate(vertices.data(), sizeof(vertices[0]) * vertices.size(), GL_STATIC_DRAW);
   ebo.allocate(indices.data(), sizeof(GLuint) * indices.size(), GL_STATIC_DRAW);
 
@@ -181,11 +192,11 @@ Mesh::Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& ind
   ebo.unbind();
 }
 
-Mesh::Mesh(const std::vector<VertexPC>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool autoClear)
+Mesh::Mesh(const std::vector<VertexPC>& vertices, const std::vector<GLuint>& indices, GLenum mode)
   : count(indices.size()),
-    mode(mode),
-    autoClear(autoClear)
+    mode(mode)
 {
+  vao.gen();
   vbo.allocate(vertices.data(), sizeof(vertices[0]) * vertices.size(), GL_STATIC_DRAW);
   ebo.allocate(indices.data(), sizeof(GLuint) * indices.size(), GL_STATIC_DRAW);
 
@@ -205,12 +216,11 @@ Mesh::Mesh(const std::vector<VertexPC>& vertices, const std::vector<GLuint>& ind
 }
 
 Mesh::~Mesh() {
-  if (autoClear)
-    clear();
+  clear();
 };
 
 void Mesh::screenDraw(const Camera* camera, Shader& shader) {
-  static const VAO vao;
+  static const VAO& vao = VAO::getEmpty();
   setCamUniforms(camera, shader);
 
   vao.bind();
@@ -225,6 +235,9 @@ void Mesh::clear() {
 }
 
 void Mesh::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) const {
+  assert(count);
+  assert(mode);
+
   vao.bind();
 
   setCamUniforms(camera, shader);

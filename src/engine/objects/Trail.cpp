@@ -32,7 +32,7 @@ void Trail::draw(const Camera* cam, Shader& shader) const {
 
     shader.setUniform3f("u_closestPos", trailPoints.back().position);
 
-    Mesh(vertices, indices, GL_LINES, true).draw(cam, shader);
+    Mesh(vertices, indices, GL_LINES).draw(cam, shader);
   }
 }
 

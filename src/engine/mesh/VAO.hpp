@@ -6,9 +6,16 @@ struct VAO {
     glBindVertexArray(0);
   }
 
-  VAO() {
-    gen();
+  static const VAO& getEmpty() {
+    static VAO emptyVAO;
+
+    if (!emptyVAO.id)
+      emptyVAO.gen();
+
+    return emptyVAO;
   }
+
+  VAO() = default;
 
   void gen() {
     glGenVertexArrays(size, &id);
