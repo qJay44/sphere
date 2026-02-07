@@ -58,7 +58,6 @@ void Airplane::onMouseMove(dvec2 mousePos) {
   camOrientation = q * camOrientation;
 
   camera.setOrientation(camOrientation);
-  updateCamera();
 }
 
 void Airplane::onMouseScroll(dvec2 offset) {
@@ -160,10 +159,8 @@ void Airplane::drawDirections(const Camera* cam, Shader& shader) const {
 }
 
 void Airplane::updateCamera() {
-  const vec3& pivot = position;
-  // TODO: Actually doesn't do anything
   vec3 actualBack = turnQuat * rotateQuat * camera.getBack();
-  vec3 pos = pivot + actualBack * camDistance;
+  vec3 pos = position + actualBack * camDistance;
 
   camera.setUp(up);
   camera.setOrientation(-actualBack);

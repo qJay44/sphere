@@ -22,7 +22,7 @@ void main() {
   vec3 normal = normalize(in_pos);
 
   float height = texture(u_normalheightmapsLand, normal).a;
-  vec3 vertPos = in_pos + normal * height * u_heightmapScale;
+  vec3 vertPos = in_pos + normal * height * exp(u_heightmapScale);
 
   data_out.defaultNormal = normal;
   data_out.texCoord = in_tex;

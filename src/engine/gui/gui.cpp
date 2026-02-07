@@ -105,9 +105,10 @@ void gui::draw() {
     static AtmospherePlotter atmospherePlotter(&earthPtr->atmosphere, 100); // Always valid pointer?
 
     SeparatorText("Atmosphere");
-    SliderFloat("Radius##2", &atmosphere.radius, earthPtr->radius, 500.f);
+    SliderFloat("Radius##2", &atmosphere.radius, earthPtr->radius, 1000.f);
     SliderInt("Scattering points", &atmosphere.scatteringPoints, 2, 50);
     SliderInt("Optical depth points", &atmosphere.opticalDepthPoints, 2, 50);
+    SliderFloat("Sun intensity", &atmosphere.sunIntensity, 0.f, 10.f);
     SliderFloat("Density falloff", &atmosphere.densityFalloff, 0.f, 20.f);
     SliderFloat("Scattering strenth", &atmosphere.scatteringStrength, 0.f, 20.f);
 

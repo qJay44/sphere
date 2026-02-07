@@ -21,9 +21,9 @@ uniform vec3 u_scatteringCoefficients;
 uniform int u_scatteringPoints;
 uniform int u_opticalDepthPoints;
 uniform float u_planetRadius;
-uniform float u_atmosphereRadius;
-uniform float u_atmosphereViewScale;
+uniform float u_radius;
 uniform float u_densityFalloff;
+uniform float u_sunIntensity;
 
 float linearizeDepth(float depth) {
   float z = depth * 2.f - 1.f;
@@ -52,7 +52,7 @@ vec2 raySphere(vec3 center, float radius, vec3 rayOrigin, vec3 rayDir) {
 
 float densityAtPoint(vec3 densitySamplePoint) {
   float heightAboveSurface = length(densitySamplePoint - u_planetCenter) - u_planetRadius;
-  float heightNorm = heightAboveSurface / (u_atmosphereRadius - u_planetRadius);
+  float heightNorm = heightAboveSurface / (u_radius - u_planetRadius);
   float localDensity = exp(-heightNorm * u_densityFalloff) * (1.f - heightNorm);
 
   return localDensity;
@@ -61,25 +61,25 @@ float densityAtPoint(vec3 densitySamplePoint) {
 float opticalDepth(vec3 rayOrigin, vec3 rayDir, float rayLength) {
   vec3 densitySamplePoint = rayOrigin;
   float stepSize = rayLength / (u_opticalDepthPoints - 1);
-  float opticalDepth = 0.f;
+  float res = 0.f;
 
   for (int i = 0; i < u_opticalDepthPoints; i++) {
     float localDensity = densityAtPoint(densitySamplePoint);
-    opticalDepth += localDensity * stepSize;
+    res += localDensity * stepSize;
     densitySamplePoint += rayDir * stepSize;
   }
 
-  return opticalDepth;
+  return res;
 }
 
 vec3 calcLight(vec3 rayOrigin, vec3 rayDir, float rayLength, vec3 originalColor) {
   vec3 inScatteringPoint = rayOrigin;
   vec3 inScatteredLight = vec3(0.f);
-  float stepSize = rayLength / (u_scatteringPoints - 1);
+  float stepSize = rayLength / float(u_scatteringPoints - 1);
   float viewRayOpticalDepth = 0.f;
 
   for (int i = 0; i < u_scatteringPoints; i++) {
-    float sunRayLength = raySphere(u_planetCenter, u_atmosphereRadius, inScatteringPoint, dirToSun).y;
+    float sunRayLength = raySphere(u_planetCenter, u_radius, inScatteringPoint, dirToSun).y;
     float sunRayOpticalDepth = opticalDepth(inScatteringPoint, dirToSun, sunRayLength);
     viewRayOpticalDepth = opticalDepth(inScatteringPoint, -rayDir, stepSize * i);
     float localDensity = densityAtPoint(inScatteringPoint);
@@ -91,7 +91,7 @@ vec3 calcLight(vec3 rayOrigin, vec3 rayDir, float rayLength, vec3 originalColor)
 
   float originalColorTransmittance = exp(-viewRayOpticalDepth);
 
-  return originalColor * originalColorTransmittance + inScatteredLight;
+  return originalColor * originalColorTransmittance + inScatteredLight * u_sunIntensity;
 }
 
 void main() {
@@ -99,7 +99,7 @@ void main() {
   vec3 rayOrigin = u_camPos;
   vec3 rayDir = viewVec / viewVecLength;
   vec3 color = texture(u_screenColorTex, texCoord).rgb;
-  vec2 hitInfo = raySphere(u_planetCenter, u_atmosphereRadius, rayOrigin, rayDir);
+  vec2 hitInfo = raySphere(u_planetCenter, u_radius, rayOrigin, rayDir);
 
   float sceneDepthNonLinear = texture(u_screenDepthTex, texCoord).r;
   float eyeDepth = linearizeDepth(sceneDepthNonLinear);
@@ -112,7 +112,7 @@ void main() {
     vec3 pointInAtmosphere = rayOrigin + rayDir * dstToAtmosphere;
     vec3 light = calcLight(pointInAtmosphere, rayDir, dstThroughAtmosphere, color);
 
-    color = light;
+    color += light; // ugh.......
   }
 
   FragColor = vec4(color, 1.f);

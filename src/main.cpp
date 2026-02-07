@@ -239,14 +239,12 @@ int main() {
 
     airplane.draw(cameraATM, airplaneShader);
 
-    glDisable(GL_CULL_FACE);
-
-    cameraATM->draw(cameraAirplane, linesShader, CAMERA_FLAG_DRAW_FRUSTUM);
 
     FBO::unbind();
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
 
     screenColorTexture.bind();
     screenDepthTexture.bind();
@@ -261,6 +259,8 @@ int main() {
     airplane.drawDirections(cameraATM, linesShader);
 
     light.draw(cameraATM, lightShader);
+
+    cameraATM->draw(cameraAirplane, linesShader, CAMERA_FLAG_DRAW_FRUSTUM);
 
     if (global::drawGlobalAxis)
       axis.draw(cameraATM, linesShader);
