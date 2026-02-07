@@ -9,9 +9,9 @@
 struct TerrainFaceChunk : public Mesh {
   vec3 firstVertex;
   vec3 lastVertex;
-  vec3 _debugColor;
+  vec3 debugColor;
 
-  // TODO: All this additional column and row calculations seems useless
+  // TODO: All this additional column and row calculations seems to be useless
   static TerrainFaceChunk build(
     const vec3& up,
     const Earth* earth,
@@ -74,7 +74,7 @@ struct TerrainFaceChunk : public Mesh {
   ) : Mesh(vertices, indices, GL_TRIANGLES, false) {
     firstVertex = vertices.front().position;
     lastVertex = vertices.back().position;
-    _debugColor = {
+    debugColor = {
       (rand() % 255) / 255.f,
       (rand() % 255) / 255.f,
       (rand() % 255) / 255.f

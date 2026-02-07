@@ -8,7 +8,7 @@
 
 class Airplane : public Moveable, public Mesh {
 public:
-  Airplane(vec3 position, float flyHeight, float meshScale = 1.f);
+  Airplane(vec3 position, float flyHeight, const fspath& model, float meshScale = 1.f);
   ~Airplane();
 
   void moveLeft()  override;

@@ -22,8 +22,6 @@ struct IndexHasher {
     hash_combine(h, i.vertex_index);
     hash_combine(h, i.normal_index);
     hash_combine(h, i.texcoord_index);
-    // TODO:
-    // hash_combine(h, i.vertex_index); // colors
     return h;
   }
 };

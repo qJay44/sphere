@@ -5,16 +5,15 @@
 
 Texture Airplane::texDiffuse;
 
-Airplane::Airplane(vec3 position, float flyHeight, float meshScale)
+Airplane::Airplane(vec3 position, float flyHeight, const fspath& model, float meshScale)
   : Moveable(position, 0.f, 0.f),
-  // TODO Pass path instead
-    Mesh(Mesh::loadObj("res/obj/11804_Airplane_v2_l2.obj")),
+    Mesh(Mesh::loadObj(model)),
     camera(position),
     flyHeight(flyHeight),
     meshScale(meshScale)
 {
   if (texDiffuse.getUniformName().empty())
-    texDiffuse = Texture("res/tex/airplane/11804_Airplane_diff.jpg", {"diffuse0", 0});
+    texDiffuse = Texture(image2D("res/tex/airplane/11804_Airplane_diff.jpg", IMAGE2D_LOAD_STB, true), {"diffuse0", 0});
 
   // Facing +Y
   Mesh::translate(position);
@@ -116,6 +115,8 @@ void Airplane::update(const Earth& earth) {
   position = newPos;
   turnMomentumRad *= turnMomentumDecreaseFactor;
   tiltMomentumRad *= tiltMomentumDecreaseFactor;
+
+  // TODO: Trails getting some offset when holding SHIFT and turning
 
   // ========== Add left and right trails ========== //
 

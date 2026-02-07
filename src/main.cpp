@@ -111,7 +111,7 @@ int main() {
   Shader lightShader("light.vert", "light.frag");
   Shader linesShader("lines.vert", "lines.frag");
 
-  const float earthInitRadius = 500.f;
+  const float earthInitRadius = 300.f;
 
   // ===== Light ================================================ //
 
@@ -127,7 +127,7 @@ int main() {
   vec3 airplanePosInit(0.f);
   float airplaneFlyHeight = 10.f;
   airplanePosInit.z = earthInitRadius + airplaneFlyHeight;
-  Airplane airplane(airplanePosInit, airplaneFlyHeight, 0.001f);
+  Airplane airplane(airplanePosInit, airplaneFlyHeight, "res/obj/11804_Airplane_v2_l2.obj", 0.001f);
   airplane.setSpeedDefault(PI / 100.f);
   airplane.setTurnSpeed(PI / 10.f);
 
@@ -238,7 +238,6 @@ int main() {
     earth.draw(cameraATM, frustum::Frustum(cameraAirplane), earthShader);
 
     airplane.draw(cameraATM, airplaneShader);
-
 
     FBO::unbind();
     glClearColor(0.f, 0.f, 0.f, 1.f);

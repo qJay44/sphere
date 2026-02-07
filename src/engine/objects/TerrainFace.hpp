@@ -36,14 +36,9 @@ struct TerrainFace {
       chunk.clear();
   }
 
-  void draw(const Camera* camera, Shader& shader, frustum::Frustum frustum, const vec3& tfColor) const {
-    static const GLint tfColorLoc = shader.getUniformLoc("u_debug_terrainFaceColor");
-    static const GLint tfChunkColorLoc = shader.getUniformLoc("u_debug_terrainFaceChunkColor");
-
-    shader.setUniform3f(tfColorLoc, tfColor);
-
+  void draw(const Camera* camera, Shader& shader, frustum::Frustum frustum) const {
     for (const TerrainFaceChunk& chunk : chunks) {
-      shader.setUniform3f(tfChunkColorLoc, chunk._debugColor);
+      shader.setUniform3f("u_terrainFaceChunkColor", chunk.debugColor);
 
       vec3 center = (chunk.lastVertex + chunk.firstVertex) * 0.5f;
       float radius = glm::length(chunk.lastVertex - chunk.firstVertex) * 2.f; // Additionally multipling by 2 to keep some chunks when camera is to close to the earth

@@ -65,6 +65,14 @@ void gui::draw() {
     earthPtr->chunks = std::clamp(earthPtr->chunks, 2u, 1024u);    SameLine();
     Text("%d", earthPtr->chunks);
 
+    static int rbFaceChunk = 0;
+    if (RadioButton("Default"     , rbFaceChunk == 0)) rbFaceChunk = 0;
+    if (RadioButton("Color faces" , rbFaceChunk == 1)) rbFaceChunk = 1;
+    if (RadioButton("Color chunks", rbFaceChunk == 2)) rbFaceChunk = 2;
+
+    earthPtr->useTerrainFaceColors = rbFaceChunk == 1;
+    earthPtr->useTerrainFaceChunkColors = rbFaceChunk == 2;
+
     // ++++++++++++++++++++++++++++++++++++++++++ //
 
     SliderFloat("Radius", &earthPtr->radius, 1.f, 500.f);
@@ -120,7 +128,7 @@ void gui::draw() {
 
   if (!airplanePtr) error("The airplane is not linked to gui");
   if (CollapsingHeader("Airplane")) {
-    SliderFloat("Speed", &airplanePtr->speedDefault, 0.f, PI * 2.f);
+    SliderFloat("Speed", &airplanePtr->speed, 0.f, PI * 2.f);
     SetItemTooltip("Radians");
 
     SliderFloat("Fly height", &airplanePtr->flyHeight, 1.f, 100.f);

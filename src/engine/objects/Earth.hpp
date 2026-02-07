@@ -66,6 +66,8 @@ private:
 
   PlanetAtmosphere atmosphere;
 
+  bool useTerrainFaceColors = false;
+  bool useTerrainFaceChunkColors = false;
   bool printBuildInfo = false;
 
 private:

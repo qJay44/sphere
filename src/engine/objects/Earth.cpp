@@ -13,7 +13,7 @@ constexpr vec3 directions[6] {
   {0.f,  0.f,  -1.f}, // Front
 };
 
-constexpr vec3 debug_terrainFaceColors[6] {
+constexpr vec3 terrainFaceColors[6] {
   {0.f,    0.992f, 1.f   },
   {1.f,    0.149f, 0.f   },
   {1.f,    0.251f, 0.988f},
@@ -118,7 +118,7 @@ Earth::Earth(u32 resolution, u32 chunksPerFace, float radius)
   : resolution(resolution),
     chunks(chunksPerFace),
     radius(radius),
-    atmosphere(radius * 1.15f) {
+    atmosphere(radius * 1.55f) {
   terrainFaces = new TerrainFace[6];
 
   build();
@@ -168,6 +168,9 @@ void Earth::draw(const Camera* camera, const frustum::Frustum& frustum, Shader& 
   shader.setUniform1f("u_waterShoreWaveNoiseScale", waterShoreWaveNoiseScale);
   shader.setUniform1f("u_waterShoreWaveNoiseSpeed", waterShoreWaveNoiseSpeed);
   shader.setUniform1f("u_waterShoreWaveNoiseAmplitude", waterShoreWaveNoiseAmplitude);
+  shader.setUniform1f("u_radius", radius);
+  shader.setUniform1f("u_maskTerrainFaceColor", useTerrainFaceColors);
+  shader.setUniform1f("u_maskTerrainFaceChunkColor", useTerrainFaceChunkColors);
   shader.setUniform3f("u_bordersColor", bordersColor);
   shader.setUniform3f("u_waterShallowColor", waterShallowColor);
   shader.setUniform3f("u_waterDeepColor", waterDeepColor);
@@ -180,8 +183,10 @@ void Earth::draw(const Camera* camera, const frustum::Frustum& frustum, Shader& 
   texNormalmapWave0.bind();
   texNormalmapWave1.bind();
 
-  for (u8 i = 0; i < 6; i++)
-    terrainFaces[i].draw(camera, shader, frustum, debug_terrainFaceColors[i]);
+  for (u8 i = 0; i < 6; i++) {
+    shader.setUniform3f("u_terrainFaceColor", terrainFaceColors[i]);
+    terrainFaces[i].draw(camera, shader, frustum);
+  }
 
   texHeightmapsWater.unbind();
   texDistanceFieldWater.unbind();
