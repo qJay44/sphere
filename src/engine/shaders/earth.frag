@@ -143,10 +143,11 @@ void main() {
   vec3 normalWave1 = triplanarNormal(u_normalmapWave1,  u_time * u_waterWaveFreq);
   vec3 normalWaves = normalize(normalWave0 + normalWave1);
   vec3 dirLight = directionalLight(normal);
+  float border = texture(u_borders, defaultNormal).r;
   int deepness = texture(u_heightmapsWater, defaultNormal).r; // [-32768, 32767]
 
-  float border = texture(u_borders, defaultNormal).r;
-  float isWater = 1.f - (sign(deepness) * 0.5f + 0.5f);
+  // water: -1; land: 0 and 1
+  float isWater = floor(-sign(deepness) * 0.5f + 0.5f);
   float isLand = 1.f - isWater;
 
   color = isWater * calculateDeepColor(deepness) + isLand * color;

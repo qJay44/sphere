@@ -24,6 +24,9 @@ void Earth::loadTextures() {
       .target         = GL_TEXTURE_CUBE_MAP,
       .internalFormat = GL_RGBA,
       .format         = GL_RGBA,
+      .wrapS          = GL_CLAMP_TO_EDGE,
+      .wrapT          = GL_CLAMP_TO_EDGE,
+      .wrapR          = GL_CLAMP_TO_EDGE,
     }
   );
 
@@ -40,6 +43,9 @@ void Earth::loadTextures() {
       .type           = GL_SHORT,
       .minFilter      = GL_NEAREST, // NOTE: Required for isampler
       .magFilter      = GL_NEAREST, // NOTE: Required for isampler
+      .wrapS          = GL_CLAMP_TO_EDGE,
+      .wrapT          = GL_CLAMP_TO_EDGE,
+      .wrapR          = GL_CLAMP_TO_EDGE,
       .genMipMap      = false,
     }
   );
@@ -55,6 +61,9 @@ void Earth::loadTextures() {
       .type           = GL_UNSIGNED_SHORT,
       .minFilter      = GL_NEAREST, // NOTE: Required for usampler
       .magFilter      = GL_NEAREST, // NOTE: Required for usampler
+      .wrapS          = GL_CLAMP_TO_EDGE,
+      .wrapT          = GL_CLAMP_TO_EDGE,
+      .wrapR          = GL_CLAMP_TO_EDGE,
       .genMipMap      = false,
     }
   );
@@ -69,6 +78,9 @@ void Earth::loadTextures() {
       .format         = GL_RGBA,
       .minFilter      = GL_LINEAR,
       .magFilter      = GL_LINEAR,
+      .wrapS          = GL_CLAMP_TO_EDGE,
+      .wrapT          = GL_CLAMP_TO_EDGE,
+      .wrapR          = GL_CLAMP_TO_EDGE,
       .genMipMap      = false,
     }
   );
@@ -81,6 +93,9 @@ void Earth::loadTextures() {
       .target         = GL_TEXTURE_CUBE_MAP,
       .minFilter      = GL_LINEAR,
       .magFilter      = GL_LINEAR,
+      .wrapS          = GL_CLAMP_TO_EDGE,
+      .wrapT          = GL_CLAMP_TO_EDGE,
+      .wrapR          = GL_CLAMP_TO_EDGE,
       .genMipMap      = false,
     }
   );
@@ -95,6 +110,9 @@ void Earth::loadTextures() {
       .format         = GL_RED,
       .minFilter      = GL_LINEAR,
       .magFilter      = GL_LINEAR,
+      .wrapS          = GL_CLAMP_TO_EDGE,
+      .wrapT          = GL_CLAMP_TO_EDGE,
+      .wrapR          = GL_CLAMP_TO_EDGE,
       .genMipMap      = false,
     }
   );
@@ -104,12 +122,12 @@ void Earth::loadTextures() {
 
   texBakedOpticalDepth = Texture(ivec2(256), {
     .uniformName    = "u_bakedOpticalDepth",
-    .unit           = 3,
+    .unit           = 2,
     .internalFormat = GL_R32F,
-    .format         = GL_RED,
-    .type           = GL_FLOAT,
     .minFilter      = GL_LINEAR,
     .magFilter      = GL_LINEAR,
+    .wrapS          = GL_CLAMP_TO_EDGE,
+    .wrapT          = GL_CLAMP_TO_EDGE,
     .genMipMap      = false
   });
 

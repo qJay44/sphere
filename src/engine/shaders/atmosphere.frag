@@ -10,7 +10,7 @@ out vec4 FragColor;
 
 layout(binding = 0) uniform sampler2D u_screenColorTex;
 layout(binding = 1) uniform sampler2D u_screenDepthTex;
-layout(binding = 3) uniform sampler2D u_bakedOpticalDepth;
+layout(binding = 2) uniform sampler2D u_bakedOpticalDepth;
 
 uniform vec3 u_camPos;
 uniform vec3 u_camForward;
@@ -63,8 +63,9 @@ float opticalDepth(vec3 rayOrigin, vec3 rayDir) {
   float height = length(u_planetCenter - rayOrigin) - u_planetRadius;
   float heightNorm = height / (u_atmosphereRadius - u_planetRadius);
   float angleNorm = dot(normalize(rayOrigin - u_planetCenter), rayDir) * 0.5f + 0.5f;
+  vec2 uv = vec2(angleNorm, heightNorm);
 
-  return texture(u_bakedOpticalDepth, vec2(angleNorm, heightNorm)).r;
+  return texture(u_bakedOpticalDepth, uv).r;
 }
 
 vec3 calcLight(vec3 rayOrigin, vec3 rayDir, float rayLength, vec3 originalColor) {

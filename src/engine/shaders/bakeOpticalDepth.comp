@@ -5,7 +5,7 @@
 
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
-layout(r8, binding = 0) writeonly uniform image2D imageWrite;
+layout(r32f, binding = 0) writeonly uniform image2D imageWrite;
 
 uniform float u_planetRadius;
 uniform float u_atmosphereRadius;
@@ -70,7 +70,7 @@ void main() {
   vec2 inPoint = vec2(0.f, mix(u_planetRadius, u_atmosphereRadius, heightNorm));
   float dstThroughAtmosphere = raySphere(vec3(planetCenter, 0.f), u_atmosphereRadius, vec3(inPoint, 0.f), vec3(dir, 0.f)).y;
   vec2 outPoint = inPoint + dir * dstThroughAtmosphere;
-  float outScattering = opticalDepth(inPoint + dir * 0.0001f, dir, dstThroughAtmosphere - 0.0002f);
+  float outScattering = opticalDepth(inPoint + dir * 0.01f, dir, dstThroughAtmosphere);
 
   imageStore(imageWrite, texCoord, vec4(outScattering));
 }
