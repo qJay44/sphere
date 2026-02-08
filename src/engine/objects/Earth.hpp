@@ -17,9 +17,9 @@ public:
   const float& getHeightmapScale()   const;
 
   void loadTextures();
-  void rebuild();
-  void rebuild(int resolution, float radius);
+  void build();
   void update(const Light& light);
+  void bakeOpticalDepth();
   void draw(const Camera* camera, const frustum::Frustum& frustum, Shader& shader) const;
   void drawAtmosphere(const Camera* camera, Shader& shader) const;
 
@@ -37,6 +37,7 @@ private:
   Texture texBorders;
   Texture texNormalmapWave0;
   Texture texNormalmapWave1;
+  Texture texBakedOpticalDepth;
 
   TerrainFace terrainFaces[6];
 
@@ -68,8 +69,5 @@ private:
   bool useTerrainFaceColors = false;
   bool useTerrainFaceChunkColors = false;
   bool printBuildInfo = false;
-
-private:
-  void build();
 };
 

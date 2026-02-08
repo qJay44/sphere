@@ -102,6 +102,17 @@ void Earth::loadTextures() {
   texNormalmapWave0 = Texture("res/tex/earth/normalmapWave0.png", {"u_normalmapWave0", 5});
   texNormalmapWave1 = Texture("res/tex/earth/normalmapWave1.png", {"u_normalmapWave1", 6});
 
+  texBakedOpticalDepth = Texture(ivec2(256), {
+    .uniformName    = "u_bakedOpticalDepth",
+    .unit           = 3,
+    .internalFormat = GL_R32F,
+    .format         = GL_RED,
+    .type           = GL_FLOAT,
+    .minFilter      = GL_LINEAR,
+    .magFilter      = GL_LINEAR,
+    .genMipMap      = false
+  });
+
   #endif
 }
 
@@ -117,16 +128,6 @@ const int&   Earth::getResolution()     const { return resolution;       }
 const float& Earth::getRadius()         const { return radius;           }
 const float& Earth::getHeightmapScale() const { return heightmapScale;   }
 
-void Earth::rebuild() {
-  rebuild(resolution, radius);
-};
-
-void Earth::rebuild(int resolution, float radius) {
-  this->resolution = resolution;
-  this->radius = radius;
-  build();
-}
-
 void Earth::update(const Light& light) {
   texHeightmapsWater.update();
   texDistanceFieldWater.update();
@@ -135,7 +136,31 @@ void Earth::update(const Light& light) {
   texBorders.update();
   texNormalmapWave0.update();
   texNormalmapWave1.update();
+  texBakedOpticalDepth.update();
   atmosphere.update(light);
+}
+
+void Earth::build() {
+  for (int i = 0; i < 6; i++)
+    terrainFaces[i] = TerrainFace(i, chunksPerSide, resolution, radius);
+  bakeOpticalDepth();
+}
+
+void Earth::bakeOpticalDepth() {
+  static Shader shader("bakeOpticalDepth.comp");
+  constexpr uvec2 localSize(16); // NOTE: Must match in the shader
+
+  const uvec2 size{256, 256};
+  const uvec2 numGroups = (size + localSize - 1u) / localSize;
+
+  shader.use();
+  shader.setUniform1f("u_planetRadius", radius);
+  shader.setUniform1f("u_atmosphereRadius", atmosphere.radius);
+  shader.setUniform1f("u_densityFalloff", atmosphere.densityFalloff);
+  shader.setUniform1i("u_opticalDepthPoints", atmosphere.opticalDepthPoints);
+  glBindImageTexture(0, texBakedOpticalDepth.getId(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32F);
+  glDispatchCompute(numGroups.x, numGroups.y, 1);
+  glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
 
 void Earth::draw(const Camera* camera, const frustum::Frustum& frustum, Shader& shader) const {
@@ -192,11 +217,8 @@ void Earth::drawAtmosphere(const Camera* camera, Shader& shader) const {
   shader.setUniformMatrix4f("u_camInv", camera->getProjViewInv());
   atmosphere.setUniforms(shader);
 
+  texBakedOpticalDepth.bind();
   Mesh::screenDraw(camera, shader);
-}
-
-void Earth::build() {
-  for (int i = 0; i < 6; i++)
-    terrainFaces[i] = TerrainFace(i, chunksPerSide, resolution, radius);
+  texBakedOpticalDepth.unbind();
 }
 

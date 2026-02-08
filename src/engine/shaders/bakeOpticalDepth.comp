@@ -1,0 +1,77 @@
+#version 460 core
+
+#define FLOAT_MAX 3.4028235e38f
+#define PI 3.141592265359f
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+layout(r8, binding = 0) writeonly uniform image2D imageWrite;
+
+uniform float u_planetRadius;
+uniform float u_atmosphereRadius;
+uniform float u_densityFalloff;
+uniform int u_opticalDepthPoints;
+
+const vec2 planetCenter = vec2(0.f);
+
+vec2 raySphere(vec3 center, float radius, vec3 rayOrigin, vec3 rayDir) {
+  vec3 offset = rayOrigin - center;
+  float a = 1.f;
+  float b = 2.f * dot(offset, rayDir);
+  float c = dot(offset, offset) - radius * radius;
+  float discriminant = b * b - 4.f * a * c;
+
+  if (discriminant > 0.f) {
+    float s = sqrt(discriminant);
+    float dstToSphereNear = max(0.f, (-b - s) / (2.f * a));
+    float dstToSphereFar = (-b + s) / (2.f * a);
+
+    if (dstToSphereFar >= 0.f)
+      return vec2(dstToSphereNear, dstToSphereFar - dstToSphereNear);
+  }
+
+  return vec2(FLOAT_MAX, 0.f);
+}
+
+float densityAtPoint(vec2 densitySamplePoint) {
+  float heightAboveSurface = length(densitySamplePoint - planetCenter) - u_planetRadius;
+  float heightNorm = heightAboveSurface / (u_atmosphereRadius - u_planetRadius);
+  float localDensity = exp(-heightNorm * u_densityFalloff) * (1.f - heightNorm);
+
+  return localDensity;
+}
+
+float opticalDepth(vec2 rayOrigin, vec2 rayDir, float rayLength) {
+  vec2 densitySamplePoint = rayOrigin;
+  float stepSize = rayLength / (u_opticalDepthPoints - 1);
+  float res = 0.f;
+
+  for (int i = 0; i < u_opticalDepthPoints; i++) {
+    float localDensity = densityAtPoint(densitySamplePoint);
+    res += localDensity * stepSize;
+    densitySamplePoint += rayDir * stepSize;
+  }
+
+  return res;
+}
+
+void main() {
+  ivec2 texCoord = ivec2(gl_GlobalInvocationID.xy);
+  ivec2 imgSize = imageSize(imageWrite);
+
+  vec2 uv = vec2(texCoord) / imgSize;
+  float heightNorm = uv.y;
+  float angle = uv.x * PI;
+  vec2 dir = vec2(sin(angle), cos(angle));
+  float y = uv.x * 2.f - 1.f;
+  float x = sin(acos(y));
+  dir = vec2(x, y);
+
+  vec2 inPoint = vec2(0.f, mix(u_planetRadius, u_atmosphereRadius, heightNorm));
+  float dstThroughAtmosphere = raySphere(vec3(planetCenter, 0.f), u_atmosphereRadius, vec3(inPoint, 0.f), vec3(dir, 0.f)).y;
+  vec2 outPoint = inPoint + dir * dstThroughAtmosphere;
+  float outScattering = opticalDepth(inPoint + dir * 0.0001f, dir, dstThroughAtmosphere - 0.0002f);
+
+  imageStore(imageWrite, texCoord, vec4(outScattering));
+}
+

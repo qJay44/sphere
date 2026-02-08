@@ -11,10 +11,13 @@ public:
   Airplane(vec3 position, float flyHeight, const fspath& model, float meshScale = 1.f);
   ~Airplane();
 
-  void moveLeft()  override;
-  void moveRight() override;
-  void moveUp()    override;
-  void moveDown()  override;
+  void moveForward() override;
+  void moveBack()    override;
+  void moveLeft()    override;
+  void moveRight()   override;
+  void moveUp()      override;
+  void moveDown()    override;
+
   void onMouseMove(dvec2 mousePos) override;
   void onMouseScroll(dvec2 offset) override;
 

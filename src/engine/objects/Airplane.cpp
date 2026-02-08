@@ -32,6 +32,9 @@ Airplane::~Airplane() {
   Mesh::clear();
 }
 
+void Airplane::moveForward() {}
+void Airplane::moveBack()    {}
+
 void Airplane::moveLeft()  { turn( 1.f); }
 void Airplane::moveRight() { turn(-1.f); }
 
@@ -81,8 +84,6 @@ void Airplane::turn(float dir) {
 void Airplane::update(const Earth& earth) {
   trailLeft.update();
   trailRight.update();
-
-  // TODO: The model getting some offset when holding SHIFT and turning
 
   // Turn
   turnQuat = glm::angleAxis(turnMomentumRad, up);

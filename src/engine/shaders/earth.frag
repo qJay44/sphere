@@ -87,7 +87,7 @@ vec3 directionalLight(vec3 normal) {
   float lightAmount = (diffuse + u_ambient + specular);
   float intensity = smoothstep(u_radius * 2.5f, 0.f, lightDist);
 
-  return u_lightColor * lightAmount * intensity;
+  return u_lightColor * lightAmount * intensity * u_lightMultiplier;
 }
 
 vec3 triplanarNormal(sampler2D normalmap, float timeStep) {

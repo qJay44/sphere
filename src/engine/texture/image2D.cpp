@@ -64,9 +64,6 @@ void image2D::load(fspath path, GLenum loadType, bool flipVertically) {
   this->loadType = loadType;
   this->flipVertically = flipVertically;
 
-  // TODO: Make it scoped depended?
-  // status::start("Loading", path.string());
-
   switch (loadType) {
     case IMAGE2D_LOAD_NO:
       error("[image2D::load] What?");
@@ -81,8 +78,6 @@ void image2D::load(fspath path, GLenum loadType, bool flipVertically) {
       load_STB();
       this->loadType = IMAGE2D_LOAD_STB;
   }
-
-  // status::end(pixels);
 
   if (!pixels)
     error(std::format("[image2D::load] Didn't load image [{}]", path.string()));

@@ -5,9 +5,9 @@
 
 struct PlanetAtmosphere {
   float radius;
-  int scatteringPoints = 11;
-  int opticalDepthPoints = 11;
-  float densityFalloff = 11.f;
+  int scatteringPoints = 40;
+  int opticalDepthPoints = 50;
+  float densityFalloff = 20.f;
   float scatteringStrength = 0.02f;
   float sunIntensity = 1.5f;
   vec3 scatteringCoefficients = vec3(1.f);
@@ -36,7 +36,7 @@ struct PlanetAtmosphere {
     shader.setUniform1i("u_scatteringPoints", scatteringPoints);
     shader.setUniform1i("u_opticalDepthPoints", opticalDepthPoints);
     shader.setUniform1f("u_densityFalloff", densityFalloff);
-    shader.setUniform1f("u_radius", radius);
+    shader.setUniform1f("u_atmosphereRadius", radius);
     shader.setUniform1f("u_sunIntensity", sunIntensity);
   }
 };

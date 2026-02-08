@@ -186,6 +186,8 @@ int main() {
   glFrontFace(GL_CW);
 
   earth.loadTextures();
+  earth.update(light);
+  earth.bakeOpticalDepth();
 
   // Render loop
   while (!glfwWindowShouldClose(window)) {

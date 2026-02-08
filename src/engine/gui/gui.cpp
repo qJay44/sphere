@@ -1,8 +1,5 @@
 #include "gui.hpp"
 
-#include <algorithm>
-#include <cmath>
-
 #include "AtmospherePlotter.hpp"
 #include "imgui.h"
 #include "glm/gtc/type_ptr.hpp"
@@ -32,15 +29,20 @@ void gui::draw() {
 
   // ===== Planet ======================================================================================== //
 
+  bool rebakeOpticalDepth = false;
+
   if (!earthPtr) error("The earth object is not linked to gui");
   if (CollapsingHeader("Planet")) {
     bool rebuild = false;
     rebuild |= SliderInt("Chunks per side", &earthPtr->chunksPerSide, 1, 20);
     rebuild |= SliderInt("Resolution", &earthPtr->resolution, 2, 100);
-    rebuild |= SliderFloat("Radius", &earthPtr->radius, 1.f, 500.f);
+    bool _r = SliderFloat("Radius", &earthPtr->radius, 1.f, 500.f);
+
+    rebuild |= _r;
+    rebakeOpticalDepth |= _r;
 
     if (rebuild)
-      earthPtr->rebuild();
+      earthPtr->build();
 
     static int rbFaceChunk = 0;
     if (RadioButton("Default"     , rbFaceChunk == 0)) rbFaceChunk = 0;
@@ -75,9 +77,6 @@ void gui::draw() {
     SliderFloat("Light multiplier", &earthPtr->lightMultiplier, 0.1f, 20.f);
     SliderFloat("Ambient", &earthPtr->ambient, 0.0f, 20.f);
     SliderFloat("Specular light", &earthPtr->specularLight, 0.0f, 20.f);
-
-    if (Button("Rebuild"))
-      earthPtr->rebuild();
   }
 
   // ===== Atmosphere ==================================================================================== //
@@ -87,15 +86,18 @@ void gui::draw() {
     static AtmospherePlotter atmospherePlotter(&earthPtr->atmosphere, 100); // Always valid pointer?
 
     SeparatorText("Atmosphere");
-    SliderFloat("Radius##2", &atmosphere.radius, earthPtr->radius, 1000.f);
-    SliderInt("Scattering points", &atmosphere.scatteringPoints, 2, 50);
-    SliderInt("Optical depth points", &atmosphere.opticalDepthPoints, 2, 50);
-    SliderFloat("Sun intensity", &atmosphere.sunIntensity, 0.f, 10.f);
-    SliderFloat("Density falloff", &atmosphere.densityFalloff, 0.f, 20.f);
-    SliderFloat("Scattering strenth", &atmosphere.scatteringStrength, 0.f, 20.f);
+    rebakeOpticalDepth |= SliderFloat("Radius##2", &atmosphere.radius, earthPtr->radius, 1000.f);
+    rebakeOpticalDepth |= SliderInt("Scattering points", &atmosphere.scatteringPoints, 2, 50);
+    rebakeOpticalDepth |= SliderInt("Optical depth points", &atmosphere.opticalDepthPoints, 2, 50);
+    rebakeOpticalDepth |= SliderFloat("Sun intensity", &atmosphere.sunIntensity, 0.f, 10.f);
+    rebakeOpticalDepth |= SliderFloat("Density falloff", &atmosphere.densityFalloff, 0.f, 20.f);
+    rebakeOpticalDepth |= SliderFloat("Scattering strenth", &atmosphere.scatteringStrength, 0.f, 10.f);
 
     atmospherePlotter.renderDensity(1.f);
     atmospherePlotter.renderTransmittance(5.f);
+
+    if (rebakeOpticalDepth)
+      earthPtr->bakeOpticalDepth();
   }
 
   // ===== Airplane ====================================================================================== //
@@ -137,20 +139,20 @@ void gui::draw() {
   Camera& camAirplane = airplanePtr->getCamera();
 
   if (CollapsingHeader("Airplane Camera")) {
-    SliderFloat("Near",     &camAirplane.nearPlane, 0.01f, 1.f);
-    SliderFloat("Far",      &camAirplane.farPlane,  10.f , 1000.f);
-    SliderFloat("Distance", &airplanePtr->camDistance,  1.f  , 50.f);
-    SliderFloat("FOV",      &camAirplane.fov,       45.f , 179.f);
+    SliderFloat("Near", &camAirplane.nearPlane, 0.01f, 1.f);
+    SliderFloat("Far", &camAirplane.farPlane, 10.f, 1000.f);
+    SliderFloat("Distance", &airplanePtr->camDistance, 1.f, 50.f);
+    SliderFloat("FOV", &camAirplane.fov, 45.f, 179.f);
   }
 
   // ===== Spectate camera =============================================================================== //
 
   if (!camSpecatePtr) error("The spectate camera is not linked to gui");
   if (CollapsingHeader("Spectate camera")) {
-    SliderFloat("Near##2",  &camSpecatePtr->nearPlane, 0.01f, 1.f);
-    SliderFloat("Far##2",   &camSpecatePtr->farPlane,  10.f , 1000.f);
-    SliderFloat("Speed##2", &camSpecatePtr->speed,     1.f  , 50.f);
-    SliderFloat("FOV##2",   &camSpecatePtr->fov,       45.f , 179.f);
+    SliderFloat("Near##2", &camSpecatePtr->nearPlane, 0.01f, 1.f);
+    SliderFloat("Far##2", &camSpecatePtr->farPlane,  10.f, 1000.f);
+    SliderFloat("Speed##2", &camSpecatePtr->speedDefault, 1.f, 50.f);
+    SliderFloat("FOV##2", &camSpecatePtr->fov, 45.f, 179.f);
     DragFloat("Yaw##2", &camSpecatePtr->yaw);
     DragFloat("Pitch##2", &camSpecatePtr->pitch);
     DragFloat3("Position", glm::value_ptr(camSpecatePtr->position));
