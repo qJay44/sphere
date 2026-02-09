@@ -3,13 +3,14 @@
 #include "Moveable.hpp"
 #include "Shader.hpp"
 
-#define CAMERA_FLAG_DRAW_RIGHT    1
-#define CAMERA_FLAG_DRAW_UP       1 << 1
-#define CAMERA_FLAG_DRAW_FORWARD  1 << 2
-#define CAMERA_FLAG_DRAW_MESH     1 << 3
-#define CAMERA_FLAG_DRAW_FRUSTUM  1 << 4
-
-#define CAMERA_FLAG_DRAW_DIRECTIONS (CAMERA_FLAG_DRAW_RIGHT | CAMERA_FLAG_DRAW_UP | CAMERA_FLAG_DRAW_FORWARD)
+enum CameraFlags : u32 {
+  CameraFlags_None        = 0,
+  CameraFlags_DrawRight   = 1,
+  CameraFlags_DrawUp      = 1 << 1,
+  CameraFlags_DrawForward = 1 << 2,
+  CameraFlags_DrawFrustum = 1 << 3,
+  CameraFlags_DrawDirections = CameraFlags_DrawRight | CameraFlags_DrawUp | CameraFlags_DrawForward,
+};
 
 class Camera : public Moveable {
 public:
@@ -18,20 +19,22 @@ public:
   Camera(Camera&&) = delete;
   Camera(vec3 pos, float yaw = PI_2, float pitch = 0.f);
 
-  const float& getNearPlane() const;
-  const float& getFarPlane()  const;
-  const float& getFov()       const;
-  const mat4&  getProj()      const;
-  const mat4&  getView()      const;
-  const mat4&  getProjView()  const;
+  const float& getNearPlane()   const;
+  const float& getFarPlane()    const;
+  const float& getFov()         const;
+  const float& getAspectRatio() const;
+  const mat4&  getProj()        const;
+  const mat4&  getView()        const;
+  const mat4&  getProjView()    const;
 
   mat4 getProjViewInv() const;
 
   void setNearPlane(float p);
   void setFarPlane(float p);
+  void setFlags(u32 f);
 
   void update();
-  void draw(Camera& camToDraw, Shader& shader, u32 flags = 0) const;
+  void draw(const Camera* cam, Shader& shader) const;
 
 protected:
   friend struct gui;
@@ -45,5 +48,7 @@ protected:
   mat4 proj = mat4(1.f);
   mat4 view = mat4(1.f);
   mat4 pv   = mat4(1.f);
+
+  u32 flags = CameraFlags_DrawFrustum;
 };
 

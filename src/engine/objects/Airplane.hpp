@@ -5,6 +5,15 @@
 #include "Trail.hpp"
 #include "glm/gtc/quaternion.hpp"
 
+enum AirplaneFlags : u32 {
+  AirplaneFlags_None        = 0,
+  AirplaneFlags_DrawRight   = 1,
+  AirplaneFlags_DrawUp      = 1 << 1,
+  AirplaneFlags_DrawForward = 1 << 2,
+  AirplaneFlags_DrawFrustum = 1 << 3,
+  AirplaneFlags_DrawDirections = AirplaneFlags_DrawRight | AirplaneFlags_DrawUp | AirplaneFlags_DrawForward,
+};
+
 class Airplane : public Moveable, public Mesh {
 public:
   Airplane(vec3 position, float flyHeight, const fspath& model, float meshScale = 1.f);
@@ -60,11 +69,10 @@ private:
   glm::quat turnQuat   = glm::identity<glm::quat>();
   glm::quat rotateQuat = glm::identity<glm::quat>();
 
-  bool showRight = false;
-  bool showUp = false;
-  bool showForward = false;
+  u32 flags = 0;
 
 private:
   void updateCamera();
+  void updateTrails();
 };
 

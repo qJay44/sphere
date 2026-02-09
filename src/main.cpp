@@ -232,12 +232,16 @@ int main() {
 
     light.setUniforms(earthShader);
     light.setUniforms(airplaneShader);
+    light.setUniforms(atmosphereShader);
 
     // ===== Main scene =========================================== //
 
     fboScreen.bind();
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    light.draw(cameraATM, lightShader);
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
@@ -256,8 +260,6 @@ int main() {
     screenColorTexture.bind();
     screenDepthTexture.bind();
 
-    light.setUniforms(atmosphereShader);
-
     earth.drawAtmosphere(cameraATM, atmosphereShader);
 
     screenColorTexture.unbind();
@@ -267,9 +269,7 @@ int main() {
     airplane.drawLights(cameraATM, lightShader);
     airplane.drawDirections(cameraATM, linesShader);
 
-    light.draw(cameraATM, lightShader);
-
-    cameraATM->draw(cameraAirplane, linesShader, CAMERA_FLAG_DRAW_FRUSTUM);
+    cameraAirplane.draw(cameraATM, linesShader);
 
     if (global::drawGlobalAxis)
       axis.draw(cameraATM, linesShader);

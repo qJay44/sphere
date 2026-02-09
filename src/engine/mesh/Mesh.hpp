@@ -21,7 +21,9 @@ public:
   Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& indices, GLenum mode);
   Mesh(const std::vector<VertexPC>& vertices, const std::vector<GLuint>& indices, GLenum mode);
 
-  Mesh(const std::vector<Vertex4>& vertices, GLenum mode, GLenum usage);
+  Mesh(const std::vector<Vertex4>&  vertices, GLenum mode, GLenum usage);
+  Mesh(const std::vector<VertexPT>& vertices, GLenum mode, GLenum usage);
+  Mesh(const std::vector<VertexPC>& vertices, GLenum mode, GLenum usage);
 
   ~Mesh();
 

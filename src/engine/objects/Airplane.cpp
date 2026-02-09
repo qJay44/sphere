@@ -28,6 +28,9 @@ Airplane::Airplane(vec3 position, float flyHeight, const fspath& model, float me
   camera.setPosition(position + getBack() * camDistance);
   camera.setView(this);
   camera.update();
+
+  trailLeft.width = 0.02f;
+  trailLeft.duration = 0.5f;
 }
 
 Airplane::~Airplane() {
@@ -51,13 +54,16 @@ void Airplane::onMouseMove(dvec2 mousePos) {
   vec2 delta = glm::radians(dvec2(camera.getSensitivity()) * distFromCenter / winCenter);
   vec3 camOrientation = camera.getOrientation();
 
+  // No vertical rotation if almost looking down or up
   float cosAngle = dot(camera.getUp(), camOrientation);
   if (cosAngle * glm::sign(delta.y) > 0.99f)
     delta.y = 0.f;
 
+  // Horizontal
   glm::quat q = glm::angleAxis(delta.x, camera.getUp());
   camOrientation = q * camOrientation;
 
+  // Vertical
   q = glm::angleAxis(delta.y, camera.getRight());
   camOrientation = q * camOrientation;
 
@@ -84,70 +90,41 @@ void Airplane::turn(float dir) {
 }
 
 void Airplane::update(const Earth& earth, const Camera* cam) {
-  trailRight.width = trailLeft.width;
-  trailRight.duration = trailLeft.duration;
-
-  trailLeft.update(cam);
-  trailRight.update(cam);
-
   // Turn
   turnQuat = glm::angleAxis(turnMomentumRad, up);
   Mesh::rotate(turnQuat);
   vec3 right = turnQuat * getRight();
-  vec3& forward = orientation;
 
   // Tilt
-  Mesh::rotate(glm::angleAxis(tiltMomentumRad, -forward));
+  Mesh::rotate(glm::angleAxis(tiltMomentumRad, -orientation));
   tiltRecoverMomentumRad += tiltMomentumRad;
 
   // Move forward
   float frameSpeedRad = speed * global::dt;
-  vec3 newPos = normalize(position) + forward * frameSpeedRad;
+  vec3 newPos = normalize(position) + orientation * frameSpeedRad;
   vec3 gravityUp = normalize(newPos);
   newPos = gravityUp * (earth.getRadius() + flyHeight);
   Mesh::translate(newPos - position);
 
-  // Rotate so that airplane's forward is perpendicular to the planet
+  // Rotate so that airplane's orientation is perpendicular to the planet
   // Finding left since local left (-right) can be tilted up or down
-  rotateQuat = glm::angleAxis(frameSpeedRad, normalize(cross(up, forward)));
+  rotateQuat = glm::angleAxis(frameSpeedRad, normalize(cross(up, orientation)));
   Mesh::rotate(rotateQuat);
 
   // Recovering from tilt
   float tiltRecover = tiltRecoverMomentumRad * tiltRecoverMomentumDecreaseFactor;
-  Mesh::rotate(glm::angleAxis(tiltRecover, forward));
+  Mesh::rotate(glm::angleAxis(tiltRecover, orientation));
   tiltRecoverMomentumRad -= tiltRecover;
 
   up = gravityUp;
   right = -rotMat[0];
-  forward = normalize(cross(up, right));
+  orientation = normalize(cross(up, right));
   position = newPos;
   turnMomentumRad *= turnMomentumDecreaseFactor;
   tiltMomentumRad *= tiltMomentumDecreaseFactor;
 
-  // ========== Add left and right trails ========== //
-
-  vec3 trailLeftPos = position;
-
-  trailLeftPos += normalize(cross(forward, -right))  * trailOffset.y * meshScale;
-  trailLeftPos += forward * trailOffset.z * meshScale;
-
-  vec3 trailRightPos = trailLeftPos;
-
-  lightLeft.setTrans(trailLeftPos);
-  lightRight.setTrans(trailRightPos);
-
-  trailLeftPos += right * trailOffset.x * meshScale;
-  trailRightPos += -right * trailOffset.x * meshScale;
-
-  trailLeft.add(trailLeftPos);
-  trailRight.add(trailRightPos);
-
-  lightLeft.setTrans(trailLeftPos);
-  lightRight.setTrans(trailRightPos);
-
-  // =============================================== //
-
   updateCamera();
+  updateTrails();
 }
 
 void Airplane::draw(const Camera* camera, Shader& shader) const {
@@ -176,9 +153,9 @@ void Airplane::drawLights(const Camera* camera, Shader& shader) const {
 }
 
 void Airplane::drawDirections(const Camera* camera, Shader& shader) const {
-  if (showRight)   meshes::line(position, position + getRight() , global::red).draw(camera, shader);
-  if (showUp)      meshes::line(position, position + up         , global::green).draw(camera, shader);
-  if (showForward) meshes::line(position, position + orientation, global::blue).draw(camera, shader);
+  if (flags & AirplaneFlags_DrawRight)   meshes::line(position, position + getRight() , global::red  ).draw(camera, shader);
+  if (flags & AirplaneFlags_DrawUp)      meshes::line(position, position + up         , global::green).draw(camera, shader);
+  if (flags & AirplaneFlags_DrawForward) meshes::line(position, position + orientation, global::blue ).draw(camera, shader);
 }
 
 void Airplane::updateCamera() {
@@ -189,5 +166,31 @@ void Airplane::updateCamera() {
   camera.setOrientation(-actualBack);
   camera.setPosition(pos);
   camera.update();
+}
+
+void Airplane::updateTrails() {
+  const vec3& right = -rotMat[0];
+
+  vec3 trailLeftPos = position;
+
+  trailLeftPos += normalize(cross(orientation, -right))  * trailOffset.y * meshScale;
+  trailLeftPos += orientation * trailOffset.z * meshScale;
+
+  vec3 trailRightPos = trailLeftPos;
+
+  trailLeftPos += right * trailOffset.x * meshScale;
+  trailRightPos += -right * trailOffset.x * meshScale;
+
+  trailLeft.add(trailLeftPos);
+  trailRight.add(trailRightPos);
+
+  lightLeft.setTrans(trailLeftPos);
+  lightRight.setTrans(trailRightPos);
+
+  trailRight.width = trailLeft.width;
+  trailRight.duration = trailLeft.duration;
+
+  trailLeft.update(&camera);
+  trailRight.update(&camera);
 }
 

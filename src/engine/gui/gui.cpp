@@ -125,13 +125,17 @@ void gui::draw() {
 
     SeparatorText("Trail");
     SliderFloat3("Trails offset", glm::value_ptr(airplanePtr->trailOffset), -10000.f, 10000.f);
-    SliderFloat("Width", &airplanePtr->trailLeft.width, 0.f, 10.f);
+    SliderFloat("Width", &airplanePtr->trailLeft.width, 0.f, 0.5f);
     SliderFloat("Duration", &airplanePtr->trailLeft.duration, 0.f, 10.f);
 
-    SeparatorText("Flags");
-    Checkbox("Show right", &airplanePtr->showRight);
-    Checkbox("Show up", &airplanePtr->showUp);
-    Checkbox("Show forward", &airplanePtr->showForward);
+    if (TreeNode("Flags")) {
+      CheckboxFlags("Right", &airplanePtr->flags, AirplaneFlags_DrawRight);
+      CheckboxFlags("Up", &airplanePtr->flags, AirplaneFlags_DrawUp);
+      CheckboxFlags("Forward", &airplanePtr->flags, AirplaneFlags_DrawForward);
+      CheckboxFlags("Frustum", &airplanePtr->flags, AirplaneFlags_DrawFrustum);
+
+      TreePop();
+    }
   }
 
   // ===== Airplane Camera =============================================================================== //
@@ -143,6 +147,14 @@ void gui::draw() {
     SliderFloat("Far", &camAirplane.farPlane, 10.f, 1000.f);
     SliderFloat("Distance", &airplanePtr->camDistance, 1.f, 50.f);
     SliderFloat("FOV", &camAirplane.fov, 45.f, 179.f);
+
+    if (TreeNode("Flags")) {
+      CheckboxFlags("Right", &camAirplane.flags, CameraFlags_DrawRight);
+      CheckboxFlags("Up", &camAirplane.flags, CameraFlags_DrawUp);
+      CheckboxFlags("Forward", &camAirplane.flags, CameraFlags_DrawForward);
+
+      TreePop();
+    }
   }
 
   // ===== Spectate camera =============================================================================== //
@@ -156,6 +168,15 @@ void gui::draw() {
     DragFloat("Yaw##2", &camSpecatePtr->yaw);
     DragFloat("Pitch##2", &camSpecatePtr->pitch);
     DragFloat3("Position", glm::value_ptr(camSpecatePtr->position));
+
+    if (TreeNode("Flags")) {
+      CheckboxFlags("Right", &camSpecatePtr->flags, CameraFlags_DrawRight);
+      CheckboxFlags("Up", &camSpecatePtr->flags, CameraFlags_DrawUp);
+      CheckboxFlags("Forward", &camSpecatePtr->flags, CameraFlags_DrawForward);
+      CheckboxFlags("Frustum", &camSpecatePtr->flags, CameraFlags_DrawFrustum);
+
+      TreePop();
+    }
   }
 
   // ===== Light ========================================================================================= //

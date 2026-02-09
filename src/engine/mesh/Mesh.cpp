@@ -242,6 +242,48 @@ Mesh::Mesh(const std::vector<Vertex4>& vertices, GLenum mode, GLenum usage)
   vbo.unbind();
 }
 
+Mesh::Mesh(const std::vector<VertexPT>& vertices, GLenum mode, GLenum usage)
+  : count(vertices.size()),
+    mode(mode),
+    drawFunc(Mesh::drawArrays)
+{
+  vao.gen();
+  vbo.allocate(vertices.data(), sizeof(vertices[0]) * vertices.size(), usage);
+
+  vao.bind();
+  vbo.bind();
+
+  size_t typeSize = sizeof(float);
+  GLsizei stride = sizeof(vertices[0]);
+
+  vao.linkAttrib(0, 3, GL_FLOAT, stride, (void*)(0 * typeSize));
+  vao.linkAttrib(1, 2, GL_FLOAT, stride, (void*)(3 * typeSize));
+
+  vao.unbind();
+  vbo.unbind();
+}
+
+Mesh::Mesh(const std::vector<VertexPC>& vertices, GLenum mode, GLenum usage)
+  : count(vertices.size()),
+    mode(mode),
+    drawFunc(Mesh::drawArrays)
+{
+  vao.gen();
+  vbo.allocate(vertices.data(), sizeof(vertices[0]) * vertices.size(), usage);
+
+  vao.bind();
+  vbo.bind();
+
+  size_t typeSize = sizeof(float);
+  GLsizei stride = sizeof(vertices[0]);
+
+  vao.linkAttrib(0, 3, GL_FLOAT, stride, (void*)(0 * typeSize));
+  vao.linkAttrib(1, 3, GL_FLOAT, stride, (void*)(3 * typeSize));
+
+  vao.unbind();
+  vbo.unbind();
+}
+
 Mesh::~Mesh() {
   clear();
 };

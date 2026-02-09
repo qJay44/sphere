@@ -2,7 +2,7 @@
 
 #include <vector>
 
-Trail::Trail() : Mesh({}, GL_TRIANGLE_STRIP, GL_DYNAMIC_DRAW) {}
+Trail::Trail() : Mesh({VertexPC{}}, GL_TRIANGLE_STRIP, GL_DYNAMIC_DRAW) {}
 
 void Trail::add(const vec3& pos) {
   points.push_back({pos, global::time});
@@ -12,7 +12,7 @@ void Trail::update(const Camera* cam) {
   while (!points.empty() && (global::time - points.front().timestamp > duration))
     points.erase(points.begin());
 
-  std::vector<Vertex4> vertices;
+  std::vector<VertexPC> vertices;
 
   for (size_t i = 0; i < points.size(); i++) {
     const vec3& pos = points[i].position;

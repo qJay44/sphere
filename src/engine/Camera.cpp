@@ -15,12 +15,13 @@ Camera::Camera(vec3 pos, float yaw, float pitch) : Moveable(pos, yaw, pitch) {
   update();
 };
 
-const float& Camera::getNearPlane() const { return nearPlane; }
-const float& Camera::getFarPlane()  const { return farPlane;  }
-const float& Camera::getFov()       const { return fov;       }
-const mat4&  Camera::getProj()      const { return proj;      }
-const mat4&  Camera::getView()      const { return view;      }
-const mat4&  Camera::getProjView()  const { return pv;        }
+const float& Camera::getNearPlane()   const { return nearPlane;   }
+const float& Camera::getFarPlane()    const { return farPlane;    }
+const float& Camera::getFov()         const { return fov;         }
+const float& Camera::getAspectRatio() const { return aspectRatio; }
+const mat4&  Camera::getProj()        const { return proj;        }
+const mat4&  Camera::getView()        const { return view;        }
+const mat4&  Camera::getProjView()    const { return pv;          }
 
 mat4 Camera::getProjViewInv() const {
   return glm::inverse(pv);
@@ -28,6 +29,7 @@ mat4 Camera::getProjViewInv() const {
 
 void Camera::setNearPlane(float p) { nearPlane = p; }
 void Camera::setFarPlane(float p) { farPlane = p; }
+void Camera::setFlags(u32 f) { flags = f; }
 
 void Camera::update() {
   vec2 winSize = global::getWinSize();
@@ -42,32 +44,23 @@ void Camera::update() {
     glfwSetCursorPos(global::window, winCenter.x, winCenter.y);
 }
 
-void Camera::draw(Camera& camToDraw, Shader& shader, u32 flags) const {
-  if (&camToDraw != this) {
-    static Mesh camMesh = meshes::cube({1.f, 0.f, 1.f});
+void Camera::draw(const Camera* cam, Shader& shader) const {
+  if (this != cam) {
+    const vec3& p = position;
 
-    camToDraw.update();
+    if (flags & CameraFlags_DrawRight)
+      meshes::line(p, p + getRight(), global::red).draw(cam, shader);
 
-    const vec3& camToDrawPos = camToDraw.position;
+    if (flags & CameraFlags_DrawUp)
+      meshes::line(p, p + up, global::green).draw(cam, shader);
 
-    camMesh.translate(camToDrawPos);
+    if (flags & CameraFlags_DrawForward)
+      meshes::line(p, p + getForward(), global::blue).draw(cam, shader);
 
-    Mesh frustumMesh = meshes::frustum(camToDraw);
-
-    if (flags & CAMERA_FLAG_DRAW_RIGHT)
-      meshes::line(camToDrawPos, camToDrawPos + camToDraw.getRight(), {1.f, 0.f, 0.f}).draw(this, shader);
-
-    if (flags & CAMERA_FLAG_DRAW_UP)
-      meshes::line(camToDrawPos, camToDrawPos + camToDraw.up, {0.f, 1.f, 0.f}).draw(this, shader);
-
-    if (flags & CAMERA_FLAG_DRAW_FORWARD)
-      meshes::line(camToDrawPos, camToDrawPos + camToDraw.getForward(), {0.f, 0.f, 1.f}).draw(this, shader);
-
-    if (flags & CAMERA_FLAG_DRAW_MESH)
-      camMesh.draw(this, shader);
-
-    if (flags & CAMERA_FLAG_DRAW_FRUSTUM)
-      frustumMesh.draw(this, shader);
+    if (flags & CameraFlags_DrawFrustum) {
+      Mesh frustumMesh = meshes::frustum(*this);
+      frustumMesh.draw(cam, shader);
+    }
   }
 }
 

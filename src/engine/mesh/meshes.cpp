@@ -13,11 +13,7 @@ Mesh line(vec3 p1, vec3 p2, vec3 color) {
     {p2, color}
   };
 
-  std::vector<GLuint> indices{
-    0, 1
-  };
-
-  return Mesh(vertices, indices, GL_LINES);
+  return Mesh(vertices, GL_LINES, GL_STATIC_DRAW);
 }
 
 Mesh axis() {
@@ -30,13 +26,7 @@ Mesh axis() {
     {{0.f, 0.f, 1.f}, global::blue},
   };
 
-  std::vector<GLuint> indices{
-    0, 1,
-    2, 3,
-    4, 5
-  };
-
-  return Mesh(vertices, indices, GL_LINES);
+  return Mesh(vertices, GL_LINES, GL_STATIC_DRAW);
 }
 
 Mesh plane(vec3 color, GLenum mode) {
@@ -176,9 +166,7 @@ Mesh cube(vec3 color) {
 Mesh frustum(const Camera& cam, vec3 color) {
   frustum::Frustum frustum(cam);
 
-  ivec2 winSize;
-  glfwGetWindowSize(global::window, &winSize.x, &winSize.y);
-  float aspect = static_cast<float>(winSize.x) / winSize.y;
+  const float& aspect = cam.getAspectRatio();
 
   vec3 camCrossUp = normalize(cross(cam.getForward(), cam.getLeft()));
   float fovRad = glm::radians(cam.getFov());
