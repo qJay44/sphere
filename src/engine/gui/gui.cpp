@@ -91,7 +91,9 @@ void gui::draw() {
     rebakeOpticalDepth |= SliderInt("Optical depth points", &atmosphere.opticalDepthPoints, 2, 50);
     rebakeOpticalDepth |= SliderFloat("Sun intensity", &atmosphere.sunIntensity, 0.f, 10.f);
     rebakeOpticalDepth |= SliderFloat("Density falloff", &atmosphere.densityFalloff, 0.f, 20.f);
-    rebakeOpticalDepth |= SliderFloat("Scattering strenth", &atmosphere.scatteringStrength, 0.f, 10.f);
+    rebakeOpticalDepth |= SliderFloat("Scattering strenth", &atmosphere.scatteringStrength, 0.f, 1.f);
+
+    Checkbox("Gamma correction", &atmosphere.useGammaCorrection);
 
     atmospherePlotter.renderDensity(1.f);
     atmospherePlotter.renderTransmittance(5.f);
@@ -123,10 +125,8 @@ void gui::draw() {
 
     SeparatorText("Trail");
     SliderFloat3("Trails offset", glm::value_ptr(airplanePtr->trailOffset), -10000.f, 10000.f);
-    SliderFloat("Duration", &airplanePtr->trailDuration, 0.f, 30.f);
-    SliderFloat("Alpha factor", &airplanePtr->trailAlphaFactor, 0.f, 1.f);
-    ColorEdit3("Color", glm::value_ptr(airplanePtr->trailLeft.color));
-    airplanePtr->trailRight.color = airplanePtr->trailLeft.color;
+    SliderFloat("Width", &airplanePtr->trailLeft.width, 0.f, 10.f);
+    SliderFloat("Duration", &airplanePtr->trailLeft.duration, 0.f, 10.f);
 
     SeparatorText("Flags");
     Checkbox("Show right", &airplanePtr->showRight);

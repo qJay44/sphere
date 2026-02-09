@@ -1,17 +1,21 @@
 #version 460 core
 
-layout(location = 0) in vec3 in_pos;
-layout(location = 1) in vec3 in_color;
+layout(location = 0) in vec3 inPos;
+layout(location = 1) in vec3 inColor;
+layout(location = 2) in vec2 inTex;
+layout(location = 3) in vec3 inNormal;
 
-out vec4 color;
+out float alpha;
+out vec2 texCoord;
 
 uniform mat4 u_camPV;
-uniform vec3 u_closestPos;
-uniform float u_alphaFactor;
+uniform mat4 u_model;
+uniform float u_fade;
 
 void main() {
-  float len = length(in_pos - u_closestPos);
-  color = vec4(in_color, 1.f - len * u_alphaFactor);
-  gl_Position = u_camPV * vec4(in_pos, 1.f);
+  alpha = inColor.r;
+  texCoord = inTex;
+
+  gl_Position = u_camPV * u_model * vec4(inPos, 1.f);
 }
 

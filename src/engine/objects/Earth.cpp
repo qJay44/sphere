@@ -4,15 +4,6 @@
 
 //#define USE_DEGUG_LOAD
 
-constexpr vec3 terrainFaceColors[6] {
-  {0.f,    0.992f, 1.f   },
-  {1.f,    0.149f, 0.f   },
-  {1.f,    0.251f, 0.988f},
-  {0.f,    0.976f, 0.173f},
-  {0.024f, 0.204f, 0.988f},
-  {0.996f, 0.984f, 0.169f},
-};
-
 void Earth::loadTextures() {
   #ifdef USE_DEGUG_LOAD
 
@@ -155,6 +146,7 @@ void Earth::update(const Light& light) {
   texNormalmapWave0.update();
   texNormalmapWave1.update();
   texBakedOpticalDepth.update();
+
   atmosphere.update(light);
 }
 
@@ -215,10 +207,8 @@ void Earth::draw(const Camera* camera, const frustum::Frustum& frustum, Shader& 
   texNormalmapWave0.bind();
   texNormalmapWave1.bind();
 
-  for (u8 i = 0; i < 6; i++) {
-    shader.setUniform3f("u_terrainFaceColor", terrainFaceColors[i]);
-    terrainFaces[i].draw(camera, shader, frustum);
-  }
+  for (const TerrainFace& tf : terrainFaces)
+    tf.draw(camera, shader, frustum);
 
   texHeightmapsWater.unbind();
   texDistanceFieldWater.unbind();

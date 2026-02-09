@@ -7,7 +7,6 @@ out vec3 viewVec;
 uniform mat4 u_camInv;
 uniform vec3 u_camPos;
 uniform vec3 u_lightPos;
-uniform vec3 u_planetCenter;
 
 const vec2 vertices[] = vec2[](
   vec2(-1, -1),
@@ -31,7 +30,7 @@ void main() {
   vec3 vert = vec3(vertices[gl_VertexID], 0.f);
   texCoord = vert.xy * 0.5f + 0.5f;
   viewVec = calcViewVec(texCoord);
-  dirToSun = normalize(u_lightPos - u_planetCenter);
+  dirToSun = normalize(u_lightPos - u_camPos);
 	gl_Position = vec4(vert, 1.f);
 }
 

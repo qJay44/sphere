@@ -10,7 +10,9 @@ Airplane::Airplane(vec3 position, float flyHeight, const fspath& model, float me
     Mesh(Mesh::loadObj(model)),
     camera(position),
     flyHeight(flyHeight),
-    meshScale(meshScale)
+    meshScale(meshScale),
+    lightLeft(position, 0.1f, global::green),
+    lightRight(position, 0.1f, global::red)
 {
   if (texDiffuse.getUniformName().empty())
     texDiffuse = Texture(image2D("res/tex/airplane/11804_Airplane_diff.jpg", IMAGE2D_LOAD_STB, true), {"diffuse0", 0});
@@ -81,9 +83,12 @@ void Airplane::turn(float dir) {
     tiltMomentumRad += turnMomentumRad;
 }
 
-void Airplane::update(const Earth& earth) {
-  trailLeft.update();
-  trailRight.update();
+void Airplane::update(const Earth& earth, const Camera* cam) {
+  trailRight.width = trailLeft.width;
+  trailRight.duration = trailLeft.duration;
+
+  trailLeft.update(cam);
+  trailRight.update(cam);
 
   // Turn
   turnQuat = glm::angleAxis(turnMomentumRad, up);
@@ -128,36 +133,52 @@ void Airplane::update(const Earth& earth) {
 
   vec3 trailRightPos = trailLeftPos;
 
+  lightLeft.setTrans(trailLeftPos);
+  lightRight.setTrans(trailRightPos);
+
   trailLeftPos += right * trailOffset.x * meshScale;
   trailRightPos += -right * trailOffset.x * meshScale;
 
-  trailLeft.add(trailLeftPos, trailDuration);
-  trailRight.add(trailRightPos, trailDuration);
+  trailLeft.add(trailLeftPos);
+  trailRight.add(trailRightPos);
+
+  lightLeft.setTrans(trailLeftPos);
+  lightRight.setTrans(trailRightPos);
 
   // =============================================== //
 
   updateCamera();
 }
 
-void Airplane::draw(const Camera* cam, Shader& shader) const {
+void Airplane::draw(const Camera* camera, Shader& shader) const {
   Airplane::texDiffuse.bind();
 
-  Mesh::draw(cam, shader);
+  Mesh::draw(camera, shader);
 
   Airplane::texDiffuse.unbind();
 }
 
-void Airplane::drawTrail(const Camera* camera, Shader& shader) const {
-  shader.setUniform1f("u_alphaFactor", trailAlphaFactor);
+void Airplane::drawTrails(const Camera* camera, Shader& shader) const {
+  glDepthMask(GL_FALSE);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   trailLeft.draw(camera, shader);
   trailRight.draw(camera, shader);
+
+  glDepthMask(GL_TRUE);
+  glDisable(GL_BLEND);
 }
 
-void Airplane::drawDirections(const Camera* cam, Shader& shader) const {
-  if (showRight)   meshes::line(position, position + getRight() , global::red).draw(cam, shader);
-  if (showUp)      meshes::line(position, position + up         , global::green).draw(cam, shader);
-  if (showForward) meshes::line(position, position + orientation, global::blue).draw(cam, shader);
+void Airplane::drawLights(const Camera* camera, Shader& shader) const {
+  lightLeft.draw(camera, shader);
+  lightRight.draw(camera, shader);
+}
+
+void Airplane::drawDirections(const Camera* camera, Shader& shader) const {
+  if (showRight)   meshes::line(position, position + getRight() , global::red).draw(camera, shader);
+  if (showUp)      meshes::line(position, position + up         , global::green).draw(camera, shader);
+  if (showForward) meshes::line(position, position + orientation, global::blue).draw(camera, shader);
 }
 
 void Airplane::updateCamera() {

@@ -8,7 +8,7 @@ out vec2 texCoord;
 uniform mat4 u_camProj;
 uniform mat4 u_camView;
 uniform mat4 u_model;
-uniform float u_radius;
+uniform float u_lightRadius;
 
 void main() {
   texCoord = inTex;
@@ -16,7 +16,7 @@ void main() {
   vec3 worldPos = vec3(u_model * vec4(0.f, 0.f, 0.f, 1.f));
   vec4 viewPos = u_camView * vec4(worldPos, 1.f);
 
-  viewPos.xy += inPos.xy * u_radius;
+  viewPos.xy += inPos.xy * u_lightRadius;
 
   vec4 clipSpace = u_camProj * viewPos;
 

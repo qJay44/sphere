@@ -1,5 +1,4 @@
 #pragma once
-
 #include "../mesh/Mesh.hpp"
 
 #include "Earth.hpp"
@@ -26,10 +25,11 @@ public:
   void setTurnSpeed(float speedRad);
 
   void turn(float dir);
-  void update(const Earth& earth);
-  void draw(const Camera* cam, Shader& shader) const;
-  void drawTrail(const Camera* cam, Shader& shader) const;
-  void drawDirections(const Camera* cam, Shader& shader) const;
+  void update(const Earth& earth, const Camera* cam);
+  void draw(const Camera* camera, Shader& shader) const;
+  void drawTrails(const Camera* camera, Shader& shader) const;
+  void drawLights(const Camera* camera, Shader& shader) const;
+  void drawDirections(const Camera* camera, Shader& shader) const;
 
 private:
   friend struct gui;
@@ -40,6 +40,13 @@ private:
   float flyHeight;
   float turnSpeedRad;
   float meshScale;
+  Light lightLeft;
+  Light lightRight;
+
+  Trail trailLeft;
+  Trail trailRight;
+  vec3 trailOffset = vec3(540.f, 190.f, -50.f);
+
   float camDistance = 10.f;
 
   float turnMomentumDecreaseFactor = 0.45f;
@@ -52,13 +59,6 @@ private:
 
   glm::quat turnQuat   = glm::identity<glm::quat>();
   glm::quat rotateQuat = glm::identity<glm::quat>();
-
-  Trail trailLeft;
-  Trail trailRight;
-  vec3 trailOffset = vec3(540.f, 190.f, -50.f);
-
-  float trailDuration = 2.f;
-  float trailAlphaFactor = 0.3f;
 
   bool showRight = false;
   bool showUp = false;

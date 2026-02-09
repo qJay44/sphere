@@ -11,6 +11,7 @@ public:
   const vec3& getWaveLengths() const;
 
   void update();
+  void setUniforms(Shader& shader) const;
 
   void draw(const Camera* camera, Shader& shader, bool forceNoWireframe = false) const;
 

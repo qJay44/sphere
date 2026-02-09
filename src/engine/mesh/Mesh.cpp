@@ -138,6 +138,7 @@ Mesh::Mesh(Mesh &&other) {
   vao = other.vao;
   vbo = other.vbo;
   ebo = other.ebo;
+  drawFunc = std::move(other.drawFunc);
 
   other.vao = VAO();
   other.vbo = BufferObject();
@@ -146,7 +147,8 @@ Mesh::Mesh(Mesh &&other) {
 
 Mesh::Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indices, GLenum mode)
   : count(indices.size()),
-    mode(mode)
+    mode(mode),
+    drawFunc(Mesh::drawElements)
 {
   vao.gen();
   vbo.allocate(vertices.data(), sizeof(vertices[0]) * vertices.size(), GL_STATIC_DRAW);
@@ -171,7 +173,8 @@ Mesh::Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indi
 
 Mesh::Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& indices, GLenum mode)
   : count(indices.size()),
-    mode(mode)
+    mode(mode),
+    drawFunc(Mesh::drawElements)
 {
   vao.gen();
   vbo.allocate(vertices.data(), sizeof(vertices[0]) * vertices.size(), GL_STATIC_DRAW);
@@ -194,7 +197,8 @@ Mesh::Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& ind
 
 Mesh::Mesh(const std::vector<VertexPC>& vertices, const std::vector<GLuint>& indices, GLenum mode)
   : count(indices.size()),
-    mode(mode)
+    mode(mode),
+    drawFunc(Mesh::drawElements)
 {
   vao.gen();
   vbo.allocate(vertices.data(), sizeof(vertices[0]) * vertices.size(), GL_STATIC_DRAW);
@@ -213,6 +217,29 @@ Mesh::Mesh(const std::vector<VertexPC>& vertices, const std::vector<GLuint>& ind
   vao.unbind();
   vbo.unbind();
   ebo.unbind();
+}
+
+Mesh::Mesh(const std::vector<Vertex4>& vertices, GLenum mode, GLenum usage)
+  : count(vertices.size()),
+    mode(mode),
+    drawFunc(Mesh::drawArrays)
+{
+  vao.gen();
+  vbo.allocate(vertices.data(), sizeof(vertices[0]) * vertices.size(), usage);
+
+  vao.bind();
+  vbo.bind();
+
+  size_t typeSize = sizeof(float);
+  GLsizei stride = sizeof(vertices[0]);
+
+  vao.linkAttrib(0, 3, GL_FLOAT, stride, (void*)(0 * typeSize));
+  vao.linkAttrib(1, 3, GL_FLOAT, stride, (void*)(3 * typeSize));
+  vao.linkAttrib(2, 2, GL_FLOAT, stride, (void*)(6 * typeSize));
+  vao.linkAttrib(3, 3, GL_FLOAT, stride, (void*)(8 * typeSize));
+
+  vao.unbind();
+  vbo.unbind();
 }
 
 Mesh::~Mesh() {
@@ -246,7 +273,7 @@ void Mesh::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) con
   if (global::drawWireframe & !forceNoWireframe)
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-  glDrawElements(mode, count, GL_UNSIGNED_INT, 0);
+  drawFunc(mode, count);
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -265,5 +292,13 @@ void Mesh::setCamUniforms(const Camera* c, Shader& s) {
   s.setUniformMatrix4f("u_camProj"   , c->getProj());
   s.setUniformMatrix4f("u_camView"   , c->getView());
   s.setUniformMatrix4f("u_camPV"     , c->getProjView());
+}
+
+void Mesh::drawElements(GLenum mode, GLsizei count) {
+  glDrawElements(mode, count, GL_UNSIGNED_INT, 0);
+}
+
+void Mesh::drawArrays(GLenum mode, GLsizei count) {
+  glDrawArrays(mode, 0, count);
 }
 

@@ -1,38 +1,38 @@
 #include "Trail.hpp"
 
-#include "../mesh/Mesh.hpp"
+#include <vector>
 
-Trail::Trail(vec3 color)
-  : color(color) {}
+Trail::Trail() : Mesh({}, GL_TRIANGLE_STRIP, GL_DYNAMIC_DRAW) {}
 
-void Trail::add(const vec3& pos, const float& duration) {
-  trailPoints.push_back({pos, global::time, duration});
+void Trail::add(const vec3& pos) {
+  points.push_back({pos, global::time});
 }
 
-void Trail::update() {
-  while (!trailPoints.empty() && (global::time - trailPoints.front().timestamp > trailPoints.front().duration))
-    trailPoints.erase(trailPoints.begin());
-}
+void Trail::update(const Camera* cam) {
+  while (!points.empty() && (global::time - points.front().timestamp > duration))
+    points.erase(points.begin());
 
-void Trail::draw(const Camera* cam, Shader& shader) const {
-  const size_t count = trailPoints.size();
+  std::vector<Vertex4> vertices;
 
-  if (count > 1) {
-    std::vector<VertexPC> vertices(count);
-    std::vector<GLuint> indices((count - 1) * 2);
-    size_t indicesIdx = 0;
+  for (size_t i = 0; i < points.size(); i++) {
+    const vec3& pos = points[i].position;
+    vec3 dir = global::up;
 
-    for (size_t i = 0; i < count; i++) {
-      vertices[i] = {trailPoints[i].position, color};
-      if (i != count - 1) {
-        indices[indicesIdx++] = i;
-        indices[indicesIdx++] = i + 1;
-      }
-    }
+    if (i < points.size() - 1)
+      dir = normalize(points[i + 1].position - pos);
+    else if (i)
+      dir = normalize(pos - points[i - 1].position);
 
-    shader.setUniform3f("u_closestPos", trailPoints.back().position);
+    vec3 toCam = normalize(pos - cam->getPosition());
+    vec3 side = normalize(cross(dir, toCam)) * width;
 
-    Mesh(vertices, indices, GL_LINES).draw(cam, shader);
+    float age = (global::time - points[i].timestamp) / duration;
+    float alpha = glm::clamp(1.f - age, 0.f, 1.f);
+
+    vertices.push_back({pos + side, vec3(alpha)});
+    vertices.push_back({pos - side, vec3(alpha)});
   }
+
+  updateData(vertices, GL_DYNAMIC_DRAW);
 }
 

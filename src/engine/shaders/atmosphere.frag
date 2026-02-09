@@ -1,6 +1,7 @@
 #version 460 core
 
 #define FLOAT_MAX 3.4028235e38f
+#define PI 3.141592265359f
 
 in vec2 texCoord;
 in vec3 viewVec;
@@ -25,11 +26,16 @@ uniform float u_planetRadius;
 uniform float u_atmosphereRadius;
 uniform float u_densityFalloff;
 uniform float u_sunIntensity;
+uniform float u_maskGammaCorrection;
 
 float linearizeDepth(float depth) {
   float z = depth * 2.f - 1.f;
 
   return (2.f * u_camNear * u_camFar) / (u_camFar + u_camNear - z * (u_camFar - u_camNear));
+}
+
+vec3 applyMask(vec3 no, vec3 yes, float mask) {
+  return yes * mask + (1.f - mask) * no;
 }
 
 vec2 raySphere(vec3 center, float radius, vec3 rayOrigin, vec3 rayDir) {
@@ -90,9 +96,8 @@ vec3 calcLight(vec3 rayOrigin, vec3 rayDir, float rayLength, vec3 originalColor)
 }
 
 void main() {
-  float viewVecLength = length(viewVec);
   vec3 rayOrigin = u_camPos;
-  vec3 rayDir = viewVec / viewVecLength;
+  vec3 rayDir = normalize(viewVec);
   vec3 color = texture(u_screenColorTex, texCoord).rgb;
   vec2 hitInfo = raySphere(u_planetCenter, u_atmosphereRadius, rayOrigin, rayDir);
 
@@ -109,6 +114,8 @@ void main() {
 
     color = light;
   }
+
+  color = applyMask(color, pow(color, vec3(1.f / 2.2f)), u_maskGammaCorrection);
 
   FragColor = vec4(color, 1.f);
 }

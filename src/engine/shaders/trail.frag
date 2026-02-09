@@ -1,10 +1,11 @@
 #version 460 core
 
-in vec4 color;
+in float alpha;
+in vec2 texCoord;
 
 out vec4 FragColor;
 
 void main() {
-	FragColor = color;
+	FragColor = vec4(vec3(1.f), alpha);
 }
 

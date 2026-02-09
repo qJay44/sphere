@@ -67,7 +67,7 @@ int main() {
   glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
   // Window init
-  window = glfwCreateWindow(1200, 720, "MyProgram", NULL, NULL);
+  window = glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, "MyProgram", NULL, NULL);
   ivec2 winSize = global::getWinSize();
   dvec2 winCenter = dvec2(winSize) / 2.;
 
@@ -150,12 +150,7 @@ int main() {
 
   InputsHandler::airplanePtr = &airplane;
 
-  // ============================================================ //
-
-  gui::earthPtr = &earth;
-  gui::camSpecatePtr = &cameraSpectate;
-  gui::airplanePtr = &airplane;
-  gui::lightPtr = &light;
+  // ===== Framebuffers ========================================= //
 
   TextureDescriptor fboTexDesc{};
   fboTexDesc.uniformName = "u_screenColorTex";
@@ -179,11 +174,18 @@ int main() {
   fboScreen.attach2D(GL_COLOR_ATTACHMENT0, screenColorTexture);
   fboScreen.attach2D(GL_DEPTH_ATTACHMENT, screenDepthTexture);
 
+  // ============================================================ //
+
   Mesh axis = meshes::axis();
   axis.scale(1e4f);
 
   glCullFace(GL_FRONT);
   glFrontFace(GL_CW);
+
+  gui::earthPtr = &earth;
+  gui::camSpecatePtr = &cameraSpectate;
+  gui::airplanePtr = &airplane;
+  gui::lightPtr = &light;
 
   earth.loadTextures();
   earth.update(light);
@@ -224,13 +226,14 @@ int main() {
 
     light.update();
     earth.update(light);
-    airplane.update(earth);
+    airplane.update(earth, cameraATM);
 
-    earthShader.setUniform3f("u_lightPos", light.getPosition());
-    earthShader.setUniform3f("u_lightColor", light.getColor());
     earthShader.setUniform1f("u_time", global::time);
-    airplaneShader.setUniform3f("u_lightPos", light.getPosition());
-    airplaneShader.setUniform3f("u_lightColor", light.getColor());
+
+    light.setUniforms(earthShader);
+    light.setUniforms(airplaneShader);
+
+    // ===== Main scene =========================================== //
 
     fboScreen.bind();
     glClearColor(0.f, 0.f, 0.f, 1.f);
@@ -242,6 +245,8 @@ int main() {
 
     airplane.draw(cameraATM, airplaneShader);
 
+    // ===== Post Processing ====================================== //
+
     FBO::unbind();
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -251,13 +256,15 @@ int main() {
     screenColorTexture.bind();
     screenDepthTexture.bind();
 
-    atmosphereShader.setUniform3f("u_lightPos", light.getPosition());
+    light.setUniforms(atmosphereShader);
+
     earth.drawAtmosphere(cameraATM, atmosphereShader);
 
     screenColorTexture.unbind();
     screenDepthTexture.unbind();
 
-    airplane.drawTrail(cameraATM, trailShader);
+    airplane.drawTrails(cameraATM, trailShader);
+    airplane.drawLights(cameraATM, lightShader);
     airplane.drawDirections(cameraATM, linesShader);
 
     light.draw(cameraATM, lightShader);
@@ -266,6 +273,8 @@ int main() {
 
     if (global::drawGlobalAxis)
       axis.draw(cameraATM, linesShader);
+
+    // ============================================================ //
 
     gui::draw();
     ImGui::Render();

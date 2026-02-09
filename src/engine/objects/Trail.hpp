@@ -3,28 +3,23 @@
 #include <vector>
 
 #include "../Camera.hpp"
+#include "../mesh/Mesh.hpp"
 
-class Trail {
+struct Trail : public Mesh {
 public:
-  Trail() = default;
-  Trail(vec3 color);
+  Trail();
 
-  void add(const vec3& pos, const float& duration);
-  void update();
+  float width = 0.1f;
+  float duration = 2.f;
 
-  void draw(const Camera* cam, Shader& shader) const;
-
-private:
-  friend struct gui;
-
-  vec3 color = vec3(1.f);
-
-  struct TrailPoint {
+  struct Point {
     vec3 position;
     float timestamp;
-    float duration;
   };
 
-  std::vector<TrailPoint> trailPoints;
+  std::vector<Point> points;
+
+  void add(const vec3& pos);
+  void update(const Camera* cam);
 };
 

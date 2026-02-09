@@ -13,10 +13,14 @@ void Light::update() {
   setTrans(position);
 }
 
+void Light::setUniforms(Shader& shader) const {
+  shader.setUniform1f("u_lightRadius", radius);
+  shader.setUniform3f("u_lightPos", position);
+  shader.setUniform3f("u_lightColor", color);
+}
+
 void Light::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) const {
-  shader.setUniform1f("u_radius", radius);
-  shader.setUniform3f("u_pos", position);
-  shader.setUniform3f("u_col", color);
+  setUniforms(shader);
 
   glDepthMask(GL_FALSE);
   glEnable(GL_BLEND);
