@@ -226,7 +226,7 @@ int main() {
 
     light.update();
     earth.update(light);
-    airplane.update(earth, cameraATM);
+    airplane.update(earth);
 
     earthShader.setUniform1f("u_time", global::time);
 

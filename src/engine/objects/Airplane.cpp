@@ -89,7 +89,7 @@ void Airplane::turn(float dir) {
     tiltMomentumRad += turnMomentumRad;
 }
 
-void Airplane::update(const Earth& earth, const Camera* cam) {
+void Airplane::update(const Earth& earth) {
   // Turn
   turnQuat = glm::angleAxis(turnMomentumRad, up);
   Mesh::rotate(turnQuat);

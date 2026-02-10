@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <span>
 #include <vector>
 
 #include "Vertex.hpp"
@@ -17,9 +18,9 @@ public:
 
   Mesh(Mesh &&other);
 
-  Mesh(const std::vector<Vertex4>&  vertices, const std::vector<GLuint>& indices, GLenum mode);
-  Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& indices, GLenum mode);
-  Mesh(const std::vector<VertexPC>& vertices, const std::vector<GLuint>& indices, GLenum mode);
+  Mesh(const std::vector<Vertex4>&  vertices, const std::vector<GLuint>& indices, GLenum mode, GLenum usage = GL_STATIC_DRAW);
+  Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& indices, GLenum mode, GLenum usage = GL_STATIC_DRAW);
+  Mesh(const std::vector<VertexPC>& vertices, const std::vector<GLuint>& indices, GLenum mode, GLenum usage = GL_STATIC_DRAW);
 
   Mesh(const std::vector<Vertex4>&  vertices, GLenum mode, GLenum usage);
   Mesh(const std::vector<VertexPT>& vertices, GLenum mode, GLenum usage);
@@ -53,6 +54,29 @@ private:
 
   static void drawElements(GLenum mode, GLsizei count);
   static void drawArrays(GLenum mode, GLsizei count);
+
+  template<typename V>
+  Mesh(const std::span<const V> v, const std::span<const GLuint> i, GLenum mode, GLenum usage)
+    : count(i.size() ?: v.size()),
+      mode(mode),
+      drawFunc(i.size() ? drawElements : drawArrays)
+  {
+    bool useEBO = i.size();
+
+    vao.gen();
+    vbo.allocate(v, usage);
+    if (useEBO) ebo.allocate(i, usage);
+
+    vao.bind();
+    vbo.bind();
+    if (useEBO) ebo.bind();
+
+    V::link(vao);
+
+    vao.unbind();
+    vbo.unbind();
+    if (useEBO) ebo.unbind();
+  }
 };
 
 

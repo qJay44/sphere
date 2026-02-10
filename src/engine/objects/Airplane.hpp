@@ -34,7 +34,7 @@ public:
   void setTurnSpeed(float speedRad);
 
   void turn(float dir);
-  void update(const Earth& earth, const Camera* cam);
+  void update(const Earth& earth);
   void draw(const Camera* camera, Shader& shader) const;
   void drawTrails(const Camera* camera, Shader& shader) const;
   void drawLights(const Camera* camera, Shader& shader) const;

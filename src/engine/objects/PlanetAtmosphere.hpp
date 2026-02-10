@@ -9,7 +9,7 @@ struct PlanetAtmosphere {
   int opticalDepthPoints = 50;
   float densityFalloff = 20.f;
   float scatteringStrength = 0.02f;
-  float sunIntensity = 1.5f;
+  float sunIntensity = 2.f;
   vec3 scatteringCoefficients = vec3(1.f);
 
   bool useGammaCorrection = false;
