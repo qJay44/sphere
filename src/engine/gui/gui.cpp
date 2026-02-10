@@ -90,8 +90,10 @@ void gui::draw() {
     rebakeOpticalDepth |= SliderInt("Scattering points", &atmosphere.scatteringPoints, 2, 50);
     rebakeOpticalDepth |= SliderInt("Optical depth points", &atmosphere.opticalDepthPoints, 2, 50);
     rebakeOpticalDepth |= SliderFloat("Sun intensity", &atmosphere.sunIntensity, 0.f, 10.f);
-    rebakeOpticalDepth |= SliderFloat("Density falloff", &atmosphere.densityFalloff, 0.f, 20.f);
-    rebakeOpticalDepth |= SliderFloat("Scattering strenth", &atmosphere.scatteringStrength, 0.f, 1.f);
+    rebakeOpticalDepth |= SliderFloat("Density falloff Rayleigh", &atmosphere.densityFalloffR, 0.f, 50.f);
+    rebakeOpticalDepth |= SliderFloat("Density falloff Mie", &atmosphere.densityFalloffM, 0.f, 50.f);
+    rebakeOpticalDepth |= SliderFloat("Scattering strenth Rayleigh", &atmosphere.scatteringStrengthR, 0.f, 0.1f);
+    rebakeOpticalDepth |= SliderFloat("Scattering strenth Mie", &atmosphere.scatteringStrengthM, 0.f, 0.1f);
 
     Checkbox("Gamma correction", &atmosphere.useGammaCorrection);
 

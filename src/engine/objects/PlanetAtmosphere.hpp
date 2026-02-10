@@ -7,10 +7,13 @@ struct PlanetAtmosphere {
   float radius;
   int scatteringPoints = 40;
   int opticalDepthPoints = 50;
-  float densityFalloff = 20.f;
-  float scatteringStrength = 0.02f;
+  float densityFalloffR = 1.f / 8.f;
+  float densityFalloffM = 1.f / 12.f;
+  float scatteringStrengthR = 0.02f;
+  float scatteringStrengthM = 0.02f;
   float sunIntensity = 2.f;
-  vec3 scatteringCoefficients = vec3(1.f);
+  vec3 scatteringCoefficientsR = vec3(1.f);
+  vec3 scatteringCoefficientsM = vec3(1.f);
 
   bool useGammaCorrection = false;
 
@@ -23,21 +26,26 @@ struct PlanetAtmosphere {
   }
 
   void update(const Light& light) {
-    static float prev{0xFFFFFF};
+    static float prevR{0xFFFFFF};
+    static float prevM{0xFFFFFF};
 
-    if (prev == scatteringStrength)
+    if (prevR == scatteringStrengthR && prevM == scatteringStrengthM)
       return;
 
-    scatteringCoefficients = glm::pow(400.f / light.getWaveLengths(), vec3(4.f)) * scatteringStrength;
+    scatteringCoefficientsR = glm::pow(400.f / light.getWaveLengths(), vec3(4.f)) * scatteringStrengthR;
+    scatteringCoefficientsM = glm::pow(400.f / light.getWaveLengths(), vec3(4.f)) * scatteringStrengthM;
 
-    prev = scatteringStrength;
+    prevR = scatteringStrengthR;
+    prevM = scatteringStrengthM;
   }
 
   void setUniforms(Shader& shader) const {
-    shader.setUniform3f("u_scatteringCoefficients", scatteringCoefficients);
+    shader.setUniform3f("u_scatteringCoefficientsR", scatteringCoefficientsR);
+    shader.setUniform3f("u_scatteringCoefficientsM", scatteringCoefficientsM);
     shader.setUniform1i("u_scatteringPoints", scatteringPoints);
     shader.setUniform1i("u_opticalDepthPoints", opticalDepthPoints);
-    shader.setUniform1f("u_densityFalloff", densityFalloff);
+    shader.setUniform1f("u_densityFalloffR", densityFalloffR);
+    shader.setUniform1f("u_densityFalloffM", densityFalloffM);
     shader.setUniform1f("u_atmosphereRadius", radius);
     shader.setUniform1f("u_sunIntensity", sunIntensity);
     shader.setUniform1f("u_maskGammaCorrection", useGammaCorrection);

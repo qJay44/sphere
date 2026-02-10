@@ -147,7 +147,7 @@ void main() {
   int deepness = texture(u_heightmapsWater, defaultNormal).r; // [-32768, 32767]
 
   // water: -1; land: 0 and 1
-  float isWater = floor(-sign(deepness) * 0.5f + 0.5f);
+  float isWater = ceil(-sign(deepness) * 0.5f + 0.5f);
   float isLand = 1.f - isWater;
 
   color = isWater * calculateDeepColor(deepness) + isLand * color;

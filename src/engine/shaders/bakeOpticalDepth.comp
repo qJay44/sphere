@@ -5,11 +5,12 @@
 
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
-layout(r32f, binding = 0) writeonly uniform image2D imageWrite;
+layout(rg32f, binding = 0) writeonly uniform image2D imageWrite;
 
 uniform float u_planetRadius;
 uniform float u_atmosphereRadius;
-uniform float u_densityFalloff;
+uniform float u_densityFalloffR;
+uniform float u_densityFalloffM;
 uniform int u_opticalDepthPoints;
 
 const vec2 planetCenter = vec2(0.f);
@@ -33,26 +34,27 @@ vec2 raySphere(vec3 center, float radius, vec3 rayOrigin, vec3 rayDir) {
   return vec2(FLOAT_MAX, 0.f);
 }
 
-float densityAtPoint(vec2 densitySamplePoint) {
+float densityAtPoint(vec2 densitySamplePoint, float scale) {
   float heightAboveSurface = length(densitySamplePoint - planetCenter) - u_planetRadius;
   float heightNorm = heightAboveSurface / (u_atmosphereRadius - u_planetRadius);
-  float localDensity = exp(-heightNorm * u_densityFalloff) * (1.f - heightNorm);
+  float localDensity = exp(-heightNorm * scale) * (1.f - heightNorm);
 
   return localDensity;
 }
 
-float opticalDepth(vec2 rayOrigin, vec2 rayDir, float rayLength) {
+vec2 opticalDepth(vec2 rayOrigin, vec2 rayDir, float rayLength) {
   vec2 densitySamplePoint = rayOrigin;
   float stepSize = rayLength / (u_opticalDepthPoints - 1);
-  float res = 0.f;
+  float densityR = 0.f;
+  float densityM = 0.f;
 
   for (int i = 0; i < u_opticalDepthPoints; i++) {
-    float localDensity = densityAtPoint(densitySamplePoint);
-    res += localDensity * stepSize;
+    densityR = densityAtPoint(densitySamplePoint, u_densityFalloffR) * stepSize;
+    densityM = densityAtPoint(densitySamplePoint, u_densityFalloffM) * stepSize;
     densitySamplePoint += rayDir * stepSize;
   }
 
-  return res;
+  return vec2(densityR, densityM);
 }
 
 void main() {
@@ -70,8 +72,8 @@ void main() {
   vec2 inPoint = vec2(0.f, mix(u_planetRadius, u_atmosphereRadius, heightNorm));
   float dstThroughAtmosphere = raySphere(vec3(planetCenter, 0.f), u_atmosphereRadius, vec3(inPoint, 0.f), vec3(dir, 0.f)).y;
   vec2 outPoint = inPoint + dir * dstThroughAtmosphere;
-  float outScattering = opticalDepth(inPoint + dir * 0.01f, dir, dstThroughAtmosphere);
+  vec2 outScattering = opticalDepth(inPoint + dir * 0.01f, dir, dstThroughAtmosphere);
 
-  imageStore(imageWrite, texCoord, vec4(outScattering));
+  imageStore(imageWrite, texCoord, vec4(outScattering, 0.f, 1.f));
 }
 

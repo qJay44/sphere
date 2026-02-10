@@ -64,7 +64,7 @@ void AtmospherePlotter::renderTransmittance(float xmax, ImVec2 size) {
 void AtmospherePlotter::updateDensity(float xmax) {
   static float prev = 0xFFFFFF;
 
-  const float& a = atmosphere->densityFalloff;
+  const float& a = atmosphere->densityFalloffR;
 
   if (prev == a)
     return;
@@ -83,13 +83,13 @@ void AtmospherePlotter::updateDensity(float xmax) {
 void AtmospherePlotter::updateTranmittance(float xmax) {
   static float prev = 0xFFFFFF;
 
-  const float& a = atmosphere->scatteringStrength;
+  const float& a = atmosphere->scatteringStrengthR;
 
   if (prev == a)
     return;
 
   float step = xmax / (points - 1);
-  const vec3& b = atmosphere->scatteringCoefficients;
+  const vec3& b = atmosphere->scatteringCoefficientsR;
 
   for (int i = 0; i < points; i++) {
     float x = i * step;

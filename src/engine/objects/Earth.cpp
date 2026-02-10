@@ -166,7 +166,8 @@ void Earth::bakeOpticalDepth() {
   shader.use();
   shader.setUniform1f("u_planetRadius", radius);
   shader.setUniform1f("u_atmosphereRadius", atmosphere.radius);
-  shader.setUniform1f("u_densityFalloff", atmosphere.densityFalloff);
+  shader.setUniform1f("u_densityFalloffR", atmosphere.densityFalloffR);
+  shader.setUniform1f("u_densityFalloffM", atmosphere.densityFalloffM);
   shader.setUniform1i("u_opticalDepthPoints", atmosphere.opticalDepthPoints);
   glBindImageTexture(0, texBakedOpticalDepth.getId(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32F);
   glDispatchCompute(numGroups.x, numGroups.y, 1);
