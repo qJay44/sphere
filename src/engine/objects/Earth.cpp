@@ -60,7 +60,7 @@ void Earth::loadTextures() {
   );
 
   texNormalheightmapsLand = Texture(
-    "res/tex/earth/faces/normalheightmap21600_5",
+    "res/tex/earth/faces/normalheightmapLand21600",
     {
       .uniformName    = "u_normalheightmapsLand",
       .unit           = 2,
@@ -77,7 +77,7 @@ void Earth::loadTextures() {
   );
 
   texWorldColors = Texture(
-    "res/tex/earth/faces/worldColors21600",
+    "res/tex/earth/faces/colormap21600",
     {
       .uniformName    = "u_worldColors",
       .unit           = 3,
@@ -174,10 +174,13 @@ void Earth::bakeOpticalDepth() {
 }
 
 void Earth::draw(const Camera* camera, const frustum::Frustum& frustum, Shader& shader) const {
-  shader.setUniform1f("u_lightMultiplier", lightMultiplier);
+  shader.setUniform1f("u_div", tessDivs);
   shader.setUniform1f("u_heightmapScale", heightmapScale);
+  shader.setUniform1f("u_radius", radius);
   shader.setUniform1f("u_ambient", ambient);
   shader.setUniform1f("u_specularLight", specularLight);
+  shader.setUniform1f("u_lightMultiplier", lightMultiplier);
+  shader.setUniform1f("u_lightDimScale", lightDimScale);
   shader.setUniform1f("u_triplanarBlendSharpness", triplanarBlendSharpness);
   shader.setUniform1f("u_waterSpecularSmoothness", waterSpecularSmoothness);
   shader.setUniform1f("u_waterDeepFactor", waterDeepFactor);
@@ -192,7 +195,6 @@ void Earth::draw(const Camera* camera, const frustum::Frustum& frustum, Shader& 
   shader.setUniform1f("u_waterShoreWaveNoiseScale", waterShoreWaveNoiseScale);
   shader.setUniform1f("u_waterShoreWaveNoiseSpeed", waterShoreWaveNoiseSpeed);
   shader.setUniform1f("u_waterShoreWaveNoiseAmplitude", waterShoreWaveNoiseAmplitude);
-  shader.setUniform1f("u_radius", radius);
   shader.setUniform1f("u_maskTerrainFaceColor", useTerrainFaceColors);
   shader.setUniform1f("u_maskTerrainFaceChunkColor", useTerrainFaceChunkColors);
   shader.setUniform3f("u_bordersColor", bordersColor);
@@ -207,8 +209,12 @@ void Earth::draw(const Camera* camera, const frustum::Frustum& frustum, Shader& 
   texNormalmapWave0.bind();
   texNormalmapWave1.bind();
 
-  for (const TerrainFace& tf : terrainFaces)
-    tf.draw(camera, shader, frustum);
+  if (useFrustum)
+    for (const TerrainFace& tf : terrainFaces)
+      tf.draw(camera, shader, frustum);
+  else
+    for (const TerrainFace& tf : terrainFaces)
+      tf.draw(camera, shader);
 
   texHeightmapsWater.unbind();
   texDistanceFieldWater.unbind();

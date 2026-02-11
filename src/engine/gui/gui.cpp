@@ -34,6 +34,17 @@ void gui::draw() {
   if (!earthPtr) error("The earth object is not linked to gui");
   if (CollapsingHeader("Planet")) {
     bool rebuild = false;
+
+    Checkbox("Frustum culling", &earthPtr->useFrustum);
+
+    static int rbFaceChunk = 0;
+    if (RadioButton("Default"     , rbFaceChunk == 0)) rbFaceChunk = 0;
+    if (RadioButton("Color faces" , rbFaceChunk == 1)) rbFaceChunk = 1;
+    if (RadioButton("Color chunks", rbFaceChunk == 2)) rbFaceChunk = 2;
+
+    earthPtr->useTerrainFaceColors = rbFaceChunk == 1;
+    earthPtr->useTerrainFaceChunkColors = rbFaceChunk == 2;
+
     rebuild |= SliderInt("Chunks per side", &earthPtr->chunksPerSide, 1, 20);
     rebuild |= SliderInt("Resolution", &earthPtr->resolution, 2, 100);
     bool _r = SliderFloat("Radius", &earthPtr->radius, 1.f, 500.f);
@@ -44,14 +55,8 @@ void gui::draw() {
     if (rebuild)
       earthPtr->build();
 
-    static int rbFaceChunk = 0;
-    if (RadioButton("Default"     , rbFaceChunk == 0)) rbFaceChunk = 0;
-    if (RadioButton("Color faces" , rbFaceChunk == 1)) rbFaceChunk = 1;
-    if (RadioButton("Color chunks", rbFaceChunk == 2)) rbFaceChunk = 2;
-
-    earthPtr->useTerrainFaceColors = rbFaceChunk == 1;
-    earthPtr->useTerrainFaceChunkColors = rbFaceChunk == 2;
-
+    Spacing();
+    SliderFloat("TESC divisions scale", &earthPtr->tessDivs, 0.f, 100.f);
     SliderFloat("Heightmap scale", &earthPtr->heightmapScale, 0.01f, 100.f);
     SliderFloat("Triplanar blend sharpness", &earthPtr->triplanarBlendSharpness, 1.f, 10.f);
     ColorEdit3("Border color", glm::value_ptr(earthPtr->bordersColor));
@@ -74,7 +79,8 @@ void gui::draw() {
     ColorEdit3("Deep color", glm::value_ptr(earthPtr->waterDeepColor));
 
     SeparatorText("Lightning");
-    SliderFloat("Light multiplier", &earthPtr->lightMultiplier, 0.1f, 20.f);
+    SliderFloat("Multiplier", &earthPtr->lightMultiplier, 0.1f, 20.f);
+    SliderFloat("Distance dim scale", &earthPtr->lightDimScale, 0.1f, 20.f);
     SliderFloat("Ambient", &earthPtr->ambient, 0.0f, 20.f);
     SliderFloat("Specular light", &earthPtr->specularLight, 0.0f, 20.f);
   }
@@ -94,6 +100,7 @@ void gui::draw() {
     rebakeOpticalDepth |= SliderFloat("Scattering strenth", &atmosphere.scatteringStrength, 0.f, 1.f);
 
     Checkbox("Gamma correction", &atmosphere.useGammaCorrection);
+    Checkbox("Apply", &atmosphere.apply);
 
     atmospherePlotter.renderDensity(1.f);
     atmospherePlotter.renderTransmittance(5.f);

@@ -27,6 +27,7 @@ uniform float u_atmosphereRadius;
 uniform float u_densityFalloff;
 uniform float u_sunIntensity;
 uniform float u_maskGammaCorrection;
+uniform float u_maskApply;
 
 float linearizeDepth(float depth) {
   float z = depth * 2.f - 1.f;
@@ -99,6 +100,7 @@ void main() {
   vec3 rayOrigin = u_camPos;
   vec3 rayDir = normalize(viewVec);
   vec3 color = texture(u_screenColorTex, texCoord).rgb;
+  vec3 originalColor = color;
   vec2 hitInfo = raySphere(u_planetCenter, u_atmosphereRadius, rayOrigin, rayDir);
 
   float sceneDepthNonLinear = texture(u_screenDepthTex, texCoord).r;
@@ -116,6 +118,7 @@ void main() {
   }
 
   color = applyMask(color, pow(color, vec3(1.f / 2.2f)), u_maskGammaCorrection);
+  color = applyMask(originalColor, color, u_maskApply);
 
   FragColor = vec4(color, 1.f);
 }

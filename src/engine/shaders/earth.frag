@@ -6,13 +6,10 @@
 
 out vec4 FragColor;
 
-in vec3 vertPos;
-in vec3 vertPosOriginal;
-in vec3 defaultNormal;
-in vec3 lightPos;
-in vec3 camPos;
-in vec2 texCoord;
-
+in DATA {
+  vec3 normal;
+  vec4 worldPos;
+} dataIn;
 
 layout(binding = 0) uniform isamplerCube u_heightmapsWater;
 layout(binding = 1) uniform usamplerCube u_distanceFieldsWater;
@@ -22,18 +19,22 @@ layout(binding = 4) uniform samplerCube u_borders;
 layout(binding = 5) uniform sampler2D u_normalmapWave0;
 layout(binding = 6) uniform sampler2D u_normalmapWave1;
 
+uniform vec3 u_camPos;
+uniform vec3 u_lightPos;
 uniform vec3 u_lightColor;
 uniform vec3 u_bordersColor;
-uniform vec3 u_waterShallowColor;
 uniform vec3 u_waterDeepColor;
+uniform vec3 u_waterShallowColor;
 uniform vec3 u_terrainFaceColor;
 uniform vec3 u_terrainFaceChunkColor;
+uniform float u_time;
 uniform float u_radius;
-uniform float u_maskTerrainFaceColor;
-uniform float u_maskTerrainFaceChunkColor;
-uniform float u_lightMultiplier;
 uniform float u_ambient;
 uniform float u_specularLight;
+uniform float u_lightDimScale;
+uniform float u_lightMultiplier;
+uniform float u_maskTerrainFaceColor;
+uniform float u_maskTerrainFaceChunkColor;
 uniform float u_waterDeepFactor;
 uniform float u_waterDeepEdgeStart;
 uniform float u_waterDeepEdgeEnd;
@@ -48,7 +49,6 @@ uniform float u_waterShoreWaveAmplitude;
 uniform float u_waterShoreWaveNoiseScale;
 uniform float u_waterShoreWaveNoiseSpeed;
 uniform float u_waterShoreWaveNoiseAmplitude;
-uniform float u_time;
 uniform float u_triplanarBlendSharpness;
 
 float hash(vec2 p) {
@@ -73,45 +73,36 @@ float noise(vec2 p) {
   return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
 }
 
-vec3 directionalLight(vec3 normal) {
-  vec3 lightDistVec = lightPos - vertPos;
+vec3 directionalLight(vec3 normal, float isWater) {
+  vec3 lightDistVec = u_lightPos - dataIn.worldPos.xyz;
   float lightDist = length(lightDistVec);
 
   vec3 lightDirection = normalize(lightDistVec);
   float diffuse = max(dot(normal, lightDirection), 0.f);
 
-  vec3 viewDirection = normalize(camPos - vertPos);
+  vec3 viewDirection = normalize(u_camPos - dataIn.worldPos.xyz);
   vec3 reflectionDirection = reflect(-lightDirection, normal);
   float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.f), 8);
-  float specular = specAmount * u_specularLight;
+  float specular = specAmount * u_specularLight * isWater;
   float lightAmount = (diffuse + u_ambient + specular);
-  float intensity = smoothstep(u_radius * 2.5f, 0.f, lightDist);
+  float intensity = smoothstep(u_radius * u_lightDimScale, 0.f, lightDist);
 
   return u_lightColor * lightAmount * intensity * u_lightMultiplier;
 }
 
 vec3 triplanarNormal(sampler2D normalmap, float timeStep) {
-  vec3 absNormal = abs(defaultNormal);
+  vec3 absNormal = abs(dataIn.normal);
   float sum = absNormal.x + absNormal.y + absNormal.z;
   vec3 weights = absNormal / (sum + 1e-16f);
 
-  vec3 colorX = texture(normalmap, vertPosOriginal.yz * u_waterWaveResMult + timeStep).rgb * 2.f - 1.f;
-  vec3 colorY = texture(normalmap, vertPosOriginal.xz * u_waterWaveResMult + timeStep).rgb * 2.f - 1.f;
-  vec3 colorZ = texture(normalmap, vertPosOriginal.xy * u_waterWaveResMult + timeStep).rgb * 2.f - 1.f;
+  vec3 colorX = texture(normalmap, dataIn.worldPos.yz * u_waterWaveResMult + timeStep).rgb * 2.f - 1.f;
+  vec3 colorY = texture(normalmap, dataIn.worldPos.xz * u_waterWaveResMult + timeStep).rgb * 2.f - 1.f;
+  vec3 colorZ = texture(normalmap, dataIn.worldPos.xy * u_waterWaveResMult + timeStep).rgb * 2.f - 1.f;
 
   weights = pow(weights, vec3(u_triplanarBlendSharpness));
   weights /= (weights.x + weights.y + weights.z);
 
   return normalize(colorX * weights.x + colorY * weights.y + colorZ * weights.z);
-}
-
-float calculateSpecular(vec3 normal) {
-  vec3 lightDirection = normalize(lightPos - vertPos);
-  float specularAngle = acos(dot(lightDirection, normal));
-  float specularExponent = specularAngle / u_waterSpecularSmoothness;
-  float specularHighlight = exp(-specularExponent * specularExponent);
-
-  return specularHighlight;
 }
 
 vec3 calculateDeepColor(int deepness) {
@@ -123,10 +114,10 @@ vec3 calculateDeepColor(int deepness) {
 }
 
 float calculateShoreWaves() {
-  const uint distFromShore = texture(u_distanceFieldsWater, defaultNormal).r;
+  const uint distFromShore = texture(u_distanceFieldsWater, dataIn.normal).r;
   float dist = 1.f - float(distFromShore) / UINT16_MAX;
   float factor = smoothstep(u_waterShoreWaveThresholdStart, u_waterShoreWaveThresholdEnd, dist);
-  float n = noise(vertPosOriginal.xy * u_waterShoreWaveNoiseScale + u_time * u_waterShoreWaveNoiseSpeed);
+  float n = noise(dataIn.worldPos.xy * u_waterShoreWaveNoiseScale + u_time * u_waterShoreWaveNoiseSpeed);
   float wave = sin(dist * u_waterShoreWaveFreq + u_time * 2.f + n * u_waterShoreWaveNoiseAmplitude) * u_waterShoreWaveAmplitude;
 
   return abs(mix(0.f, wave, factor));
@@ -137,24 +128,25 @@ vec3 applyMask(vec3 no, vec3 yes, float mask) {
 }
 
 void main() {
-  vec3 normal = texture(u_normalheightmapsLand, defaultNormal).rgb * 2.f - 1.f;
-  vec3 color = texture(u_worldColors, defaultNormal).rgb;
+  vec4 normalheightSample = texture(u_normalheightmapsLand, dataIn.normal);
+  vec3 surfaceNormal = normalize(normalheightSample.rgb * 2.f - 1.f);
+  vec3 color = texture(u_worldColors, dataIn.normal).rgb;
   vec3 normalWave0 = triplanarNormal(u_normalmapWave0, -u_time * u_waterWaveFreq);
   vec3 normalWave1 = triplanarNormal(u_normalmapWave1,  u_time * u_waterWaveFreq);
   vec3 normalWaves = normalize(normalWave0 + normalWave1);
-  vec3 dirLight = directionalLight(normal);
-  float border = texture(u_borders, defaultNormal).r;
-  int deepness = texture(u_heightmapsWater, defaultNormal).r; // [-32768, 32767]
+  float border = texture(u_borders, dataIn.normal).r;
+  int deepness = texture(u_heightmapsWater, dataIn.normal).r; // [-32768, 32767]
 
   // water: -1; land: 0 and 1
   float isWater = floor(-sign(deepness) * 0.5f + 0.5f);
   float isLand = 1.f - isWater;
 
+  surfaceNormal *= -1.f;
+
   color = isWater * calculateDeepColor(deepness) + isLand * color;
-  color *= isLand * dirLight + isWater;
-  color += isWater * calculateShoreWaves() * dirLight;
-  color += isWater * calculateSpecular(normalWaves);
-  color *= isWater * directionalLight(normalWaves) + isLand;
+  color *= isLand * directionalLight(surfaceNormal, 0.f) + isWater;
+  color += isWater * calculateShoreWaves() * directionalLight(surfaceNormal, 1.f);
+  color *= isWater * directionalLight(normalWaves, 1.f) + isLand;
   color += border * u_bordersColor;
 
   color = applyMask(color, u_terrainFaceColor, u_maskTerrainFaceColor);

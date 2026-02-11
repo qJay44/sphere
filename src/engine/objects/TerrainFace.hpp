@@ -38,7 +38,12 @@ struct TerrainFace {
         chunks.push_back(TerrainFaceChunk::build(directions[i], {x, y}, chunksPerSide, resolution, radius));
   }
 
-  void draw(const Camera* camera, Shader& shader, frustum::Frustum frustum) const {
+  void draw(const Camera* camera, Shader& shader) const {
+    for (const TerrainFaceChunk& chunk : chunks)
+      chunk.draw(camera, shader);
+  }
+
+  void draw(const Camera* camera, Shader& shader, const frustum::Frustum& frustum) const {
     shader.setUniform3f("u_terrainFaceColor", color);
 
     for (const TerrainFaceChunk& chunk : chunks) {

@@ -13,6 +13,7 @@ struct PlanetAtmosphere {
   vec3 scatteringCoefficients = vec3(1.f);
 
   bool useGammaCorrection = false;
+  bool apply = true;
 
   inline static float transmittance(float x, float a, float b) {
     return std::exp(-x * a * b);
@@ -41,6 +42,7 @@ struct PlanetAtmosphere {
     shader.setUniform1f("u_atmosphereRadius", radius);
     shader.setUniform1f("u_sunIntensity", sunIntensity);
     shader.setUniform1f("u_maskGammaCorrection", useGammaCorrection);
+    shader.setUniform1f("u_maskApply", apply);
   }
 };
 

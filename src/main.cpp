@@ -103,7 +103,7 @@ int main() {
 
   Shader::setDirectoryLocation("src/engine/shaders");
 
-  Shader earthShader("earth.vert", "earth.frag", "earth.geom");
+  Shader earthShader("earth.vert", "earth.frag", "earth.tesc", "earth.tese");
   Shader airplaneShader("airplane.vert", "airplane.frag");
   Shader trailShader("trail.vert", "trail.frag");
   Shader planetBordersShader("borders.vert", "borders.frag");
@@ -181,6 +181,7 @@ int main() {
 
   glCullFace(GL_FRONT);
   glFrontFace(GL_CW);
+  glPatchParameteri(GL_PATCH_VERTICES, 4);
 
   gui::earthPtr = &earth;
   gui::camSpecatePtr = &cameraSpectate;

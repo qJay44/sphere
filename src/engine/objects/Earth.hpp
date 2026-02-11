@@ -41,11 +41,13 @@ private:
 
   TerrainFace terrainFaces[6];
 
-  float heightmapScale = 2.f;
+  float heightmapScale = 8.f;
   float lightMultiplier = 1.5f;
   float ambient = 0.2f;
-  float specularLight = 0.5f;
+  float specularLight = 2.5f;
   float triplanarBlendSharpness = 1.f;
+  float lightDimScale = 2.5f;
+  float tessDivs = 2.5f;
 
   vec3 bordersColor = vec3(0.55f);
   vec3 waterShallowColor{0.f, 0.705f, 0.799f};
@@ -66,6 +68,7 @@ private:
 
   PlanetAtmosphere atmosphere;
 
+  bool useFrustum = true;
   bool useTerrainFaceColors = false;
   bool useTerrainFaceChunkColors = false;
   bool printBuildInfo = false;

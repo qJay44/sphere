@@ -18,7 +18,7 @@ struct TerrainFaceChunk : public Mesh {
     float radius
   ) {
     std::vector<VertexPT> vertices(resolution * resolution);
-    std::vector<GLuint> indices((resolution - 1) * (resolution - 1) * 2 * 3);
+    std::vector<GLuint> indices((resolution - 1) * (resolution - 1) * 4);
     size_t triIndex = 0;
 
     vec3 axisA = vec3(up.y, up.z, up.x);
@@ -50,15 +50,12 @@ struct TerrainFaceChunk : public Mesh {
         };
 
         if (x != resolution - 1 && y != resolution - 1) {
-          indices[triIndex + 0] = idx + resolution;      // 2       0 -------- 1
-          indices[triIndex + 1] = idx;                   // 0       |          |
-          indices[triIndex + 2] = idx + 1;               // 1       |          |
-          //                                                        |          |
-          indices[triIndex + 3] = idx + 1;               // 1       |          |
-          indices[triIndex + 4] = idx + resolution + 1;  // 3       |          |
-          indices[triIndex + 5] = idx + resolution;      // 2       2 -------- 3
+          indices[triIndex + 0] = idx;                  // 0
+          indices[triIndex + 1] = idx + 1;              // 1
+          indices[triIndex + 2] = idx + resolution + 1; // 3
+          indices[triIndex + 3] = idx + resolution;     // 2
 
-          triIndex += 6;
+          triIndex += 4;
         }
       }
     }
@@ -70,7 +67,7 @@ struct TerrainFaceChunk : public Mesh {
     const std::vector<VertexPT>& vertices,
     const std::vector<GLuint>& indices,
     const size_t& resolution
-  ) : Mesh(vertices, indices, GL_TRIANGLES) {
+  ) : Mesh(vertices, indices, GL_PATCHES) {
     firstVertex = vertices.front().position;
     lastVertex = vertices.back().position;
     debugColor = {
