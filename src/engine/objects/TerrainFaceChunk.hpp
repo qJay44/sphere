@@ -6,8 +6,8 @@
 #include <cstdlib>
 
 struct TerrainFaceChunk : public Mesh {
-  vec3 firstVertex;
-  vec3 lastVertex;
+  VertexPT firstVertex;
+  VertexPT lastVertex;
   vec3 debugColor;
 
   static TerrainFaceChunk build(
@@ -34,20 +34,21 @@ struct TerrainFaceChunk : public Mesh {
       vec3 pY = percentY * axisB;
 
       for (int x = 0; x < resolution; x++) {
+        int idx = x + y * resolution;
         float globalX = globalStartX + x;
         float percentX = globalX * step * 2.f - 1.f;
         vec3 pX = percentX * axisA;
-
-        int idx = x + y * resolution;
         vec3 pointOnPlane = up + pX + pY;
-        VertexPT& vertex = vertices[idx];
-        vertex.position = spherifyFancy(pointOnPlane) * radius;
 
-        vec3 normal = normalize(vertex.position);
-        vertex.texture = {
-          0.5f - atan2(normal.z, normal.x) / (2.f * PI),
-          0.5f + asin(normal.y) / PI
-        };
+        VertexPT& vertex = vertices[idx];
+        vec3 pos = spherifyFancy(pointOnPlane) * radius;
+        vec3 normal = normalize(pos);
+        float u = atan2(normal.z, normal.x) / (2.f * PI) + 0.5f;
+        float v = asin(normal.y) / PI + 0.5f;
+
+        // To avoid using vips flipping operations
+        u = 1.f - u;
+        v = 1.f - v;
 
         if (x != resolution - 1 && y != resolution - 1) {
           indices[triIndex + 0] = idx;                  // 0
@@ -57,6 +58,9 @@ struct TerrainFaceChunk : public Mesh {
 
           triIndex += 4;
         }
+
+        vertex.position = pos;
+        vertex.texture = {u, v}; // Just for the TileManager
       }
     }
 
@@ -68,8 +72,8 @@ struct TerrainFaceChunk : public Mesh {
     const std::vector<GLuint>& indices,
     const size_t& resolution
   ) : Mesh(vertices, indices, GL_PATCHES) {
-    firstVertex = vertices.front().position;
-    lastVertex = vertices.back().position;
+    firstVertex = vertices.front();
+    lastVertex = vertices.back();
     debugColor = {
       (rand() % 255) / 255.f,
       (rand() % 255) / 255.f,

@@ -3,22 +3,30 @@
 #define INT16_MIN -32768
 #define INT16_MAX  32767
 #define UINT16_MAX 65535u
+#define PI 3.141592265359f
+
+// TODO: Rework water
 
 out vec4 FragColor;
-
 in DATA {
-  vec3 normal;
+  vec2 texCoord;
   vec4 worldPos;
+  float isLand;
 } dataIn;
 
-layout(binding = 0) uniform isamplerCube u_heightmapsWater;
-layout(binding = 1) uniform usamplerCube u_distanceFieldsWater;
-layout(binding = 2) uniform samplerCube u_normalheightmapsLand;
-layout(binding = 3) uniform samplerCube u_worldColors;
-layout(binding = 4) uniform samplerCube u_borders;
-layout(binding = 5) uniform sampler2D u_normalmapWave0;
-layout(binding = 6) uniform sampler2D u_normalmapWave1;
+layout(binding = 0) uniform sampler2DArray u_texColors;
+layout(binding = 1) uniform usampler2D u_texColorsIndirection;
 
+layout(binding = 4) uniform sampler2DArray u_texNormalmapLand;
+layout(binding = 5) uniform usampler2D u_texNormalmapLandIndirection;
+
+layout(binding = 6) uniform sampler2D u_texBathymetry;
+layout(binding = 7) uniform sampler2D u_texLandSDF;
+layout(binding = 8) uniform sampler2D u_texBorders;
+layout(binding = 9) uniform sampler2D u_texNormalmapWave0;
+layout(binding = 10) uniform sampler2D u_texNormalmapWave1;
+
+uniform vec2 u_virtualDims;
 uniform vec3 u_camPos;
 uniform vec3 u_lightPos;
 uniform vec3 u_lightColor;
@@ -30,7 +38,8 @@ uniform vec3 u_terrainFaceChunkColor;
 uniform float u_time;
 uniform float u_radius;
 uniform float u_ambient;
-uniform float u_specularLight;
+uniform float u_specularStrength;
+uniform float u_seaLevel;
 uniform float u_lightDimScale;
 uniform float u_lightMultiplier;
 uniform float u_maskTerrainFaceColor;
@@ -50,6 +59,14 @@ uniform float u_waterShoreWaveNoiseScale;
 uniform float u_waterShoreWaveNoiseSpeed;
 uniform float u_waterShoreWaveNoiseAmplitude;
 uniform float u_triplanarBlendSharpness;
+
+vec3 normalSphere = normalize(dataIn.worldPos.xyz);
+
+// Flip to avoid using vips flipping operations
+vec2 globalUV = vec2(
+  0.5f - atan(normalSphere.z, normalSphere.x) / (2.f * PI),
+  0.5f - (asin(normalSphere.y) / PI)
+);
 
 float hash(vec2 p) {
   p = fract(p * vec2(123.34, 456.21));
@@ -73,25 +90,24 @@ float noise(vec2 p) {
   return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
 }
 
-vec3 directionalLight(vec3 normal, float isWater) {
-  vec3 lightDistVec = u_lightPos - dataIn.worldPos.xyz;
-  float lightDist = length(lightDistVec);
+vec3 directionalLight(vec3 normal) {
+  vec3 lightDir = normalize(u_lightPos - dataIn.worldPos.xyz);
+  float diffuse = max(dot(normal, lightDir), 0.f);
 
-  vec3 lightDirection = normalize(lightDistVec);
-  float diffuse = max(dot(normal, lightDirection), 0.f);
-
-  vec3 viewDirection = normalize(u_camPos - dataIn.worldPos.xyz);
-  vec3 reflectionDirection = reflect(-lightDirection, normal);
-  float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.f), 8);
-  float specular = specAmount * u_specularLight * isWater;
-  float lightAmount = (diffuse + u_ambient + specular);
-  float intensity = smoothstep(u_radius * u_lightDimScale, 0.f, lightDist);
-
-  return u_lightColor * lightAmount * intensity * u_lightMultiplier;
+  return u_lightColor * diffuse * u_lightMultiplier;
 }
 
-vec3 triplanarNormal(sampler2D normalmap, float timeStep) {
-  vec3 absNormal = abs(dataIn.normal);
+vec3 specularLight(vec3 normal) {
+  vec3 viewDir = normalize(u_camPos - dataIn.worldPos.xyz);
+  vec3 toLightDir = -normalize(u_lightPos - dataIn.worldPos.xyz);
+  vec3 reflDir = reflect(toLightDir, normal); // Reflected light from the world point
+  float specular = pow(max(dot(reflDir, viewDir), 0.f), 32.f);
+
+  return u_lightColor * specular * u_specularStrength;
+}
+
+vec3 triplanarNormal(sampler2D normalmap, vec3 normal, float timeStep) {
+  vec3 absNormal = abs(normal);
   float sum = absNormal.x + absNormal.y + absNormal.z;
   vec3 weights = absNormal / (sum + 1e-16f);
 
@@ -105,17 +121,16 @@ vec3 triplanarNormal(sampler2D normalmap, float timeStep) {
   return normalize(colorX * weights.x + colorY * weights.y + colorZ * weights.z);
 }
 
-vec3 calculateDeepColor(int deepness) {
-  float d = float(deepness) / INT16_MAX * 0.5f + 0.5f;
-  float t = pow(d, u_waterDeepFactor);
+vec3 calculateDeepColor(float deepness) {
+  float t = pow(deepness, u_waterDeepFactor);
   t = smoothstep(u_waterDeepEdgeStart, u_waterDeepEdgeEnd, t);
 
   return mix(u_waterDeepColor, u_waterShallowColor, t);
 }
 
-float calculateShoreWaves() {
-  const uint distFromShore = texture(u_distanceFieldsWater, dataIn.normal).r;
-  float dist = 1.f - float(distFromShore) / UINT16_MAX;
+float calculateShoreWaves(vec3 normal) {
+  float sdf = texture(u_texLandSDF, globalUV).r;
+  float dist = 1.f - sdf;
   float factor = smoothstep(u_waterShoreWaveThresholdStart, u_waterShoreWaveThresholdEnd, dist);
   float n = noise(dataIn.worldPos.xy * u_waterShoreWaveNoiseScale + u_time * u_waterShoreWaveNoiseSpeed);
   float wave = sin(dist * u_waterShoreWaveFreq + u_time * 2.f + n * u_waterShoreWaveNoiseAmplitude) * u_waterShoreWaveAmplitude;
@@ -127,26 +142,40 @@ vec3 applyMask(vec3 no, vec3 yes, float mask) {
   return yes * mask + (1.f - mask) * no;
 }
 
-void main() {
-  vec4 normalheightSample = texture(u_normalheightmapsLand, dataIn.normal);
-  vec3 surfaceNormal = normalize(normalheightSample.rgb * 2.f - 1.f);
-  vec3 color = texture(u_worldColors, dataIn.normal).rgb;
-  vec3 normalWave0 = triplanarNormal(u_normalmapWave0, -u_time * u_waterWaveFreq);
-  vec3 normalWave1 = triplanarNormal(u_normalmapWave1,  u_time * u_waterWaveFreq);
-  vec3 normalWaves = normalize(normalWave0 + normalWave1);
-  float border = texture(u_borders, dataIn.normal).r;
-  int deepness = texture(u_heightmapsWater, dataIn.normal).r; // [-32768, 32767]
+vec4 textureVirtual(sampler2DArray texPhysical, usampler2D texVirtual) {
+  ivec2 tileCoord = ivec2(globalUV * u_virtualDims);
+  tileCoord = min(tileCoord, ivec2(u_virtualDims) - 1);
 
-  // water: -1; land: 0 and 1
-  float isWater = floor(-sign(deepness) * 0.5f + 0.5f);
-  float isLand = 1.f - isWater;
+  uint physicalSlot = texelFetch(texVirtual, tileCoord, 0).r;
+
+  if (physicalSlot == 255u)
+    return vec4(0.f, 1.f, 0.f, 0.f);
+
+  vec2 localUV = fract(globalUV * u_virtualDims);
+
+  return texture(texPhysical, vec3(localUV, physicalSlot));
+}
+
+void main() {
+  vec3 color = textureVirtual(u_texColors, u_texColorsIndirection).rgb;
+  vec4 surfaceNormalSample = textureVirtual(u_texNormalmapLand, u_texNormalmapLandIndirection);
+
+  vec3 surfaceNormal = normalize(surfaceNormalSample.rgb * 2.f - 1.f);
+  vec3 normalWave0 = triplanarNormal(u_texNormalmapWave0, normalSphere, -u_time * u_waterWaveFreq);
+  vec3 normalWave1 = triplanarNormal(u_texNormalmapWave1, normalSphere,  u_time * u_waterWaveFreq);
+  vec3 normalWaves = normalize(normalWave0 + normalWave1);
+  float border = texture(u_texBorders, globalUV).r;
+  float deepness = texture(u_texBathymetry, globalUV).r;
+
+  float isLand = round(deepness); // TODO: Probably not that easy
+  float isWater = 1.f - isLand;
 
   surfaceNormal *= -1.f;
 
   color = isWater * calculateDeepColor(deepness) + isLand * color;
-  color *= isLand * directionalLight(surfaceNormal, 0.f) + isWater;
-  color += isWater * calculateShoreWaves() * directionalLight(surfaceNormal, 1.f);
-  color *= isWater * directionalLight(normalWaves, 1.f) + isLand;
+  color *= isLand * directionalLight(surfaceNormal) + isWater;
+  color += isWater * calculateShoreWaves(normalSphere);
+  color += isWater * specularLight(normalWaves);
   color += border * u_bordersColor;
 
   color = applyMask(color, u_terrainFaceColor, u_maskTerrainFaceColor);

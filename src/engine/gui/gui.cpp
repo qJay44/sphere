@@ -1,8 +1,14 @@
 #include "gui.hpp"
 
+#undef IM_NEW
+#undef IM_FREE
+
 #include "AtmospherePlotter.hpp"
-#include "imgui.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "imgui.h"
+#include "implot.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
 
 using namespace ImGui;
 
@@ -13,11 +19,41 @@ Camera* gui::camSpecatePtr = nullptr;
 Airplane* gui::airplanePtr = nullptr;
 Light* gui::lightPtr = nullptr;
 
+float gui::_sliderf0 = 0.f;
+int gui::_slideri0 = 0.f;
+
 u16 gui::fps = 1;
+
+void gui::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+  ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
+}
+
+void gui::scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+  ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
+}
+
+void gui::cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
+  ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
+}
+
+void gui::init() {
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImPlot::CreateContext();
+  ImGuiIO& io = ImGui::GetIO();
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+  io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
+  ImGui_ImplGlfw_InitForOpenGL(global::window, true);
+  ImGui_ImplOpenGL3_Init();
+}
 
 void gui::toggle() { collapsed = !collapsed; }
 
 void gui::draw() {
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+
   static RunOnce a([]() {
     SetNextWindowPos({0, 0});
   });
@@ -45,6 +81,7 @@ void gui::draw() {
     earthPtr->useTerrainFaceColors = rbFaceChunk == 1;
     earthPtr->useTerrainFaceChunkColors = rbFaceChunk == 2;
 
+    Text("Chunks drawn: %d", earthPtr->chunksDrawn);
     rebuild |= SliderInt("Chunks per side", &earthPtr->chunksPerSide, 1, 20);
     rebuild |= SliderInt("Resolution", &earthPtr->resolution, 2, 100);
     bool _r = SliderFloat("Radius", &earthPtr->radius, 1.f, 500.f);
@@ -59,6 +96,7 @@ void gui::draw() {
     SliderFloat("TESC divisions scale", &earthPtr->tessDivs, 0.f, 100.f);
     SliderFloat("Heightmap scale", &earthPtr->heightmapScale, 0.01f, 100.f);
     SliderFloat("Triplanar blend sharpness", &earthPtr->triplanarBlendSharpness, 1.f, 10.f);
+    SliderFloat("Sea level", &earthPtr->seaLevel, -100.f, 100.f);
     ColorEdit3("Border color", glm::value_ptr(earthPtr->bordersColor));
 
     SeparatorText("Water");
@@ -82,7 +120,7 @@ void gui::draw() {
     SliderFloat("Multiplier", &earthPtr->lightMultiplier, 0.1f, 20.f);
     SliderFloat("Distance dim scale", &earthPtr->lightDimScale, 0.1f, 20.f);
     SliderFloat("Ambient", &earthPtr->ambient, 0.0f, 20.f);
-    SliderFloat("Specular light", &earthPtr->specularLight, 0.0f, 20.f);
+    SliderFloat("Specular strength", &earthPtr->specularStrength, 0.0f, 20.f);
   }
 
   // ===== Atmosphere ==================================================================================== //
@@ -97,7 +135,7 @@ void gui::draw() {
     rebakeOpticalDepth |= SliderInt("Optical depth points", &atmosphere.opticalDepthPoints, 2, 50);
     rebakeOpticalDepth |= SliderFloat("Sun intensity", &atmosphere.sunIntensity, 0.f, 10.f);
     rebakeOpticalDepth |= SliderFloat("Density falloff", &atmosphere.densityFalloff, 0.f, 20.f);
-    rebakeOpticalDepth |= SliderFloat("Scattering strenth", &atmosphere.scatteringStrength, 0.f, 1.f);
+    rebakeOpticalDepth |= SliderFloat("Scattering strength", &atmosphere.scatteringStrength, 0.f, 1.f);
 
     Checkbox("Gamma correction", &atmosphere.useGammaCorrection);
     Checkbox("Apply", &atmosphere.apply);
@@ -200,8 +238,21 @@ void gui::draw() {
   if (CollapsingHeader("Other")) {
     Checkbox("Show global axis", &global::drawGlobalAxis);
     Checkbox("Planet print build info", &earthPtr->printBuildInfo);
+
+    DragFloat("_sliderf0", &_sliderf0);
+    DragInt("_slideri0", &_slideri0);
   }
 
   End();
+
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void gui::shutdown() {
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImPlot::DestroyContext();
+  ImGui::DestroyContext();
 }
 

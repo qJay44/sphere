@@ -19,7 +19,7 @@ void PlotLine::update(float xmin, float xmax, int points) {
   }
 }
 
-void PlotLine::render(const ImVec4& color, float weight) {
+void PlotLine::render(const vec4& color, float weight) {
   ImPlot::SetNextLineStyle(color, weight);
   ImPlot::PlotLine(label.c_str(), xData.data(), yData.data(), xData.size());
 }

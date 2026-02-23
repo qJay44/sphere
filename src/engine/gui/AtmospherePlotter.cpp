@@ -27,7 +27,7 @@ AtmospherePlotter::AtmospherePlotter(const PlanetAtmosphere* atmosphere, int poi
   y3_transmittance.resize(points);
 }
 
-void AtmospherePlotter::renderDensity(float xmax, ImVec2 size) {
+void AtmospherePlotter::renderDensity(float xmax, vec2 size) {
   if (ImPlot::BeginPlot("Density", size, flagsPlot)) {
     updateDensity(xmax);
 
@@ -41,7 +41,7 @@ void AtmospherePlotter::renderDensity(float xmax, ImVec2 size) {
   }
 }
 
-void AtmospherePlotter::renderTransmittance(float xmax, ImVec2 size) {
+void AtmospherePlotter::renderTransmittance(float xmax, vec2 size) {
   if (ImPlot::BeginPlot("Transmittance", size, flagsPlot)) {
     updateTranmittance(xmax);
 

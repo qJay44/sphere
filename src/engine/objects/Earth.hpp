@@ -1,11 +1,14 @@
 #pragma once
 
 #include "../Camera.hpp"
-#include "../texture/Texture.hpp"
+#include "../texture/Texture2DArray.hpp"
+#include "../texture/TextureCubemap.hpp"
+#include "../texture/Texture2D.hpp"
 #include "../frustum/Frustum.hpp"
 #include "TerrainFace.hpp"
 #include "PlanetAtmosphere.hpp"
 #include "Light.hpp"
+#include "TileManager.hpp"
 
 class Earth {
 public:
@@ -16,38 +19,44 @@ public:
   const float& getAtmosphereRadius() const;
   const float& getHeightmapScale()   const;
 
-  void loadTextures();
   void build();
+  void createTextures();
   void update(const Light& light);
   void bakeOpticalDepth();
-  void draw(const Camera* camera, const frustum::Frustum& frustum, Shader& shader) const;
+  void draw(const Camera* camera, const frustum::Frustum& frustum, Shader& shader);
   void drawAtmosphere(const Camera* camera, Shader& shader) const;
 
 private:
   friend struct gui;
 
+  static const fspath facesPath;
+
   int resolution;
   int chunksPerSide;
   float radius;
+  TileManager tileManager;
 
-  Texture texHeightmapsWater;
-  Texture texDistanceFieldWater;
-  Texture texNormalheightmapsLand;
-  Texture texWorldColors;
-  Texture texBorders;
-  Texture texNormalmapWave0;
-  Texture texNormalmapWave1;
-  Texture texBakedOpticalDepth;
+  TextureVirtual texVirtColors;
+  TextureVirtual texVirtHeightmapLand;
+  TextureVirtual texVirtNormalmapLand;
+
+  Texture2D texBathymetry;
+  Texture2D texLandSDF;
+  Texture2D texBorders;
+  Texture2D texNormalmapWave0;
+  Texture2D texNormalmapWave1;
+  Texture2D texBakedOpticalDepth;
 
   TerrainFace terrainFaces[6];
 
   float heightmapScale = 8.f;
   float lightMultiplier = 1.5f;
   float ambient = 0.2f;
-  float specularLight = 2.5f;
+  float specularStrength = 1.25f;
   float triplanarBlendSharpness = 1.f;
   float lightDimScale = 2.5f;
   float tessDivs = 2.5f;
+  float seaLevel = 0.f;
 
   vec3 bordersColor = vec3(0.55f);
   vec3 waterShallowColor{0.f, 0.705f, 0.799f};
@@ -68,9 +77,14 @@ private:
 
   PlanetAtmosphere atmosphere;
 
+  int chunksDrawn = 0;
+
   bool useFrustum = true;
   bool useTerrainFaceColors = false;
   bool useTerrainFaceChunkColors = false;
   bool printBuildInfo = false;
+
+private:
+  static void tileLoad(const fspath& path, const Texture2DArray& tex);
 };
 

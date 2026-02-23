@@ -5,6 +5,7 @@
 
 #include "TerrainFaceChunk.hpp"
 #include "../frustum/volumes/Sphere.hpp"
+#include "TileManager.hpp"
 
 struct TerrainFace {
   std::list<TerrainFaceChunk> chunks;
@@ -12,30 +13,12 @@ struct TerrainFace {
 
   TerrainFace() = default;
 
-  TerrainFace(int i, int chunksPerSide, int resolution, float radius) {
-    constexpr vec3 directions[6] {
-      {1.f,  0.f,  0.f},  // Right
-      {-1.f, 0.f,  0.f},  // Left
-      {0.f,  1.f,  0.f},  // Top
-      {0.f,  -1.f, 0.f},  // Bottom
-      {0.f,  0.f,  1.f},  // Back
-      {0.f,  0.f,  -1.f}, // Front
-    };
-
-    constexpr vec3 colors[6] {
-      {0.f,    0.992f, 1.f   },
-      {1.f,    0.149f, 0.f   },
-      {1.f,    0.251f, 0.988f},
-      {0.f,    0.976f, 0.173f},
-      {0.024f, 0.204f, 0.988f},
-      {0.996f, 0.984f, 0.169f},
-    };
-
-    color = colors[i];
+  void build(vec3 up, int chunksPerSide, int resolution, float radius) {
+    chunks.clear();
 
     for (int y = 0; y < chunksPerSide; y++)
       for (int x = 0; x < chunksPerSide; x++)
-        chunks.push_back(TerrainFaceChunk::build(directions[i], {x, y}, chunksPerSide, resolution, radius));
+        chunks.push_back(TerrainFaceChunk::build(up, {x, y}, chunksPerSide, resolution, radius));
   }
 
   void draw(const Camera* camera, Shader& shader) const {
@@ -43,19 +26,41 @@ struct TerrainFace {
       chunk.draw(camera, shader);
   }
 
-  void draw(const Camera* camera, Shader& shader, const frustum::Frustum& frustum) const {
+  int draw(const Camera* camera, Shader& shader, const frustum::Frustum& frustum, TileManager& tm) const {
+    int cnt = 0;
     shader.setUniform3f("u_terrainFaceColor", color);
 
     for (const TerrainFaceChunk& chunk : chunks) {
       shader.setUniform3f("u_terrainFaceChunkColor", chunk.debugColor);
 
-      vec3 center = (chunk.lastVertex + chunk.firstVertex) * 0.5f;
-      float radius = glm::length(chunk.lastVertex - chunk.firstVertex) * 2.f; // Additionally multipling by 2 to keep some chunks when camera is to close to the earth
-      frustum::Sphere frustumSphere(center, radius);
+      vec3 centerPos = (chunk.lastVertex.position + chunk.firstVertex.position) * 0.5f;
+      float radius = glm::distance(chunk.lastVertex.position, chunk.firstVertex.position);
+      frustum::Sphere frustumSphere(centerPos, radius);
 
-      if (frustumSphere.isOnFrustum(frustum, chunk))
+      if (frustumSphere.isOnFrustum(frustum, chunk)) {
+        float padding = 0.05f;
+        vec2 uv0 = chunk.firstVertex.texture;
+        vec2 uv1 = chunk.lastVertex.texture;
+
+        vec2 centerUV = (uv0 + uv1) * 0.5f;
+
+        vec2 uvMin = max(centerUV - padding, {0.f, 0.f});
+        vec2 uvMax = min(centerUV + padding, {1.f, 1.f});
+
+        // Request all tiles (width) at the poles FIXME: Too big?
+        if (uvMin.y < 0.001f || uvMax.y > 0.999f) {
+          uvMin.x = 0.f;
+          uvMax.x = 1.f;
+        }
+
+        tm.requestTile(uvMin, uvMax);
+
         chunk.draw(camera, shader);
+        cnt++;
+      }
     }
+
+    return cnt;
   }
 };
 

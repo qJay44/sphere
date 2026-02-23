@@ -9,11 +9,6 @@
   #define CHDIR(p) chdir(p);
 #endif
 
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
-#include "implot.h"
-
 #include "global.hpp"
 #include "engine/gui/gui.hpp"
 #include "engine/Camera.hpp"
@@ -21,7 +16,7 @@
 #include "engine/InputsHandler.hpp"
 #include "engine/FBO.hpp"
 #include "engine/mesh/meshes.hpp"
-#include "engine/texture/Texture.hpp"
+#include "engine/texture/Texture2D.hpp"
 #include "engine/objects/Airplane.hpp"
 #include "engine/objects/Earth.hpp"
 #include "engine/objects/Light.hpp"
@@ -90,14 +85,12 @@ int main() {
   glEnable(GL_DEBUG_OUTPUT);
   glDebugMessageCallback(MessageCallback, 0);
 
-  IMGUI_CHECKVERSION();
-  ImGui::CreateContext();
-  ImPlot::CreateContext();
-  ImGuiIO& io = ImGui::GetIO();
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-  io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
-  ImGui_ImplGlfw_InitForOpenGL(window, true);
-  ImGui_ImplOpenGL3_Init();
+  gui::init();
+
+  if (VIPS_INIT("TileApp"))
+    vips_error_exit("Unable to init libvips");
+
+  vips_cache_set_max(0);
 
   // ===== Shaders ============================================== //
 
@@ -119,7 +112,7 @@ int main() {
 
   // ===== Planet ============================================== //
 
-  Earth earth(50, 20, earthInitRadius);
+  Earth earth(50, 9, earthInitRadius);
 
   // ===== Airplane ============================================= //
 
@@ -162,14 +155,14 @@ int main() {
   fboTexDesc.genMipMap = false;
 
   FBO fboScreen;
-  Texture screenColorTexture(winSize, fboTexDesc);
+  Texture2D screenColorTexture(winSize, fboTexDesc);
 
   fboTexDesc.uniformName = "u_screenDepthTex";
   fboTexDesc.unit = 1;
   fboTexDesc.internalFormat = GL_DEPTH_COMPONENT;
   fboTexDesc.format = GL_DEPTH_COMPONENT;
 
-  Texture screenDepthTexture(winSize, fboTexDesc);
+  Texture2D screenDepthTexture(winSize, fboTexDesc);
 
   fboScreen.attach2D(GL_COLOR_ATTACHMENT0, screenColorTexture);
   fboScreen.attach2D(GL_DEPTH_ATTACHMENT, screenDepthTexture);
@@ -188,7 +181,6 @@ int main() {
   gui::airplanePtr = &airplane;
   gui::lightPtr = &light;
 
-  earth.loadTextures();
   earth.update(light);
   earth.bakeOpticalDepth();
 
@@ -214,10 +206,6 @@ int main() {
       cameraATM->update();
     } else
       glfwSetCursorPos(window, winCenter.x, winCenter.y);
-
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
 
     // Update window title every 0.3 seconds
     if (currTime - titleTimer >= 0.3) {
@@ -278,17 +266,12 @@ int main() {
     // ============================================================ //
 
     gui::draw();
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
 
-  ImGui_ImplOpenGL3_Shutdown();
-  ImGui_ImplGlfw_Shutdown();
-  ImPlot::DestroyContext();
-  ImGui::DestroyContext();
+  gui::shutdown();
   glfwTerminate();
 
   return 0;

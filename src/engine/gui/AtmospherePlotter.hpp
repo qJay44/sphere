@@ -3,14 +3,13 @@
 #include <vector>
 
 #include "../objects/PlanetAtmosphere.hpp"
-#include "imgui.h"
 
 class AtmospherePlotter {
 public:
   AtmospherePlotter(const PlanetAtmosphere* atmosphere, int points);
 
-  void renderDensity(float xmax = 5.f, ImVec2 size = {400.f, 200.f});
-  void renderTransmittance(float xmax = 5.f, ImVec2 size = {400.f, 200.f});
+  void renderDensity(float xmax = 5.f, vec2 size = {400.f, 200.f});
+  void renderTransmittance(float xmax = 5.f, vec2 size = {400.f, 200.f});
 
 private:
   const PlanetAtmosphere* atmosphere;

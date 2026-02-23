@@ -11,6 +11,9 @@ project(MyProject VERSION 1.0)
 
 find_package(glfw3 REQUIRED)
 find_package(TIFF REQUIRED)
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(VIPS REQUIRED vips-cpp)
 
 # ===== GLAD ====================================================== #
 
@@ -32,7 +35,6 @@ add_library(ImGui_GLFW_OpenGL STATIC
 
 target_include_directories(ImGui_GLFW_OpenGL PUBLIC
   ${IMGUI_PATH}
-  ${IMGUI_PATH}/backends
   ${IMPLOT_PATH}
 )
 
@@ -48,7 +50,7 @@ target_include_directories(Utils PUBLIC ${UTILS_PATH}/include)
 file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall ${VIPS_CFLAGS_OTHER})
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/src/pch.hpp)
 
@@ -56,7 +58,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
   ${STB_PATH}/include
   ${GLM_PATH}/include
   ${TOL_PATH}/include
+  ${VIPS_INCLUDE_DIRS}
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw TIFF::TIFF GLAD ImGui_GLFW_OpenGL Utils)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw TIFF::TIFF ${VIPS_LIBRARIES} GLAD ImGui_GLFW_OpenGL Utils)
 

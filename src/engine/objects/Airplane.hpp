@@ -43,7 +43,7 @@ public:
 private:
   friend struct gui;
 
-  static Texture texDiffuse;
+  static Texture2D texDiffuse;
 
   Camera camera;
   float flyHeight;

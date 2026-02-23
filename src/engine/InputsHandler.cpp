@@ -3,7 +3,6 @@
 #include <cassert>
 
 #include "gui/gui.hpp"
-#include "imgui_impl_glfw.h"
 
 using global::window;
 
@@ -46,12 +45,12 @@ void InputsHandler::keyCallback(GLFWwindow* window, int key, int scancode, int a
   }
 
   if (global::guiFocused)
-    ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
+    gui::keyCallback(window, key, scancode, action, mods);
 }
 
 void InputsHandler::scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
   if (global::guiFocused) {
-    ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
+    gui::scrollCallback(window, xoffset, yoffset);
   } else {
     assert(InputsHandler::airplanePtr);
     InputsHandler::airplanePtr->onMouseScroll({xoffset, yoffset});
@@ -60,7 +59,7 @@ void InputsHandler::scrollCallback(GLFWwindow* window, double xoffset, double yo
 
 void InputsHandler::cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
   mousePos = {xpos, ypos};
-  ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
+  gui::cursorPosCallback(window, xpos, ypos);
 }
 
 void InputsHandler::process(Moveable& entity) {

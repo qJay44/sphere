@@ -3,7 +3,7 @@
 #include "../mesh/meshes.hpp"
 #include "glm/common.hpp"
 
-Texture Airplane::texDiffuse;
+Texture2D Airplane::texDiffuse;
 
 Airplane::Airplane(vec3 position, float flyHeight, const fspath& model, float meshScale)
   : Moveable(position, 0.f, 0.f),
@@ -15,7 +15,7 @@ Airplane::Airplane(vec3 position, float flyHeight, const fspath& model, float me
     lightRight(position, 0.1f, global::red)
 {
   if (texDiffuse.getUniformName().empty())
-    texDiffuse = Texture(image2D("res/tex/airplane/11804_Airplane_diff.jpg", IMAGE2D_LOAD_STB, true), {"diffuse0", 0});
+    texDiffuse = Texture2D(image2D("res/tex/airplane/11804_Airplane_diff.jpg", IMAGE2D_LOAD_STB, true), {"diffuse0", 0});
 
   // Facing +Y
   Mesh::translate(position);
@@ -100,14 +100,15 @@ void Airplane::update(const Earth& earth) {
   tiltRecoverMomentumRad += tiltMomentumRad;
 
   // Move forward
-  float frameSpeedRad = speed * global::dt;
+  float dtSafe = glm::min(global::dt, 0.033f);
+  float frameSpeedRad = speed * dtSafe;
   vec3 newPos = normalize(position) + orientation * frameSpeedRad;
   vec3 gravityUp = normalize(newPos);
   newPos = gravityUp * (earth.getRadius() + flyHeight);
   Mesh::translate(newPos - position);
 
   // Rotate so that airplane's orientation is perpendicular to the planet
-  // Finding left since local left (-right) can be tilted up or down
+  // Finding a new left since local left (-right) can be tilted up or down
   rotateQuat = glm::angleAxis(frameSpeedRad, normalize(cross(up, orientation)));
   Mesh::rotate(rotateQuat);
 

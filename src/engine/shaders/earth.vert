@@ -5,8 +5,6 @@ layout(location = 1) in vec2 inTex;
 
 out vec2 uvs;
 
-layout(binding = 2) uniform samplerCube u_normalheightmapsLand;
-
 uniform mat4 u_model;
 
 void main() {
