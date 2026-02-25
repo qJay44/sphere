@@ -1,10 +1,14 @@
 #include "gui.hpp"
 
+#include <cassert>
+
 #undef IM_NEW
 #undef IM_FREE
 
 #include "AtmospherePlotter.hpp"
+#include "TilePlotter.hpp"
 #include "glm/gtc/type_ptr.hpp"
+
 #include "imgui.h"
 #include "implot.h"
 #include "backends/imgui_impl_glfw.h"
@@ -50,26 +54,27 @@ void gui::init() {
 void gui::toggle() { collapsed = !collapsed; }
 
 void gui::draw() {
+  ScopedProfilerTask _task("gui::draw");
+
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 
-  static RunOnce a([]() {
-    SetNextWindowPos({0, 0});
-  });
+  SetNextWindowPos({0, 0});
   SetNextWindowCollapsed(collapsed);
 
-  Begin("Settings");
+  // ::::: Config window ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-  ImGui::Text("FPS: %d / %f.5 ms", fps, global::dt);
+  Begin("Config");
 
   // ===== Planet ======================================================================================== //
 
   bool rebakeOpticalDepth = false;
 
-  if (!earthPtr) error("The earth object is not linked to gui");
+  assert(earthPtr);
   if (CollapsingHeader("Planet")) {
-    bool rebuild = false;
+    bool rebuild = SliderFloat("Radius", &earthPtr->radius, 1.f, 500.f);
+    rebakeOpticalDepth |= rebuild;
 
     Checkbox("Frustum culling", &earthPtr->useFrustum);
 
@@ -81,13 +86,8 @@ void gui::draw() {
     earthPtr->useTerrainFaceColors = rbFaceChunk == 1;
     earthPtr->useTerrainFaceChunkColors = rbFaceChunk == 2;
 
-    Text("Chunks drawn: %d", earthPtr->chunksDrawn);
     rebuild |= SliderInt("Chunks per side", &earthPtr->chunksPerSide, 1, 20);
     rebuild |= SliderInt("Resolution", &earthPtr->resolution, 2, 100);
-    bool _r = SliderFloat("Radius", &earthPtr->radius, 1.f, 500.f);
-
-    rebuild |= _r;
-    rebakeOpticalDepth |= _r;
 
     if (rebuild)
       earthPtr->build();
@@ -100,21 +100,21 @@ void gui::draw() {
     ColorEdit3("Border color", glm::value_ptr(earthPtr->bordersColor));
 
     SeparatorText("Water");
-    SliderFloat("Deep factor", &earthPtr->waterDeepFactor, -50.f, 50.f);
-    SliderFloat("Deep edge start", &earthPtr->waterDeepEdgeStart, 0.f, 1.f);
-    SliderFloat("Deep edge end", &earthPtr->waterDeepEdgeEnd, 0.f, 1.f);
-    SliderFloat("Specular smoothness", &earthPtr->waterSpecularSmoothness, 0.f, 10.f);
-    SliderFloat("Wave frequency", &earthPtr->waterWaveFreq, -0.5f, 0.5f);
-    SliderFloat("Wave resolution multiplier", &earthPtr->waterWaveResMult, 0.001f, 50.f);
-    SliderFloat("Shore wave frequency", &earthPtr->waterShoreWaveFreq, -10000.f, 10000.f);
-    SliderFloat("Shore wave distance threshold start", &earthPtr->waterShoreWaveThresholdStart, 0.f, 1.f);
-    SliderFloat("Shore wave distance threshold end", &earthPtr->waterShoreWaveThresholdEnd, 0.f, 1.f);
-    SliderFloat("Shore wave amplitude scale", &earthPtr->waterShoreWaveAmplitude, -1.f, 1.f);
-    SliderFloat("Shore wave noise scale", &earthPtr->waterShoreWaveNoiseScale, 0.f, 10.f);
-    SliderFloat("Shore wave noise speed", &earthPtr->waterShoreWaveNoiseSpeed, 0.f, 10.f);
-    SliderFloat("Shore wave noise amplitude", &earthPtr->waterShoreWaveNoiseAmplitude, 0.f, 10.f);
-    ColorEdit3("Shallow color", glm::value_ptr(earthPtr->waterShallowColor));
-    ColorEdit3("Deep color", glm::value_ptr(earthPtr->waterDeepColor));
+    // SliderFloat("Deep factor", &earthPtr->waterDeepFactor, -50.f, 50.f);
+    // SliderFloat("Deep edge start", &earthPtr->waterDeepEdgeStart, 0.f, 1.f);
+    // SliderFloat("Deep edge end", &earthPtr->waterDeepEdgeEnd, 0.f, 1.f);
+    // SliderFloat("Specular smoothness", &earthPtr->waterSpecularSmoothness, 0.f, 10.f);
+    // SliderFloat("Wave frequency", &earthPtr->waterWaveFreq, -0.5f, 0.5f);
+    // SliderFloat("Wave resolution multiplier", &earthPtr->waterWaveResMult, 0.001f, 50.f);
+    // SliderFloat("Shore wave frequency", &earthPtr->waterShoreWaveFreq, -10000.f, 10000.f);
+    // SliderFloat("Shore wave distance threshold start", &earthPtr->waterShoreWaveThresholdStart, 0.f, 1.f);
+    // SliderFloat("Shore wave distance threshold end", &earthPtr->waterShoreWaveThresholdEnd, 0.f, 1.f);
+    // SliderFloat("Shore wave amplitude scale", &earthPtr->waterShoreWaveAmplitude, -1.f, 1.f);
+    // SliderFloat("Shore wave noise scale", &earthPtr->waterShoreWaveNoiseScale, 0.f, 10.f);
+    // SliderFloat("Shore wave noise speed", &earthPtr->waterShoreWaveNoiseSpeed, 0.f, 10.f);
+    // SliderFloat("Shore wave noise amplitude", &earthPtr->waterShoreWaveNoiseAmplitude, 0.f, 10.f);
+    // ColorEdit3("Shallow color", glm::value_ptr(earthPtr->waterShallowColor));
+    // ColorEdit3("Deep color", glm::value_ptr(earthPtr->waterDeepColor));
 
     SeparatorText("Lightning");
     SliderFloat("Multiplier", &earthPtr->lightMultiplier, 0.1f, 20.f);
@@ -149,7 +149,7 @@ void gui::draw() {
 
   // ===== Airplane ====================================================================================== //
 
-  if (!airplanePtr) error("The airplane is not linked to gui");
+  assert(airplanePtr);
   if (CollapsingHeader("Airplane")) {
     SliderFloat("Speed", &airplanePtr->speedDefault, 0.f, PI * 2.f);
     SetItemTooltip("Radians");
@@ -204,7 +204,7 @@ void gui::draw() {
 
   // ===== Spectate camera =============================================================================== //
 
-  if (!camSpecatePtr) error("The spectate camera is not linked to gui");
+  assert(camSpecatePtr);
   if (CollapsingHeader("Spectate camera")) {
     SliderFloat("Near##2", &camSpecatePtr->nearPlane, 0.01f, 1.f);
     SliderFloat("Far##2", &camSpecatePtr->farPlane,  10.f, 1000.f);
@@ -226,7 +226,7 @@ void gui::draw() {
 
   // ===== Light ========================================================================================= //
 
-  if (!lightPtr) error("The light is not linked to gui");
+  assert(lightPtr);
   if (CollapsingHeader("Light")) {
     DragFloat3("Position", glm::value_ptr(lightPtr->position));
     DragFloat("Radius", &lightPtr->radius, 1.f, 0.f);
@@ -244,6 +244,28 @@ void gui::draw() {
   }
 
   End();
+
+  _task.end();
+
+  // ::::: Info window ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
+
+  const ImGuiViewport* viewport = GetMainViewport();
+  ImVec2 posBR = viewport->WorkPos + viewport->WorkSize;
+  SetNextWindowPos(posBR, ImGuiCond_Always, {1.f, 1.f});
+
+  Begin("Info");
+
+  ImGui::Text("FPS: %d / %f.5 ms", fps, global::dt);
+
+  static TilePlotter tilePlotter(earthPtr->chunksDrawn, earthPtr->tileManager.tilesLoaded, earthPtr->tileManager.caps.tileSlots);
+  tilePlotter.render();
+
+  assert(global::profiler);
+  global::profiler->render(400, 200, 200, 0);
+
+  End();
+
+  // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

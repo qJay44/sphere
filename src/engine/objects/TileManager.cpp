@@ -1,81 +1,106 @@
 #include "TileManager.hpp"
-#include "utils/utils.hpp"
-#include <map>
 
-TileManager::TileManager(int tileSlots, ivec2 tileSize, ivec2 virtualTileSize)
-  : tileSlots(tileSlots),
-    tileSize(tileSize),
-    virtualTileSize(virtualTileSize)
+#include <cstring>
+#include <vips/error.h>
+#include <vips/region.h>
+
+#include "utils/utils.hpp"
+#include "glm/gtx/component_wise.hpp"
+
+TileManager::TileManager(const TextureVirtual::Capabilities& caps)
+  : caps(caps),
+    ppBuffer({GL_PIXEL_UNPACK_BUFFER, glm::compMul(caps.tileSize) * 4, GL_STREAM_DRAW}), // NOTE: Up to RGBA8
+    physicalSlots(caps.tileSlots),
+    requests(glm::compMul(caps.virtualDims))
 {
-  physicalSlots.resize(tileSlots);
-  // requests.resize(virtualTileSize.x * virtualTileSize.y);
+}
+
+TileManager::~TileManager() {
+  for (TexData& texData : texs)
+    g_object_unref(texData.region);
 }
 
 void TileManager::requestTile(vec2 uvMin, vec2 uvMax) {
-  ivec2 tileStart = floor(uvMin * vec2(virtualTileSize));
-  ivec2 tileEnd = floor(uvMax * vec2(virtualTileSize));
+  ivec2 tileStart = floor(uvMin * vec2(caps.virtualDims));
+  ivec2 tileEnd = floor(uvMax * vec2(caps.virtualDims));
 
   for (int ty = tileStart.y; ty < tileEnd.y; ty++)
     for (int tx = tileStart.x; tx < tileEnd.x; tx++) {
-      int virtualIdx = ty * virtualTileSize.x + tx;
+      int virtualIdx = ty * caps.virtualDims.x + tx;
       int slot = getTileSlot(virtualIdx);
-      requests.push({{tx, ty}, slot, virtualIdx});
+      requests[virtualIdx] = {true, {tx, ty}, slot};
     }
 }
 
 void TileManager::addTexture(const TextureVirtual* tex) {
-  texs.push_back(tex);
+  const auto& img = tex->getImage().get_image();
+
+  texs.push_back({
+    tex,
+    vips_region_new(img),
+    VIPS_IMAGE_SIZEOF_PEL(img),
+    getGLformat(img->BandFmt)
+  });
 }
 
 void TileManager::processRequests() {
   tilesLoaded = 0;
 
-  while (!requests.empty()) {
-    const Request& r = requests.top();
+  for (size_t i = 0; i < requests.size(); i++) {
+    Request& r = requests[i];
+
+    if (!r.isUsing)
+      continue;
+
     int slot = r.slot;
 
     if (slot == -1) {
       slot = getFirstAvailableSlot();
-      physicalSlots[slot].virtualIdx = r.virtualIdx;
+      physicalSlots[slot].virtualIdx = i;
 
-      u8 slotByte = slot;
-
-      // TODO: Add PBO
-      for (const TextureVirtual* tex : texs) {
-        auto pixelData = getPixels(tex->getImage(), r.tileCoord);
-
-        tex->getPhysical().upload(slot, pixelData.pixels, getGLformat(pixelData.vipsFormat));
-        tex->getIndirection().upload(r.tileCoord, {1, 1}, &slotByte, GL_UNSIGNED_BYTE);
-
-        g_free(pixelData.pixels);
+      for (const TexData& texData : texs) {
+        uploadPhysical(texData, r.tileCoord, slot);
+        uploadIndirection(texData, r.tileCoord, slot);
       }
 
       tilesLoaded++;
     }
 
     physicalSlots[slot].timestamp = global::time;
-    requests.pop();
+    r.isUsing = false;
   }
 
-  if (tilesLoaded > tileSlots - 10)
-    warning("[TileManager::processRequests] Tiles loaded: {}/{}", tilesLoaded, tileSlots);
+  if (tilesLoaded > caps.tileSlots - 10)
+    warning("[TileManager::processRequests] Tiles loaded: {}/{}", tilesLoaded, caps.tileSlots);
 }
 
-GLenum TileManager::getGLformat(VipsBandFormat f) {
-  static const std::map<VipsBandFormat, GLenum> vipsToGL = {
-    {VIPS_FORMAT_UCHAR, GL_UNSIGNED_BYTE},
-    {VIPS_FORMAT_USHORT, GL_UNSIGNED_SHORT},
+GLenum TileManager::getGLformat(VipsBandFormat vipsFormat) {
+  constexpr GLenum unknownFormat = 0xffffffff;
+
+  static const GLenum vipsToGL[12] = {
+    unknownFormat,
+    GL_UNSIGNED_BYTE,
+    GL_BYTE,
+    GL_UNSIGNED_SHORT,
+    GL_SHORT,
+    GL_UNSIGNED_INT,
+    GL_INT,
+    GL_FLOAT,
+    unknownFormat,
+    unknownFormat,
+    unknownFormat,
+    unknownFormat
   };
 
-  auto it = vipsToGL.find(f);
-  if (it == vipsToGL.end())
-    error("[TileManager::getGLformat] No GL format for [{}]", (int)f);
+  GLenum glFormat = vipsToGL[vipsFormat + 1];
+  if (glFormat == unknownFormat)
+    error("[TileManager::getGLformat] Unknown format [{}]", (int)vipsFormat);
 
-  return it->second;
+  return glFormat;
 }
 
 int TileManager::getTileSlot(int virtualIdx) const {
-  for (int i = 0; i < tileSlots; i++)
+  for (int i = 0; i < caps.tileSlots; i++)
     if (physicalSlots[i].virtualIdx == virtualIdx)
       return i;
 
@@ -86,7 +111,7 @@ int TileManager::getFirstAvailableSlot() const {
   int res = 0;
   float oldest = global::time;
 
-  for (int i = 0; i < tileSlots; i++)
+  for (int i = 0; i < caps.tileSlots; i++)
     if (physicalSlots[i].timestamp < oldest) {
       res = i;
       oldest = physicalSlots[i].timestamp;
@@ -95,14 +120,40 @@ int TileManager::getFirstAvailableSlot() const {
   return res;
 }
 
-TileManager::PixelData TileManager::getPixels(vips::VImage img, ivec2 coord) const {
-  ivec2 pos = coord * tileSize;
+void TileManager::uploadPhysical(const TexData& texData, ivec2 coord, int slot) {
+  ScopedProfilerTask _task("TileManager::uploadPhysical");
 
-  vips::VImage tile = img.extract_area(pos.x, pos.y, tileSize.x, tileSize.y);
+  VipsRect area;
+  area.left = coord.x * caps.tileSize.x;
+  area.top = coord.y * caps.tileSize.y;
+  area.width = caps.tileSize.x;
+  area.height = caps.tileSize.y;
 
-  size_t bufferSize;
-  void* buffer = tile.write_to_memory(&bufferSize);
+  if (vips_region_prepare(texData.region, &area))
+    error("[TileManager::getTileData] Vips region error [{}]", vips_error_buffer());
 
-  return {buffer, tile.format()};
+  ppBuffer.bind();
+
+  size_t lineSize = texData.pelSize * caps.tileSize.x;
+  void* pboPtr = ppBuffer.map(lineSize * caps.tileSize.y);
+  u8* dest = (u8*)pboPtr;
+
+  for (int y = 0; y < area.height; y++) {
+    void* src = VIPS_REGION_ADDR(texData.region, area.left, area.top + y);
+    memcpy(dest, src, lineSize);
+    dest += lineSize;
+  }
+
+  ppBuffer.unmap();
+
+  texData.tex->getPhysical().upload(slot, (void*)0, texData.virtalTexFormat);
+
+  ppBuffer.unbind();
+  ppBuffer.next();
+}
+
+void TileManager::uploadIndirection(const TexData& texData, ivec2 coord, int slot) {
+  u8 slotByte = slot;
+  texData.tex->getIndirection()->upload(coord, {1, 1}, &slotByte, GL_UNSIGNED_BYTE);
 }
 

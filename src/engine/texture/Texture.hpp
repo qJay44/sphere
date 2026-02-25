@@ -5,8 +5,10 @@
 class Texture {
 public:
   Texture(Texture&& other);
-
   Texture& operator=(Texture&& other);
+
+  Texture(const Texture&) = delete;
+  Texture& operator=(const Texture&) = delete;
 
   virtual ~Texture() = 0;
 

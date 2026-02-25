@@ -3,7 +3,11 @@
 #include "utils/utils.hpp"
 
 TextureCubemap::TextureCubemap(const fspath& folder, const TextureDescriptor& desc, bool async)
-  : Texture(desc) {
+  : Texture(desc)
+{
+  if (desc.target != GL_TEXTURE_CUBE_MAP)
+    error("[TextureCubemap::TextureCubemap] Wrong tartget for [{}]", desc.uniformName);
+
   if (async) {
     texFuture = std::async(std::launch::async, load, folder, desc.internalFormat);
   } else {

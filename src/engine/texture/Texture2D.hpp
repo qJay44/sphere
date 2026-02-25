@@ -15,7 +15,6 @@ public:
   Texture2D(const fspath& path, const TextureDescriptor& desc);
 
   void upload(ivec2 coord, ivec2 size, const void* data, GLenum type) const;
-  void fill(const void* data, GLenum type) const;
 
 private:
   static Texture2D debug0Tex;

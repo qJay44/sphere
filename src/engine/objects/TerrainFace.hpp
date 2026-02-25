@@ -10,10 +10,12 @@
 struct TerrainFace {
   std::list<TerrainFaceChunk> chunks;
   vec3 color;
+  float uvPadding;
 
   TerrainFace() = default;
 
   void build(vec3 up, int chunksPerSide, int resolution, float radius) {
+    uvPadding = 1.f / (chunksPerSide + chunksPerSide);
     chunks.clear();
 
     for (int y = 0; y < chunksPerSide; y++)
@@ -38,14 +40,13 @@ struct TerrainFace {
       frustum::Sphere frustumSphere(centerPos, radius);
 
       if (frustumSphere.isOnFrustum(frustum, chunk)) {
-        float padding = 0.05f;
         vec2 uv0 = chunk.firstVertex.texture;
         vec2 uv1 = chunk.lastVertex.texture;
 
-        vec2 centerUV = (uv0 + uv1) * 0.5f;
+        vec2 uvCenter = (uv0 + uv1) * 0.5f;
 
-        vec2 uvMin = max(centerUV - padding, {0.f, 0.f});
-        vec2 uvMax = min(centerUV + padding, {1.f, 1.f});
+        vec2 uvMin = max(uvCenter - uvPadding, {0.f, 0.f});
+        vec2 uvMax = min(uvCenter + uvPadding, {1.f, 1.f});
 
         // Request all tiles (width) at the poles FIXME: Too big?
         if (uvMin.y < 0.001f || uvMax.y > 0.999f) {

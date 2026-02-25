@@ -36,9 +36,10 @@ private:
   float radius;
   TileManager tileManager;
 
-  TextureVirtual texVirtColors;
-  TextureVirtual texVirtHeightmapLand;
-  TextureVirtual texVirtNormalmapLand;
+  Texture2D texIndir32k;
+  TextureVirtual texVirt32kColors;
+  TextureVirtual texVirt32kHeightmapLand;
+  TextureVirtual texVirt32kNormalmapLand;
 
   Texture2D texBathymetry;
   Texture2D texLandSDF;

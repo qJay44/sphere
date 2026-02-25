@@ -21,7 +21,6 @@ using glm::dvec4;
 
 using glm::mat4;
 
-
 // #include "glad/glad.h" // Windows version?
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
@@ -32,4 +31,5 @@ using glm::mat4;
 
 #include "defines.hpp"
 #include "global.hpp"
+#include "profiler/ScopedProfilerTask.hpp"
 

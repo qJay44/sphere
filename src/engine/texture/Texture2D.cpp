@@ -45,7 +45,3 @@ void Texture2D::upload(ivec2 coord, ivec2 size, const void* data, GLenum type) c
   unbind();
 }
 
-void Texture2D::fill(const void* data, GLenum type) const {
-  upload({0, 0}, getSize(0), data, type);
-}
-

@@ -7,12 +7,16 @@
 // VBO - GL_ARRAY_BUFFER
 // EBO - GL_ELEMENT_ARRAY_BUFFER
 // UBO - GL_UNIFORM_BUFFER
-// PBO - GL_PIXEL_PACK_BUFFER
+// PBO - GL_PIXEL_UNPACK_BUFFER (upload to texture), GL_PIXEL_PACK_BUFFER (get from texture)
 // FBO - X
 // RBO - X
 
 struct BufferObject {
-public:
+  static constexpr GLsizei size = 1;
+
+  GLenum target = 0;
+  GLuint id = 0;
+
   BufferObject() = default;
 
   BufferObject(GLenum target) : target(target) {
@@ -65,11 +69,5 @@ public:
     if (id) glDeleteBuffers(size, &id);
     id = 0;
   }
-
-private:
-  static constexpr GLsizei size = 1;
-
-  GLenum target;
-  GLuint id = 0;
 };
 

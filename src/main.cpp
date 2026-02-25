@@ -62,7 +62,9 @@ int main() {
   glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
   // Window init
-  window = glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, "MyProgram", NULL, NULL);
+  window = glfwCreateWindow(1600, 900, "MyProgram", NULL, NULL);
+  global::profiler = new ProfilerManager(300);
+
   ivec2 winSize = global::getWinSize();
   dvec2 winCenter = dvec2(winSize) / 2.;
 
@@ -89,8 +91,6 @@ int main() {
 
   if (VIPS_INIT("TileApp"))
     vips_error_exit("Unable to init libvips");
-
-  vips_cache_set_max(0);
 
   // ===== Shaders ============================================== //
 
@@ -190,7 +190,7 @@ int main() {
     static double prevTime = titleTimer;
     static double currTime = prevTime;
 
-    constexpr double fpsLimit = 1. / 90.;
+    constexpr float fpsLimit = 1.f / 90.f;
     currTime = glfwGetTime();
     global::dt = currTime - prevTime;
 
@@ -212,6 +212,8 @@ int main() {
       gui::fps = static_cast<u16>(1.f / global::dt);
       titleTimer = currTime;
     }
+
+    global::profiler->clearTasks();
 
     light.update();
     earth.update(light);
@@ -273,6 +275,7 @@ int main() {
 
   gui::shutdown();
   glfwTerminate();
+  delete global::profiler;
 
   return 0;
 }

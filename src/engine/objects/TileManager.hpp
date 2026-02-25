@@ -1,15 +1,16 @@
 #pragma once
 
-#include <stack>
 #include <vector>
 #include <vips/vips8>
 
 #include "../texture/TextureVirtual.hpp"
+#include "../PingPongBuffer.hpp"
 
 class TileManager {
 public:
   TileManager() = default;
-  TileManager(int tileSlots, ivec2 tileSize, ivec2 virtualTileSize);
+  TileManager(const TextureVirtual::Capabilities& caps);
+  ~TileManager();
 
   void addTexture(const TextureVirtual* tex);
 
@@ -17,11 +18,7 @@ public:
   void processRequests();
 
 protected:
-  friend struct gui; // TODO: Make a plot of history of chunks drawn and tiles loaded
-
-  int tileSlots = 0;
-  ivec2 tileSize{0};
-  ivec2 virtualTileSize{0};
+  friend struct gui;
 
   struct PhysicalSlot {
     int virtualIdx = -1;
@@ -29,19 +26,30 @@ protected:
   };
 
   struct Request {
+    bool isUsing = false;
     ivec2 tileCoord;
-    int slot = 1;
-    int virtualIdx = -1;
+    int slot;
   };
 
-  struct PixelData {
-    void* pixels;
-    VipsBandFormat vipsFormat;
+  struct TileData {
+    VipsRegion* region;
+    VipsRect area;
+    size_t lineSize;
   };
+
+  struct TexData {
+    const TextureVirtual* tex;
+    VipsRegion* region;
+    size_t pelSize;
+    GLenum virtalTexFormat;
+  };
+
+  TextureVirtual::Capabilities caps;
+  PingPongBuffer ppBuffer;
 
   std::vector<PhysicalSlot> physicalSlots;
-  std::stack<Request> requests;
-  std::list<const TextureVirtual*> texs;
+  std::vector<Request> requests;
+  std::list<TexData> texs;
 
   int tilesLoaded = 0;
 
@@ -50,6 +58,9 @@ protected:
 
   int getTileSlot(int virtualIdx) const;
   int getFirstAvailableSlot() const;
-  PixelData getPixels(vips::VImage img, ivec2 coord) const;
+  VipsRect prepareArea(VipsRegion* img, ivec2 coord) const;
+
+  void uploadPhysical(const TexData& texData, ivec2 coord, int slot);
+  void uploadIndirection(const TexData& tecData, ivec2 coord, int slot);
 };
 

@@ -12,8 +12,8 @@ out DATA {
   float isLand;
 } dataOut;
 
-layout(binding = 2) uniform sampler2DArray u_texHeightmapLand;
-layout(binding = 3) uniform usampler2D u_texHeightmapLandIndirection;
+layout(binding = 0) uniform usampler2D u_texIndirection32k;
+layout(binding = 2) uniform sampler2DArray u_texVirt32kHeightmapLand;
 
 uniform vec2 u_virtualDims;
 uniform mat4 u_camPV;
@@ -21,7 +21,7 @@ uniform float u_heightmapScale;
 
 const float seaLevelNorm = 143.f / 255.f;
 
-vec4 textureVirtual(sampler2DArray texPhysical, usampler2D texVirtual, vec3 normal) {
+vec4 textureVirtual(sampler2DArray texVirtual, usampler2D texIndirection, vec3 normal) {
   vec2 globalUV = vec2(
     atan(normal.z, normal.x) / (2.f * PI) + 0.5f,
     asin(normal.y) / PI + 0.5f
@@ -33,14 +33,14 @@ vec4 textureVirtual(sampler2DArray texPhysical, usampler2D texVirtual, vec3 norm
   ivec2 tileCoord = ivec2(globalUV * u_virtualDims);
   tileCoord = min(tileCoord, ivec2(u_virtualDims) - 1);
 
-  uint physicalSlot = texelFetch(texVirtual, tileCoord, 0).r;
+  uint physicalSlot = texelFetch(texIndirection, tileCoord, 0).r;
 
   if (physicalSlot == 255u)
     return vec4(0.f, 1.f, 0.f, 0.f);
 
   vec2 localUV = fract(globalUV * u_virtualDims);
 
-  return texture(texPhysical, vec3(localUV, physicalSlot));
+  return texture(texVirtual, vec3(localUV, physicalSlot));
 }
 
 void main() {
@@ -56,7 +56,7 @@ void main() {
   vec4 worldPos = mix(p0, p1, v);
   vec3 normal = normalize(worldPos.xyz);
 
-  float height = textureVirtual(u_texHeightmapLand, u_texHeightmapLandIndirection, normal).r;
+  float height = textureVirtual(u_texVirt32kHeightmapLand, u_texIndirection32k, normal).r;
   worldPos.xyz += normal * height * u_heightmapScale;
 
   dataOut.texCoord = texCoord;

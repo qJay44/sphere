@@ -14,17 +14,15 @@ in DATA {
   float isLand;
 } dataIn;
 
-layout(binding = 0) uniform sampler2DArray u_texColors;
-layout(binding = 1) uniform usampler2D u_texColorsIndirection;
+layout(binding = 0) uniform usampler2D u_texIndirection32k;
+layout(binding = 1) uniform sampler2DArray u_texVirt32kColors;
+layout(binding = 3) uniform sampler2DArray u_texVirt32kNormalmapLand;
 
-layout(binding = 4) uniform sampler2DArray u_texNormalmapLand;
-layout(binding = 5) uniform usampler2D u_texNormalmapLandIndirection;
-
-layout(binding = 6) uniform sampler2D u_texBathymetry;
-layout(binding = 7) uniform sampler2D u_texLandSDF;
-layout(binding = 8) uniform sampler2D u_texBorders;
-layout(binding = 9) uniform sampler2D u_texNormalmapWave0;
-layout(binding = 10) uniform sampler2D u_texNormalmapWave1;
+layout(binding = 4) uniform sampler2D u_texBathymetry;
+layout(binding = 5) uniform sampler2D u_texLandSDF;
+layout(binding = 6) uniform sampler2D u_texBorders;
+layout(binding = 7) uniform sampler2D u_texNormalmapWave0;
+layout(binding = 8) uniform sampler2D u_texNormalmapWave1;
 
 uniform vec2 u_virtualDims;
 uniform vec3 u_camPos;
@@ -142,23 +140,23 @@ vec3 applyMask(vec3 no, vec3 yes, float mask) {
   return yes * mask + (1.f - mask) * no;
 }
 
-vec4 textureVirtual(sampler2DArray texPhysical, usampler2D texVirtual) {
+vec4 textureVirtual(sampler2DArray texVirtual, usampler2D texIndirection) {
   ivec2 tileCoord = ivec2(globalUV * u_virtualDims);
   tileCoord = min(tileCoord, ivec2(u_virtualDims) - 1);
 
-  uint physicalSlot = texelFetch(texVirtual, tileCoord, 0).r;
+  uint physicalSlot = texelFetch(texIndirection, tileCoord, 0).r;
 
   if (physicalSlot == 255u)
     return vec4(0.f, 1.f, 0.f, 0.f);
 
   vec2 localUV = fract(globalUV * u_virtualDims);
 
-  return texture(texPhysical, vec3(localUV, physicalSlot));
+  return texture(texVirtual, vec3(localUV, physicalSlot));
 }
 
 void main() {
-  vec3 color = textureVirtual(u_texColors, u_texColorsIndirection).rgb;
-  vec4 surfaceNormalSample = textureVirtual(u_texNormalmapLand, u_texNormalmapLandIndirection);
+  vec3 color = textureVirtual(u_texVirt32kColors, u_texIndirection32k).rgb;
+  vec4 surfaceNormalSample = textureVirtual(u_texVirt32kNormalmapLand, u_texIndirection32k);
 
   vec3 surfaceNormal = normalize(surfaceNormalSample.rgb * 2.f - 1.f);
   vec3 normalWave0 = triplanarNormal(u_texNormalmapWave0, normalSphere, -u_time * u_waterWaveFreq);
