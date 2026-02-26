@@ -108,20 +108,20 @@ int TileManager::getTileSlot(int virtualIdx) const {
 }
 
 int TileManager::getFirstAvailableSlot() const {
-  int res = 0;
+  int slot = 0;
   float oldest = global::time;
 
   for (int i = 0; i < caps.tileSlots; i++)
     if (physicalSlots[i].timestamp < oldest) {
-      res = i;
+      slot = i;
       oldest = physicalSlots[i].timestamp;
     }
 
-  return res;
+  return slot;
 }
 
 void TileManager::uploadPhysical(const TexData& texData, ivec2 coord, int slot) {
-  ScopedProfilerTask _task("TileManager::uploadPhysical");
+  ScopedProfilerTask _task("TileManager::uploadPhysical", 0xff7f00ff);
 
   VipsRect area;
   area.left = coord.x * caps.tileSize.x;
@@ -134,8 +134,8 @@ void TileManager::uploadPhysical(const TexData& texData, ivec2 coord, int slot) 
 
   ppBuffer.bind();
 
-  size_t lineSize = texData.pelSize * caps.tileSize.x;
-  void* pboPtr = ppBuffer.map(lineSize * caps.tileSize.y);
+  size_t lineSize = texData.pelSize * area.width;
+  void* pboPtr = ppBuffer.map(lineSize * area.height);
   u8* dest = (u8*)pboPtr;
 
   for (int y = 0; y < area.height; y++) {

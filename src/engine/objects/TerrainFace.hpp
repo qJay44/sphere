@@ -15,7 +15,7 @@ struct TerrainFace {
   TerrainFace() = default;
 
   void build(vec3 up, int chunksPerSide, int resolution, float radius) {
-    uvPadding = 1.f / (chunksPerSide + chunksPerSide);
+    uvPadding = 1.f / (chunksPerSide + chunksPerSide); // FIXME: Heavy lag with smaller radius
     chunks.clear();
 
     for (int y = 0; y < chunksPerSide; y++)
@@ -48,7 +48,6 @@ struct TerrainFace {
         vec2 uvMin = max(uvCenter - uvPadding, {0.f, 0.f});
         vec2 uvMax = min(uvCenter + uvPadding, {1.f, 1.f});
 
-        // Request all tiles (width) at the poles FIXME: Too big?
         if (uvMin.y < 0.001f || uvMax.y > 0.999f) {
           uvMin.x = 0.f;
           uvMax.x = 1.f;

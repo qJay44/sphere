@@ -7,9 +7,9 @@ struct ScopedProfilerTask {
   std::chrono::steady_clock::time_point start;
   bool ended = false;
 
-  ScopedProfilerTask(const std::string& taskName) : start(std::chrono::steady_clock::now()) {
+  ScopedProfilerTask(const std::string& taskName, u32 color = 0) : start(std::chrono::steady_clock::now()) {
     assert(global::profiler);
-    taskIdx = global::profiler->startTask(taskName);
+    taskIdx = global::profiler->startTask(taskName, color);
   }
 
   ~ScopedProfilerTask() {

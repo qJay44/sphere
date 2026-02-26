@@ -150,9 +150,6 @@ int main() {
   fboTexDesc.unit = 0;
   fboTexDesc.minFilter = GL_NEAREST;
   fboTexDesc.magFilter = GL_NEAREST;
-  fboTexDesc.wrapS = GL_CLAMP_TO_EDGE;
-  fboTexDesc.wrapT = GL_CLAMP_TO_EDGE;
-  fboTexDesc.genMipMap = false;
 
   FBO fboScreen;
   Texture2D screenColorTexture(winSize, fboTexDesc);
@@ -172,8 +169,8 @@ int main() {
   Mesh axis = meshes::axis();
   axis.scale(1e4f);
 
-  glCullFace(GL_FRONT);
-  glFrontFace(GL_CW);
+  glCullFace(GL_BACK);
+  glFrontFace(GL_CCW);
   glPatchParameteri(GL_PATCH_VERTICES, 4);
 
   gui::earthPtr = &earth;

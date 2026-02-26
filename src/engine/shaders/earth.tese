@@ -1,15 +1,16 @@
 #version 460 core
 
 #define PI 3.141592265359f
+// #define HEIGHT_MIN -10894.f
+// #define HEIGHT_MAX 7891.f
 
-layout (quads, equal_spacing, ccw) in;
+layout (quads, equal_spacing, cw) in;
 
 in vec2 uvsCoord[];
 
 out DATA {
-  vec2 texCoord;
   vec4 worldPos;
-  float isLand;
+  float maskWater;
 } dataOut;
 
 layout(binding = 0) uniform usampler2D u_texIndirection32k;
@@ -18,8 +19,7 @@ layout(binding = 2) uniform sampler2DArray u_texVirt32kHeightmapLand;
 uniform vec2 u_virtualDims;
 uniform mat4 u_camPV;
 uniform float u_heightmapScale;
-
-const float seaLevelNorm = 143.f / 255.f;
+uniform float u_seaLevel; // Kinda useless
 
 vec4 textureVirtual(sampler2DArray texVirtual, usampler2D texIndirection, vec3 normal) {
   vec2 globalUV = vec2(
@@ -47,21 +47,16 @@ void main() {
   float u = gl_TessCoord.x;
   float v = gl_TessCoord.y;
 
-  vec2 uv0 = mix(uvsCoord[0], uvsCoord[1], u);
-  vec2 uv1 = mix(uvsCoord[3], uvsCoord[2], u);
-  vec2 texCoord = mix(uv0, uv1, v);
-
   vec4 p0 = mix(gl_in[0].gl_Position, gl_in[1].gl_Position, u);
   vec4 p1 = mix(gl_in[3].gl_Position, gl_in[2].gl_Position, u);
   vec4 worldPos = mix(p0, p1, v);
   vec3 normal = normalize(worldPos.xyz);
 
-  float height = textureVirtual(u_texVirt32kHeightmapLand, u_texIndirection32k, normal).r;
+  float height = textureVirtual(u_texVirt32kHeightmapLand, u_texIndirection32k, normal).r + u_seaLevel;
   worldPos.xyz += normal * height * u_heightmapScale;
 
-  dataOut.texCoord = texCoord;
   dataOut.worldPos = worldPos;
-  dataOut.isLand = floor(height / seaLevelNorm);
+  dataOut.maskWater = float(height <= 0.f);
 
   gl_Position = u_camPV * worldPos;
 }

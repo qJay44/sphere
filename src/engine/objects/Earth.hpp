@@ -2,7 +2,6 @@
 
 #include "../Camera.hpp"
 #include "../texture/Texture2DArray.hpp"
-#include "../texture/TextureCubemap.hpp"
 #include "../texture/Texture2D.hpp"
 #include "../frustum/Frustum.hpp"
 #include "TerrainFace.hpp"
@@ -53,7 +52,6 @@ private:
   float heightmapScale = 8.f;
   float lightMultiplier = 1.5f;
   float ambient = 0.2f;
-  float specularStrength = 1.25f;
   float triplanarBlendSharpness = 1.f;
   float lightDimScale = 2.5f;
   float tessDivs = 2.5f;
@@ -62,19 +60,9 @@ private:
   vec3 bordersColor = vec3(0.55f);
   vec3 waterShallowColor{0.f, 0.705f, 0.799f};
   vec3 waterDeepColor{0.f, 0.127f, 0.255f};
-  float waterSpecularSmoothness = 0.065f;
   float waterDeepFactor = 0.4f;
-  float waterDeepEdgeStart = 0.7f;
-  float waterDeepEdgeEnd = 0.8f;
   float waterWaveFreq = 0.01f;
-  float waterWaveResMult = 0.1f;
-  float waterShoreWaveFreq = 9500.f;
-  float waterShoreWaveThresholdStart = 0.9995f;
-  float waterShoreWaveThresholdEnd = 1.f;
-  float waterShoreWaveAmplitude = 0.63f;
-  float waterShoreWaveNoiseScale = 3.034f;
-  float waterShoreWaveNoiseSpeed = 0.123f;
-  float waterShoreWaveNoiseAmplitude = 6.843f;
+  float waterWaveResScale = 0.1f;
 
   PlanetAtmosphere atmosphere;
 

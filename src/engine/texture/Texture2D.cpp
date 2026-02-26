@@ -9,7 +9,6 @@ const Texture2D& Texture2D::getDebug0Tex() {
       .unit = 0, // NOTE: Will may be changed
       .minFilter = GL_NEAREST,
       .magFilter = GL_NEAREST,
-      .genMipMap = false
     });
 
   return debug0Tex;

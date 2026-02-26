@@ -20,13 +20,13 @@ public:
   }
 
   [[nodiscard]]
-  size_t startTask(const std::string& name, const u32* color = nullptr) {
+  size_t startTask(const std::string& name, u32 color = 0) {
     assert(tasks.size() < 20);
     size_t i = tasks.size();
 
     legit::ProfilerTask task;
     task.name = name;
-    task.color = color ? *color : getColorBright(tasks.size());
+    task.color = color ? RGBA_LE(color): getColorBright(tasks.size());
     task.startTime = 0.f;
     addTask(task);
 

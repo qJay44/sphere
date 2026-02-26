@@ -96,31 +96,20 @@ void gui::draw() {
     SliderFloat("TESC divisions scale", &earthPtr->tessDivs, 0.f, 100.f);
     SliderFloat("Heightmap scale", &earthPtr->heightmapScale, 0.01f, 100.f);
     SliderFloat("Triplanar blend sharpness", &earthPtr->triplanarBlendSharpness, 1.f, 10.f);
-    SliderFloat("Sea level", &earthPtr->seaLevel, -100.f, 100.f);
+    SliderFloat("Sea level", &earthPtr->seaLevel, -1.f, 1.f);
     ColorEdit3("Border color", glm::value_ptr(earthPtr->bordersColor));
 
     SeparatorText("Water");
-    // SliderFloat("Deep factor", &earthPtr->waterDeepFactor, -50.f, 50.f);
-    // SliderFloat("Deep edge start", &earthPtr->waterDeepEdgeStart, 0.f, 1.f);
-    // SliderFloat("Deep edge end", &earthPtr->waterDeepEdgeEnd, 0.f, 1.f);
-    // SliderFloat("Specular smoothness", &earthPtr->waterSpecularSmoothness, 0.f, 10.f);
-    // SliderFloat("Wave frequency", &earthPtr->waterWaveFreq, -0.5f, 0.5f);
-    // SliderFloat("Wave resolution multiplier", &earthPtr->waterWaveResMult, 0.001f, 50.f);
-    // SliderFloat("Shore wave frequency", &earthPtr->waterShoreWaveFreq, -10000.f, 10000.f);
-    // SliderFloat("Shore wave distance threshold start", &earthPtr->waterShoreWaveThresholdStart, 0.f, 1.f);
-    // SliderFloat("Shore wave distance threshold end", &earthPtr->waterShoreWaveThresholdEnd, 0.f, 1.f);
-    // SliderFloat("Shore wave amplitude scale", &earthPtr->waterShoreWaveAmplitude, -1.f, 1.f);
-    // SliderFloat("Shore wave noise scale", &earthPtr->waterShoreWaveNoiseScale, 0.f, 10.f);
-    // SliderFloat("Shore wave noise speed", &earthPtr->waterShoreWaveNoiseSpeed, 0.f, 10.f);
-    // SliderFloat("Shore wave noise amplitude", &earthPtr->waterShoreWaveNoiseAmplitude, 0.f, 10.f);
-    // ColorEdit3("Shallow color", glm::value_ptr(earthPtr->waterShallowColor));
-    // ColorEdit3("Deep color", glm::value_ptr(earthPtr->waterDeepColor));
+    SliderFloat("Deep factor", &earthPtr->waterDeepFactor, -1.f, 1.f);
+    SliderFloat("Wave frequency", &earthPtr->waterWaveFreq, -0.5f, 0.5f);
+    SliderFloat("Wave resolution scale", &earthPtr->waterWaveResScale, 0.1f, 1.f);
+    ColorEdit3("Shallow color", glm::value_ptr(earthPtr->waterShallowColor));
+    ColorEdit3("Deep color", glm::value_ptr(earthPtr->waterDeepColor));
 
     SeparatorText("Lightning");
     SliderFloat("Multiplier", &earthPtr->lightMultiplier, 0.1f, 20.f);
     SliderFloat("Distance dim scale", &earthPtr->lightDimScale, 0.1f, 20.f);
     SliderFloat("Ambient", &earthPtr->ambient, 0.0f, 20.f);
-    SliderFloat("Specular strength", &earthPtr->specularStrength, 0.0f, 20.f);
   }
 
   // ===== Atmosphere ==================================================================================== //

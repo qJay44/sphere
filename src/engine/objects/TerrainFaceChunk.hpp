@@ -51,10 +51,11 @@ struct TerrainFaceChunk : public Mesh {
         v = 1.f - v;
 
         if (x != resolution - 1 && y != resolution - 1) {
-          indices[triIndex + 0] = idx;                  // 0
+          // CCW
+          indices[triIndex + 0] = idx + resolution + 1; // 0
           indices[triIndex + 1] = idx + 1;              // 1
-          indices[triIndex + 2] = idx + resolution + 1; // 3
-          indices[triIndex + 3] = idx + resolution;     // 2
+          indices[triIndex + 2] = idx;                  // 2
+          indices[triIndex + 3] = idx + resolution;     // 3
 
           triIndex += 4;
         }

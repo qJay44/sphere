@@ -87,11 +87,6 @@ void Earth::createTextures() {
       .unit           = 4,
       .internalFormat = GL_R8,
       .format         = GL_RED,
-      .minFilter      = GL_NEAREST,
-      .magFilter      = GL_NEAREST,
-      .wrapS          = GL_CLAMP_TO_EDGE,
-      .wrapT          = GL_CLAMP_TO_EDGE,
-      .genMipMap      = false,
     }
   );
 
@@ -102,11 +97,6 @@ void Earth::createTextures() {
       .unit           = 5,
       .internalFormat = GL_R8,
       .format         = GL_RED,
-      .minFilter      = GL_NEAREST,
-      .magFilter      = GL_NEAREST,
-      .wrapS          = GL_CLAMP_TO_EDGE,
-      .wrapT          = GL_CLAMP_TO_EDGE,
-      .genMipMap      = false,
     }
   );
 
@@ -117,26 +107,33 @@ void Earth::createTextures() {
       .unit           = 6,
       .internalFormat = GL_R8,
       .format         = GL_RED,
-      .minFilter      = GL_LINEAR,
-      .magFilter      = GL_LINEAR,
-      .wrapS          = GL_CLAMP_TO_EDGE,
-      .wrapT          = GL_CLAMP_TO_EDGE,
-      .genMipMap      = false,
     }
   );
 
-  texNormalmapWave0 = Texture2D("res/tex/earth/normalmapWave0.png", {"u_texNormalmapWave0", 7});
-  texNormalmapWave1 = Texture2D("res/tex/earth/normalmapWave1.png", {"u_texNormalmapWave1", 8});
+  texNormalmapWave0 = Texture2D(
+    "res/tex/earth/normalmapWave0.png",
+    {
+      .uniformName = "u_texNormalmapWave0",
+      .unit = 7,
+      .wrapS = GL_REPEAT,
+      .wrapT = GL_REPEAT,
+    }
+  );
+
+  texNormalmapWave1 = Texture2D(
+    "res/tex/earth/normalmapWave1.png",
+    {
+      .uniformName = "u_texNormalmapWave1",
+      .unit = 8,
+      .wrapS = GL_REPEAT,
+      .wrapT = GL_REPEAT,
+    }
+  );
 
   texBakedOpticalDepth = Texture2D(ivec2(256), {
     .uniformName    = "u_texBakedOpticalDepth",
     .unit           = 2,
     .internalFormat = GL_R32F,
-    .minFilter      = GL_LINEAR,
-    .magFilter      = GL_LINEAR,
-    .wrapS          = GL_CLAMP_TO_EDGE,
-    .wrapT          = GL_CLAMP_TO_EDGE,
-    .genMipMap      = false
   });
 }
 
@@ -166,24 +163,12 @@ void Earth::draw(const Camera* camera, const frustum::Frustum& frustum, Shader& 
   shader.setUniform1f("u_heightmapScale", heightmapScale);
   shader.setUniform1f("u_radius", radius);
   shader.setUniform1f("u_ambient", ambient);
-  shader.setUniform1f("u_specularStrength", specularStrength);
   shader.setUniform1f("u_seaLevel", seaLevel);
   shader.setUniform1f("u_lightMultiplier", lightMultiplier);
-  shader.setUniform1f("u_lightDimScale", lightDimScale);
   shader.setUniform1f("u_triplanarBlendSharpness", triplanarBlendSharpness);
-  shader.setUniform1f("u_waterSpecularSmoothness", waterSpecularSmoothness);
   shader.setUniform1f("u_waterDeepFactor", waterDeepFactor);
-  shader.setUniform1f("u_waterDeepEdgeStart", waterDeepEdgeStart);
-  shader.setUniform1f("u_waterDeepEdgeEnd", waterDeepEdgeEnd);
   shader.setUniform1f("u_waterWaveFreq", waterWaveFreq);
-  shader.setUniform1f("u_waterWaveResMult", waterWaveResMult);
-  shader.setUniform1f("u_waterShoreWaveFreq", waterShoreWaveFreq);
-  shader.setUniform1f("u_waterShoreWaveThresholdStart", waterShoreWaveThresholdStart);
-  shader.setUniform1f("u_waterShoreWaveThresholdEnd", waterShoreWaveThresholdEnd);
-  shader.setUniform1f("u_waterShoreWaveAmplitude", waterShoreWaveAmplitude);
-  shader.setUniform1f("u_waterShoreWaveNoiseScale", waterShoreWaveNoiseScale);
-  shader.setUniform1f("u_waterShoreWaveNoiseSpeed", waterShoreWaveNoiseSpeed);
-  shader.setUniform1f("u_waterShoreWaveNoiseAmplitude", waterShoreWaveNoiseAmplitude);
+  shader.setUniform1f("u_waterWaveResScale", waterWaveResScale);
   shader.setUniform1f("u_maskTerrainFaceColor", useTerrainFaceColors);
   shader.setUniform1f("u_maskTerrainFaceChunkColor", useTerrainFaceChunkColors);
   shader.setUniform2f("u_virtualDims", caps32k.virtualDims);

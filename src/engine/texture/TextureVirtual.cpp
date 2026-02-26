@@ -10,9 +10,6 @@ Texture2D TextureVirtual::generateIndirection(const TextureDescriptor& desc, con
     .format         = GL_RED_INTEGER,
     .minFilter      = GL_NEAREST,
     .magFilter      = GL_NEAREST,
-    .wrapS          = GL_CLAMP_TO_EDGE,
-    .wrapT          = GL_CLAMP_TO_EDGE,
-    .genMipMap      = false,
   });
 
   std::vector<u8> white(glm::compMul(caps.virtualDims), 255);
@@ -32,9 +29,6 @@ TextureVirtual::TextureVirtual(const fspath& filePath, const TextureDescriptor& 
     .format         = desc.format,
     .minFilter      = desc.minFilter,
     .magFilter      = desc.magFilter,
-    .wrapS          = GL_CLAMP_TO_EDGE,
-    .wrapT          = GL_CLAMP_TO_EDGE,
-    .genMipMap      = false,
   });
 
   image = vips::VImage::new_from_file(filePath.string().c_str(),
