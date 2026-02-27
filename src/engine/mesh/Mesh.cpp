@@ -1,8 +1,6 @@
 #include "Mesh.hpp"
 
-#include <cassert>
-
-#include "../../global.hpp"
+#include "global.hpp"
 #include "utils/status.hpp"
 #include "utils/clrp.hpp"
 #include "VAO.hpp"
@@ -130,19 +128,6 @@ Mesh Mesh::loadObj(const fspath& file, bool printInfo) {
   status::end(true);
 
   return Mesh(vertices, indices, GL_TRIANGLES);
-}
-
-Mesh::Mesh(Mesh &&other) {
-  count = other.count;
-  mode = other.mode;
-  vao = other.vao;
-  vbo = other.vbo;
-  ebo = other.ebo;
-  drawFunc = std::move(other.drawFunc);
-
-  other.vao = VAO();
-  other.vbo = BufferObject();
-  other.ebo = BufferObject();
 }
 
 Mesh::Mesh(const std::vector<Vertex4>&  vertices, const std::vector<GLuint>& indices, GLenum mode, GLenum usage) : Mesh(std::span(vertices), indices, mode, usage) {}

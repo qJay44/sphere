@@ -44,7 +44,7 @@ void Airplane::moveLeft()  { turn( 1.f); }
 void Airplane::moveRight() { turn(-1.f); }
 
 void Airplane::moveUp()   { speedDefault = 0.f;   }
-void Airplane::moveDown() { speedDefault = 0.01f; }
+void Airplane::moveDown() { speedDefault = 0.05f; }
 
 void Airplane::onMouseMove(dvec2 mousePos) {
   dvec2 winSize = global::getWinSize();

@@ -1,5 +1,8 @@
 #include "AtmospherePlotter.hpp"
 
+#undef IM_NEW
+#undef IM_FREE
+
 #include "implot.h"
 
 constexpr ImPlotAxisFlags flagsPlot =

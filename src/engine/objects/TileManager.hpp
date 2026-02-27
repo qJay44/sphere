@@ -1,8 +1,5 @@
 #pragma once
 
-#include <vector>
-#include <vips/vips8>
-
 #include "../texture/TextureVirtual.hpp"
 #include "../PingPongBuffer.hpp"
 
@@ -31,17 +28,11 @@ protected:
     int slot;
   };
 
-  struct TileData {
-    VipsRegion* region;
-    VipsRect area;
-    size_t lineSize;
-  };
-
   struct TexData {
     const TextureVirtual* tex;
     VipsRegion* region;
     size_t pelSize;
-    GLenum virtalTexFormat;
+    GLenum physicalTexFormat;
   };
 
   TextureVirtual::Capabilities caps;

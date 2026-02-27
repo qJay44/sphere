@@ -1,8 +1,5 @@
 #include "Texture.hpp"
 
-#include <cassert>
-#include <string>
-
 Texture::Texture(Texture&& other)
   : desc(other.desc),
     id(other.id)

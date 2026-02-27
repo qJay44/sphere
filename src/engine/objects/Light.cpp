@@ -3,7 +3,7 @@
 #include "../mesh/meshes.hpp"
 
 Light::Light(vec3 position, float radius, vec3 color)
-  : Mesh(meshes::plane(2, GL_TRIANGLES, global::forward)), position(position), radius(radius), color(color) {}
+  : Mesh(meshes::plane(2, GL_TRIANGLES, {0.f, 0.f, 1.f})), position(position), radius(radius), color(color) {}
 
 const vec3& Light::getPosition() const { return position; }
 const vec3& Light::getColor() const { return color; }

@@ -1,6 +1,6 @@
 #include "Moveable.hpp"
 
-#include "../global.hpp"
+#include "global.hpp"
 #include "glm/gtx/vector_angle.hpp"
 #include "utils/utils.hpp"
 

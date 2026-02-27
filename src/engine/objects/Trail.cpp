@@ -1,6 +1,6 @@
 #include "Trail.hpp"
 
-#include <vector>
+#include "global.hpp"
 
 Trail::Trail() : Mesh({VertexPC{}}, GL_TRIANGLE_STRIP, GL_DYNAMIC_DRAW) {}
 

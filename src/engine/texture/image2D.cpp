@@ -1,7 +1,5 @@
 #include "image2D.hpp"
 
-#include <format>
-
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 

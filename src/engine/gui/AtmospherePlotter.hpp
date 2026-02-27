@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "../objects/PlanetAtmosphere.hpp"
 
 class AtmospherePlotter {

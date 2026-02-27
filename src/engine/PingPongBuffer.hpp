@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cassert>
-
 #include "mesh/BufferObject.hpp"
 
 class PingPongBuffer {
@@ -13,11 +11,6 @@ public:
       pbo = BufferObject{target};
       pbo.allocate(nullptr, maxBufferSize, usage);
     }
-  }
-
-  ~PingPongBuffer() {
-    for (BufferObject& pbo : pp)
-      pbo.clear();
   }
 
   void bind() const {

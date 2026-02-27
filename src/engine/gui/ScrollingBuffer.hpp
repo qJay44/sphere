@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 struct ScrollingBuffer {
   size_t maxSize;
   int offset = 0;

@@ -1,14 +1,9 @@
 #include "Camera.hpp"
 
-#include <cassert>
+#include "glm/ext/matrix_clip_space.hpp"
+#include "glm/ext/matrix_transform.hpp"
 
-#include "glm/gtx/euler_angles.hpp"
-#include "glm/gtx/rotate_vector.hpp"
-#include "glm/gtx/vector_angle.hpp"
-#include "glm/matrix.hpp"
-#include "glm/trigonometric.hpp"
-
-#include "mesh/Mesh.hpp"
+#include "global.hpp"
 #include "mesh/meshes.hpp"
 
 Camera::Camera(vec3 pos, float yaw, float pitch) : Moveable(pos, yaw, pitch) {

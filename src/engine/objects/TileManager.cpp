@@ -1,11 +1,7 @@
 #include "TileManager.hpp"
 
-#include <cstring>
-#include <vips/error.h>
-#include <vips/region.h>
-
-#include "utils/utils.hpp"
 #include "glm/gtx/component_wise.hpp"
+#include "global.hpp"
 
 TileManager::TileManager(const TextureVirtual::Capabilities& caps)
   : caps(caps),
@@ -22,7 +18,7 @@ TileManager::~TileManager() {
 
 void TileManager::requestTile(vec2 uvMin, vec2 uvMax) {
   ivec2 tileStart = floor(uvMin * vec2(caps.virtualDims));
-  ivec2 tileEnd = floor(uvMax * vec2(caps.virtualDims));
+  ivec2 tileEnd = ceil(uvMax * vec2(caps.virtualDims));
 
   for (int ty = tileStart.y; ty < tileEnd.y; ty++)
     for (int tx = tileStart.x; tx < tileEnd.x; tx++) {
@@ -121,7 +117,7 @@ int TileManager::getFirstAvailableSlot() const {
 }
 
 void TileManager::uploadPhysical(const TexData& texData, ivec2 coord, int slot) {
-  ScopedProfilerTask _task("TileManager::uploadPhysical", 0xff7f00ff);
+  auto _task = global::profiler->startScopedTask("TileManager::uploadPhysical", 0xff7f00ff);
 
   VipsRect area;
   area.left = coord.x * caps.tileSize.x;
@@ -146,7 +142,7 @@ void TileManager::uploadPhysical(const TexData& texData, ivec2 coord, int slot) 
 
   ppBuffer.unmap();
 
-  texData.tex->getPhysical().upload(slot, (void*)0, texData.virtalTexFormat);
+  texData.tex->getPhysical().upload(slot, (void*)0, texData.physicalTexFormat);
 
   ppBuffer.unbind();
   ppBuffer.next();

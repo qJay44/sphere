@@ -3,8 +3,6 @@
 #include "Texture.hpp"
 #include "image2D.hpp"
 
-#include <future>
-
 class TextureCubemap : public Texture {
 public:
   TextureCubemap() = default;

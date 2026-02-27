@@ -1,6 +1,3 @@
-#include <cstdio>
-#include <cstdlib>
-
 #ifdef _WIN32
   #include <direct.h>
   #define CHDIR(p) _chdir(p);

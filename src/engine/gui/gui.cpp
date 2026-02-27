@@ -1,22 +1,22 @@
 #include "gui.hpp"
 
-#include <cassert>
-
-#undef IM_NEW
-#undef IM_FREE
-
 #include "AtmospherePlotter.hpp"
 #include "TilePlotter.hpp"
 #include "glm/gtc/type_ptr.hpp"
+
+#undef IM_NEW
+#undef IM_FREE
 
 #include "imgui.h"
 #include "implot.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
+#include "global.hpp"
 
 using namespace ImGui;
 
-static bool collapsed = true;
+static bool configCollapsed = true;
+static bool infoCollapsed = true;
 
 Earth* gui::earthPtr = nullptr;
 Camera* gui::camSpecatePtr = nullptr;
@@ -51,17 +51,18 @@ void gui::init() {
   ImGui_ImplOpenGL3_Init();
 }
 
-void gui::toggle() { collapsed = !collapsed; }
+void gui::toggleConfig() { configCollapsed = !configCollapsed; }
+void gui::toggleInfo() { infoCollapsed = !infoCollapsed; }
 
 void gui::draw() {
-  ScopedProfilerTask _task("gui::draw");
+  auto _task = global::profiler->startScopedTask("gui::draw");
 
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 
   SetNextWindowPos({0, 0});
-  SetNextWindowCollapsed(collapsed);
+  SetNextWindowCollapsed(configCollapsed);
 
   // ::::: Config window ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
@@ -240,7 +241,9 @@ void gui::draw() {
 
   const ImGuiViewport* viewport = GetMainViewport();
   ImVec2 posBR = viewport->WorkPos + viewport->WorkSize;
+
   SetNextWindowPos(posBR, ImGuiCond_Always, {1.f, 1.f});
+  SetNextWindowCollapsed(infoCollapsed);
 
   Begin("Info");
 
@@ -250,7 +253,7 @@ void gui::draw() {
   tilePlotter.render();
 
   assert(global::profiler);
-  global::profiler->render(400, 200, 200, 0);
+  global::profiler->renderTasks(400, 200, 200, 0);
 
   End();
 

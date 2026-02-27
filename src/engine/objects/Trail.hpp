@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "../Camera.hpp"
 #include "../mesh/Mesh.hpp"
 

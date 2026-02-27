@@ -1,6 +1,10 @@
 #include "TilePlotter.hpp"
 
+#undef IM_NEW
+#undef IM_FREE
+
 #include "implot.h"
+#include "global.hpp"
 
 constexpr ImPlotAxisFlags flagsPlot =
   ImPlotFlags_NoInputs    |

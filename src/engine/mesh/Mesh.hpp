@@ -1,9 +1,5 @@
 #pragma once
 
-#include <functional>
-#include <span>
-#include <vector>
-
 #include "Vertex.hpp"
 #include "Transformable.hpp"
 #include "VAO.hpp"
@@ -13,10 +9,13 @@
 
 class Mesh : public Transformable {
 public:
-  Mesh(const Mesh &) = delete;
-  Mesh &operator=(const Mesh &) = delete;
+  Mesh() = default;
 
-  Mesh(Mesh &&other);
+  Mesh(const Mesh&) = delete;
+  Mesh& operator=(const Mesh&) = delete;
+
+  Mesh(Mesh&& other) = default;
+  Mesh& operator=(Mesh&& other) = default;
 
   Mesh(const std::vector<Vertex4>&  vertices, const std::vector<GLuint>& indices, GLenum mode, GLenum usage = GL_STATIC_DRAW);
   Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& indices, GLenum mode, GLenum usage = GL_STATIC_DRAW);

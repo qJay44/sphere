@@ -1,7 +1,5 @@
 #include "Earth.hpp"
 
-#include <vips/vips8>
-
 #include "TerrainFace.hpp"
 #include "TileManager.hpp"
 

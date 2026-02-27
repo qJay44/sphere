@@ -61,6 +61,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
   ${TOL_PATH}/include
   ${PROFILER_PATH}/include
   ${VIPS_INCLUDE_DIRS}
+  ${PROJECT_SOURCE_DIR}/include
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw TIFF::TIFF ${VIPS_LIBRARIES} GLAD ImGui_GLFW_OpenGL Utils)

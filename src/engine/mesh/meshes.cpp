@@ -1,9 +1,8 @@
 #include "meshes.hpp"
 
-#include <vector>
-
 #include "../Camera.hpp"
 #include "../frustum/Frustum.hpp"
+#include "global.hpp"
 
 namespace meshes {
 

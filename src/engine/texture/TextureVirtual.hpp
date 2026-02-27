@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vips/vips8>
-
 #include "Texture2D.hpp"
 #include "Texture2DArray.hpp"
 

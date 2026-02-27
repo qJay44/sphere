@@ -1,6 +1,6 @@
 #pragma once
 
-#include "profiler/ProfilerManager.hpp"
+#include "ProfilerManager.hpp"
 
 namespace global {
 

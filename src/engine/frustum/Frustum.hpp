@@ -2,6 +2,7 @@
 
 #include "../Camera.hpp"
 #include "Plane.hpp"
+#include "global.hpp"
 
 namespace frustum {
 
