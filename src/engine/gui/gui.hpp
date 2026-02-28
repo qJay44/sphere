@@ -12,6 +12,8 @@ struct gui {
   static u16 fps;
 
   static float _sliderf0;
+  static float _sliderf1;
+  static float _sliderf2;
   static int _slideri0;
 
   static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);

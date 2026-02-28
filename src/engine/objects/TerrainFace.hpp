@@ -37,7 +37,7 @@ struct TerrainFace {
       if (frustumSphere.isOnFrustum(frustum, chunk)) {
         vec2 uvMin = chunk.minUV;
         vec2 uvMax = chunk.minUV;
-        float epsilon = 0.001f;
+        constexpr float epsilon = 0.01f;
 
         uvMin = max(uvMin - epsilon, {0.f, 0.f});
         uvMax = min(uvMax + epsilon, {1.f, 1.f});

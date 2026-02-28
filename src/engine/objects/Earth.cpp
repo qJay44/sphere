@@ -88,10 +88,10 @@ void Earth::createTextures() {
     }
   );
 
-  texLandSDF = Texture2D(
-    "res/tex/earth/landSDF.png",
+  texShoreSDF = Texture2D(
+    "res/tex/earth/shoreSDF.png",
     {
-      .uniformName    = "u_texLandSDF",
+      .uniformName    = "u_texShoreSDF",
       .unit           = 5,
       .internalFormat = GL_R8,
       .format         = GL_RED,
@@ -123,6 +123,18 @@ void Earth::createTextures() {
     {
       .uniformName = "u_texNormalmapWave1",
       .unit = 8,
+      .wrapS = GL_REPEAT,
+      .wrapT = GL_REPEAT,
+    }
+  );
+
+  texNoise = Texture2D(
+    "res/tex/earth/noise.png",
+    {
+      .uniformName = "u_texNoise",
+      .unit = 9,
+      .internalFormat = GL_R8,
+      .format = GL_RED,
       .wrapS = GL_REPEAT,
       .wrapT = GL_REPEAT,
     }
@@ -169,6 +181,14 @@ void Earth::draw(const Camera* camera, const frustum::Frustum& frustum, Shader& 
   shader.setUniform1f("u_waterWaveResScale", waterWaveResScale);
   shader.setUniform1f("u_maskTerrainFaceColor", useTerrainFaceColors);
   shader.setUniform1f("u_maskTerrainFaceChunkColor", useTerrainFaceChunkColors);
+  shader.setUniform1f("u_waterShoreFreq", waterShoreFreq);
+  shader.setUniform1f("u_waterShoreScale", waterShoreScale);
+  shader.setUniform1f("u_waterShoreNoiseFreq", waterShoreNoiseFreq);
+  shader.setUniform1f("u_waterShoreNoiseScale", waterShoreNoiseScale);
+  shader.setUniform1f("u_waterShoreNoiseStrength", waterShoreNoiseStrength);
+  shader.setUniform1f("u_waterShoreMaskBlend", waterShoreMaskBlend);
+  shader.setUniform1f("u_waterShoreWidth", waterShoreWidth);
+  shader.setUniform1f("u_waterShoreEdgeBlend", waterShoreEdgeBlend);
   shader.setUniform2f("u_virtualDims", caps32k.virtualDims);
   shader.setUniform3f("u_bordersColor", bordersColor);
   shader.setUniform3f("u_waterShallowColor", waterShallowColor);
@@ -178,10 +198,11 @@ void Earth::draw(const Camera* camera, const frustum::Frustum& frustum, Shader& 
   texVirt32kHeightmapLand.bind();
   texVirt32kNormalmapLand.bind();
   texBathymetry.bind();
-  texLandSDF.bind();
+  texShoreSDF.bind();
   texBorders.bind();
   texNormalmapWave0.bind();
   texNormalmapWave1.bind();
+  texNoise.bind();
 
   chunksDrawn = 0;
 

@@ -24,6 +24,8 @@ Airplane* gui::airplanePtr = nullptr;
 Light* gui::lightPtr = nullptr;
 
 float gui::_sliderf0 = 0.f;
+float gui::_sliderf1 = 0.f;
+float gui::_sliderf2 = 0.f;
 int gui::_slideri0 = 0.f;
 
 u16 gui::fps = 1;
@@ -104,6 +106,14 @@ void gui::draw() {
     SliderFloat("Deep factor", &earthPtr->waterDeepFactor, -1.f, 1.f);
     SliderFloat("Wave frequency", &earthPtr->waterWaveFreq, -0.5f, 0.5f);
     SliderFloat("Wave resolution scale", &earthPtr->waterWaveResScale, 0.1f, 1.f);
+    SliderFloat("Shore frequency", &earthPtr->waterShoreFreq, 0.f, 300.f);
+    SliderFloat("Shore scale", &earthPtr->waterShoreScale, 0.f, 300.f);
+    SliderFloat("Shore noise frequency", &earthPtr->waterShoreNoiseFreq, 0.f, 1.f);
+    SliderFloat("Shore noise scale", &earthPtr->waterShoreNoiseScale, 0.f, 1.f);
+    SliderFloat("Shore noise strength", &earthPtr->waterShoreNoiseStrength, 0.f, 1000.f);
+    SliderFloat("Shore mask blend", &earthPtr->waterShoreMaskBlend, 0.f, 1.f);
+    SliderFloat("Shore width", &earthPtr->waterShoreWidth, 0.f, 1.f);
+    SliderFloat("Shore edge blend", &earthPtr->waterShoreEdgeBlend, 0.f, 1.f);
     ColorEdit3("Shallow color", glm::value_ptr(earthPtr->waterShallowColor));
     ColorEdit3("Deep color", glm::value_ptr(earthPtr->waterDeepColor));
 
@@ -230,6 +240,8 @@ void gui::draw() {
     Checkbox("Planet print build info", &earthPtr->printBuildInfo);
 
     DragFloat("_sliderf0", &_sliderf0);
+    DragFloat("_sliderf1", &_sliderf1);
+    DragFloat("_sliderf2", &_sliderf2);
     DragInt("_slideri0", &_slideri0);
   }
 

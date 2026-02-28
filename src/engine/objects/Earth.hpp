@@ -41,10 +41,11 @@ private:
   TextureVirtual texVirt32kNormalmapLand;
 
   Texture2D texBathymetry;
-  Texture2D texLandSDF;
+  Texture2D texShoreSDF;
   Texture2D texBorders;
   Texture2D texNormalmapWave0;
   Texture2D texNormalmapWave1;
+  Texture2D texNoise;
   Texture2D texBakedOpticalDepth;
 
   TerrainFace terrainFaces[6];
@@ -56,13 +57,21 @@ private:
   float lightDimScale = 2.5f;
   float tessDivs = 2.5f;
   float seaLevel = 0.f;
-
   vec3 bordersColor = vec3(0.55f);
+
   vec3 waterShallowColor{0.f, 0.705f, 0.799f};
   vec3 waterDeepColor{0.f, 0.127f, 0.255f};
   float waterDeepFactor = 0.4f;
   float waterWaveFreq = 0.01f;
   float waterWaveResScale = 0.1f;
+  float waterShoreFreq = -2.f;
+  float waterShoreScale = 160.f;
+  float waterShoreNoiseFreq = 0.1f;
+  float waterShoreNoiseScale = 0.2f;
+  float waterShoreNoiseStrength = 1000.f;
+  float waterShoreMaskBlend = 0.4f;
+  float waterShoreWidth = 0.1f;
+  float waterShoreEdgeBlend = 0.2f;
 
   PlanetAtmosphere atmosphere;
 
