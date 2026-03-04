@@ -13,6 +13,7 @@ extern ProfilerManager* profiler;
 
 extern float dt;
 extern float time;
+extern float gamma;
 
 extern bool controllingAirplane;
 extern bool guiFocused;

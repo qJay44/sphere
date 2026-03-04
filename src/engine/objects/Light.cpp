@@ -7,7 +7,6 @@ Light::Light(vec3 position, float radius, vec3 color)
 
 const vec3& Light::getPosition() const { return position; }
 const vec3& Light::getColor() const { return color; }
-const vec3& Light::getWaveLengths() const { return waveLengths; }
 
 void Light::update() {
   setTrans(position);

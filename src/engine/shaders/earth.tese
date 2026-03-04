@@ -1,8 +1,6 @@
 #version 460 core
 
 #define PI 3.141592265359f
-// #define HEIGHT_MIN -10894.f
-// #define HEIGHT_MAX 7891.f
 
 layout (quads, equal_spacing, cw) in;
 
@@ -11,6 +9,7 @@ in vec2 uvsCoord[];
 out DATA {
   vec4 worldPos;
   float maskWater;
+  mat3 TBN;
 } dataOut;
 
 layout(binding = 0) uniform usampler2D u_texIndirection32k;
@@ -52,11 +51,19 @@ void main() {
   vec4 worldPos = mix(p0, p1, v);
   vec3 normal = normalize(worldPos.xyz);
 
-  float height = textureVirtual(u_texVirt32kHeightmapLand, u_texIndirection32k, normal).r + u_seaLevel;
+  float height = textureVirtual(u_texVirt32kHeightmapLand, u_texIndirection32k, normal).r;
   worldPos.xyz += normal * height * u_heightmapScale;
 
+  float theta = u * 2.f * PI;
+  float phi = v * PI;
+
+  vec3 T = normalize(vec3(-sin(theta), 0.f, cos(theta)));
+  vec3 N = normal;
+  vec3 B = normalize(cross(N, T));
+
   dataOut.worldPos = worldPos;
-  dataOut.maskWater = float(height <= 0.f);
+  dataOut.maskWater = float(height <= u_seaLevel);
+  dataOut.TBN = mat3(T, B, N);
 
   gl_Position = u_camPV * worldPos;
 }

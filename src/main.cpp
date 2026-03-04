@@ -1,3 +1,4 @@
+#include "engine/objects/Sun.hpp"
 #ifdef _WIN32
   #include <direct.h>
   #define CHDIR(p) _chdir(p);
@@ -16,7 +17,6 @@
 #include "engine/texture/Texture2D.hpp"
 #include "engine/objects/Airplane.hpp"
 #include "engine/objects/Earth.hpp"
-#include "engine/objects/Light.hpp"
 #include "utils/clrp.hpp"
 
 using global::window;
@@ -98,6 +98,7 @@ int main() {
   Shader trailShader("trail.vert", "trail.frag");
   Shader planetBordersShader("borders.vert", "borders.frag");
   Shader atmosphereShader("atmosphere.vert", "atmosphere.frag");
+  Shader sunShader("sun.vert", "sun.frag");
   Shader lightShader("light.vert", "light.frag");
   Shader linesShader("lines.vert", "lines.frag");
 
@@ -105,7 +106,8 @@ int main() {
 
   // ===== Light ================================================ //
 
-  Light light(earthInitRadius + vec3{16.3f, 24.f, 26.6f}, 50.f);
+  Sun sun(800.f, 2.f, 0.f);
+  sun.updateDir();
 
   // ===== Planet ============================================== //
 
@@ -145,6 +147,7 @@ int main() {
   TextureDescriptor fboTexDesc{};
   fboTexDesc.uniformName = "u_screenColorTex";
   fboTexDesc.unit = 0;
+  fboTexDesc.internalFormat = GL_RGBA16F;
   fboTexDesc.minFilter = GL_NEAREST;
   fboTexDesc.magFilter = GL_NEAREST;
 
@@ -173,9 +176,9 @@ int main() {
   gui::earthPtr = &earth;
   gui::camSpecatePtr = &cameraSpectate;
   gui::airplanePtr = &airplane;
-  gui::lightPtr = &light;
+  gui::sunPtr = &sun;
 
-  earth.update(light);
+  earth.update();
   earth.bakeOpticalDepth();
 
   // Render loop
@@ -209,23 +212,24 @@ int main() {
 
     global::profiler->clearTasks();
 
-    light.update();
-    earth.update(light);
+    earth.update();
     airplane.update(earth);
 
     earthShader.setUniform1f("u_time", global::time);
 
-    light.setUniforms(earthShader);
-    light.setUniforms(airplaneShader);
-    light.setUniforms(atmosphereShader);
+    sun.setUniforms(earthShader);
+    sun.setUniforms(airplaneShader);
+    sun.setUniforms(atmosphereShader);
 
     // ===== Main scene =========================================== //
 
     fboScreen.bind();
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
 
-    light.draw(cameraATM, lightShader);
+    sun.draw(cameraATM, sunShader);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -245,6 +249,7 @@ int main() {
     screenColorTexture.bind();
     screenDepthTexture.bind();
 
+    atmosphereShader.setUniform1f("u_gamma", global::gamma);
     earth.drawAtmosphere(cameraATM, atmosphereShader);
 
     screenColorTexture.unbind();

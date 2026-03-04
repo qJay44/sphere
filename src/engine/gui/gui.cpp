@@ -21,14 +21,21 @@ static bool infoCollapsed = true;
 Earth* gui::earthPtr = nullptr;
 Camera* gui::camSpecatePtr = nullptr;
 Airplane* gui::airplanePtr = nullptr;
-Light* gui::lightPtr = nullptr;
-
-float gui::_sliderf0 = 0.f;
-float gui::_sliderf1 = 0.f;
-float gui::_sliderf2 = 0.f;
-int gui::_slideri0 = 0.f;
-
+Sun* gui::sunPtr = nullptr;
 u16 gui::fps = 1;
+
+float gui::_slider1f0{};
+float gui::_slider1f1{};
+float gui::_slider1f2{};
+vec2 gui::_slider2f0{};
+vec2 gui::_slider2f1{};
+vec2 gui::_slider2f2{};
+vec3 gui::_slider3f0{};
+vec3 gui::_slider3f1{};
+vec3 gui::_slider3f2{};
+int gui::_slider1i0{};
+int gui::_slider1i1{};
+int gui::_slider1i2{};
 
 void gui::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
@@ -72,7 +79,7 @@ void gui::draw() {
 
   // ===== Planet ======================================================================================== //
 
-  bool rebakeOpticalDepth = false;
+  bool rebakeOpticalDepth = false; // Call the func at the Sun section
 
   assert(earthPtr);
   if (CollapsingHeader("Planet")) {
@@ -96,7 +103,7 @@ void gui::draw() {
       earthPtr->build();
 
     Spacing();
-    SliderFloat("TESC divisions scale", &earthPtr->tessDivs, 0.f, 100.f);
+    SliderFloat("TESC divisions scale", &earthPtr->tessDivs, 1.f, 20.f);
     SliderFloat("Heightmap scale", &earthPtr->heightmapScale, 0.01f, 100.f);
     SliderFloat("Triplanar blend sharpness", &earthPtr->triplanarBlendSharpness, 1.f, 10.f);
     SliderFloat("Sea level", &earthPtr->seaLevel, -1.f, 1.f);
@@ -119,32 +126,30 @@ void gui::draw() {
 
     SeparatorText("Lightning");
     SliderFloat("Multiplier", &earthPtr->lightMultiplier, 0.1f, 20.f);
-    SliderFloat("Distance dim scale", &earthPtr->lightDimScale, 0.1f, 20.f);
-    SliderFloat("Ambient", &earthPtr->ambient, 0.0f, 20.f);
+    SliderFloat("Ambient", &earthPtr->ambient, 0.f, 1.f);
   }
 
   // ===== Atmosphere ==================================================================================== //
 
-  if (CollapsingHeader("Atmosphere")) {
+  if (CollapsingHeader("Postprocess")) {
     PlanetAtmosphere& atmosphere = earthPtr->atmosphere;
     static AtmospherePlotter atmospherePlotter(&earthPtr->atmosphere, 100); // Always valid pointer?
 
+    SliderFloat("Gamma", &global::gamma, 0, 5.f);
+
     SeparatorText("Atmosphere");
+    Checkbox("Apply", &atmosphere.apply);
+    BeginDisabled(!atmosphere.apply);
     rebakeOpticalDepth |= SliderFloat("Radius##2", &atmosphere.radius, earthPtr->radius, 1000.f);
     rebakeOpticalDepth |= SliderInt("Scattering points", &atmosphere.scatteringPoints, 2, 50);
     rebakeOpticalDepth |= SliderInt("Optical depth points", &atmosphere.opticalDepthPoints, 2, 50);
-    rebakeOpticalDepth |= SliderFloat("Sun intensity", &atmosphere.sunIntensity, 0.f, 10.f);
     rebakeOpticalDepth |= SliderFloat("Density falloff", &atmosphere.densityFalloff, 0.f, 20.f);
     rebakeOpticalDepth |= SliderFloat("Scattering strength", &atmosphere.scatteringStrength, 0.f, 1.f);
-
-    Checkbox("Gamma correction", &atmosphere.useGammaCorrection);
-    Checkbox("Apply", &atmosphere.apply);
 
     atmospherePlotter.renderDensity(1.f);
     atmospherePlotter.renderTransmittance(5.f);
 
-    if (rebakeOpticalDepth)
-      earthPtr->bakeOpticalDepth();
+    EndDisabled();
   }
 
   // ===== Airplane ====================================================================================== //
@@ -224,14 +229,26 @@ void gui::draw() {
     }
   }
 
-  // ===== Light ========================================================================================= //
+  // ===== Sun =========================================================================================== //
 
-  assert(lightPtr);
-  if (CollapsingHeader("Light")) {
-    DragFloat3("Position", glm::value_ptr(lightPtr->position));
-    DragFloat("Radius", &lightPtr->radius, 1.f, 0.f);
-    ColorEdit3("Color", glm::value_ptr(lightPtr->color));
+  assert(sunPtr);
+  if (CollapsingHeader("Sun")) {
+    bool updateDir = false;
+    rebakeOpticalDepth |= SliderFloat("Intensity", &sunPtr->intensity, 0.f, 20.f);
+
+    SliderFloat("Focus", &sunPtr->focus, 0.f, 2000.f);
+    updateDir |= DragFloat("Yaw##3", &sunPtr->yaw, PI_2 * 0.01f);
+    updateDir |= DragFloat("Pitch##3", &sunPtr->pitch, PI_2 * 0.01f);
+    ColorEdit3("Color", glm::value_ptr(sunPtr->color));
+    Text("Direction: [%.2f, %.2f, %.2f]", sunPtr->dir.x, sunPtr->dir.y, sunPtr->dir.z);
+
+    if (updateDir)
+      sunPtr->updateDir();
   };
+
+
+  if (rebakeOpticalDepth)
+    earthPtr->bakeOpticalDepth();
 
   // ===== Other ========================================================================================= //
 
@@ -239,10 +256,18 @@ void gui::draw() {
     Checkbox("Show global axis", &global::drawGlobalAxis);
     Checkbox("Planet print build info", &earthPtr->printBuildInfo);
 
-    DragFloat("_sliderf0", &_sliderf0);
-    DragFloat("_sliderf1", &_sliderf1);
-    DragFloat("_sliderf2", &_sliderf2);
-    DragInt("_slideri0", &_slideri0);
+    DragFloat("_slider1f0", &_slider1f0);
+    DragFloat("_slider1f1", &_slider1f1);
+    DragFloat("_slider1f2", &_slider1f2);
+    DragFloat2("_slider2f0", glm::value_ptr(_slider2f0));
+    DragFloat2("_slider2f1", glm::value_ptr(_slider2f1));
+    DragFloat2("_slider2f2", glm::value_ptr(_slider2f2));
+    DragFloat3("_slider3f0", glm::value_ptr(_slider3f0));
+    DragFloat3("_slider3f1", glm::value_ptr(_slider3f1));
+    DragFloat3("_slider3f2", glm::value_ptr(_slider3f2));
+    DragInt("_slider1i0", &_slider1i0);
+    DragInt("_slider1i1", &_slider1i1);
+    DragInt("_slider1i2", &_slider1i2);
   }
 
   End();

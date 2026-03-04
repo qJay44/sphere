@@ -22,6 +22,7 @@ struct TerrainFaceChunk : public Mesh {
     std::vector<GLuint> indices((resolution - 1) * (resolution - 1) * 4);
     size_t triIndex = 0;
 
+    up = -up; // CCW fix
     vec3 axisA = vec3(up.y, up.z, up.x);
     vec3 axisB = cross(up, axisA);
 

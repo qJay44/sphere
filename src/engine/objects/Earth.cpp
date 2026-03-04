@@ -38,19 +38,8 @@ void Earth::build() {
     {0.f,  0.f,  -1.f}, // Front
   };
 
-  constexpr vec3 colors[6] {
-    {0.f,    0.992f, 1.f   },
-    {1.f,    0.149f, 0.f   },
-    {1.f,    0.251f, 0.988f},
-    {0.f,    0.976f, 0.173f},
-    {0.024f, 0.204f, 0.988f},
-    {0.996f, 0.984f, 0.169f},
-  };
-
-  for (int i = 0; i < 6; i++) {
+  for (int i = 0; i < 6; i++)
     terrainFaces[i].build(directions[i], chunksPerSide, resolution, radius);
-    terrainFaces[i].color = colors[i];
-  }
 
   bakeOpticalDepth();
 }
@@ -64,6 +53,7 @@ void Earth::createTextures() {
   texVirt32kColors = TextureVirtual("res/tex/earth/32768x16384/colormap.tif", {
     .uniformName = "u_texVirt32kColors",
     .unit = 1,
+    // .internalFormat = GL_SRGB8
   }, caps32k, &texIndir32k);
 
   texVirt32kHeightmapLand = TextureVirtual("res/tex/earth/32768x16384/heightmapLand.tif", {
@@ -147,8 +137,8 @@ void Earth::createTextures() {
   });
 }
 
-void Earth::update(const Light& light) {
-  atmosphere.update(light);
+void Earth::update() {
+  atmosphere.update();
 }
 
 void Earth::bakeOpticalDepth() {

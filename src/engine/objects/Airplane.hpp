@@ -4,6 +4,7 @@
 #include "Earth.hpp"
 #include "Trail.hpp"
 #include "glm/gtc/quaternion.hpp"
+#include "Light.hpp"
 
 enum AirplaneFlags : u32 {
   AirplaneFlags_None        = 0,
@@ -17,7 +18,6 @@ enum AirplaneFlags : u32 {
 class Airplane : public Moveable, public Mesh {
 public:
   Airplane(vec3 position, float flyHeight, const fspath& model, float meshScale = 1.f);
-  ~Airplane();
 
   void moveForward() override;
   void moveBack()    override;

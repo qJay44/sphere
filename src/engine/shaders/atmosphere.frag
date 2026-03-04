@@ -5,7 +5,6 @@
 
 in vec2 texCoord;
 in vec3 viewVec;
-in vec3 dirToSun;
 
 out vec4 FragColor;
 
@@ -18,15 +17,16 @@ uniform vec3 u_camForward;
 uniform float u_camNear;
 uniform float u_camFar;
 
+uniform vec3 u_sunDir;
 uniform vec3 u_planetCenter;
 uniform vec3 u_scatteringCoefficients;
 uniform int u_scatteringPoints;
 uniform int u_opticalDepthPoints;
+uniform float u_gamma;
 uniform float u_planetRadius;
 uniform float u_atmosphereRadius;
 uniform float u_densityFalloff;
 uniform float u_sunIntensity;
-uniform float u_maskGammaCorrection;
 uniform float u_maskApply;
 
 float linearizeDepth(float depth) {
@@ -82,7 +82,7 @@ vec3 calcLight(vec3 rayOrigin, vec3 rayDir, float rayLength, vec3 originalColor)
   float viewRayOpticalDepth = 0.f;
 
   for (int i = 0; i < u_scatteringPoints; i++) {
-    float sunRayOpticalDepth = opticalDepth(inScatteringPoint, dirToSun);
+    float sunRayOpticalDepth = opticalDepth(inScatteringPoint, -u_sunDir);
     float localDensity = densityAtPoint(inScatteringPoint);
     viewRayOpticalDepth += localDensity * stepSize;
     vec3 transmittance = exp(-(sunRayOpticalDepth + viewRayOpticalDepth) * u_scatteringCoefficients);
@@ -117,8 +117,10 @@ void main() {
     color = light;
   }
 
-  color = applyMask(color, pow(color, vec3(1.f / 2.2f)), u_maskGammaCorrection);
+  // No atmosphere
   color = applyMask(originalColor, color, u_maskApply);
+
+  color = pow(color, vec3(1.f / u_gamma));
 
   FragColor = vec4(color, 1.f);
 }

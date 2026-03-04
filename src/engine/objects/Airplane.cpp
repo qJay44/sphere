@@ -33,10 +33,6 @@ Airplane::Airplane(vec3 position, float flyHeight, const fspath& model, float me
   trailLeft.duration = 0.5f;
 }
 
-Airplane::~Airplane() {
-  Mesh::clear();
-}
-
 void Airplane::moveForward() {}
 void Airplane::moveBack()    {}
 

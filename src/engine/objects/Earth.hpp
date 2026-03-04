@@ -1,12 +1,10 @@
 #pragma once
 
 #include "../Camera.hpp"
-#include "../texture/Texture2DArray.hpp"
 #include "../texture/Texture2D.hpp"
 #include "../frustum/Frustum.hpp"
 #include "TerrainFace.hpp"
 #include "PlanetAtmosphere.hpp"
-#include "Light.hpp"
 #include "TileManager.hpp"
 
 class Earth {
@@ -20,7 +18,7 @@ public:
 
   void build();
   void createTextures();
-  void update(const Light& light);
+  void update();
   void bakeOpticalDepth();
   void draw(const Camera* camera, const frustum::Frustum& frustum, Shader& shader);
   void drawAtmosphere(const Camera* camera, Shader& shader) const;
@@ -51,10 +49,7 @@ private:
   TerrainFace terrainFaces[6];
 
   float heightmapScale = 8.f;
-  float lightMultiplier = 1.5f;
-  float ambient = 0.2f;
-  float triplanarBlendSharpness = 1.f;
-  float lightDimScale = 2.5f;
+  float triplanarBlendSharpness = 2.f;
   float tessDivs = 2.5f;
   float seaLevel = 0.f;
   vec3 bordersColor = vec3(0.55f);
@@ -65,13 +60,16 @@ private:
   float waterWaveFreq = 0.01f;
   float waterWaveResScale = 0.1f;
   float waterShoreFreq = -2.f;
-  float waterShoreScale = 160.f;
-  float waterShoreNoiseFreq = 0.1f;
-  float waterShoreNoiseScale = 0.2f;
-  float waterShoreNoiseStrength = 1000.f;
-  float waterShoreMaskBlend = 0.4f;
-  float waterShoreWidth = 0.1f;
-  float waterShoreEdgeBlend = 0.2f;
+  float waterShoreScale = 59.f;
+  float waterShoreNoiseFreq = 1.f;
+  float waterShoreNoiseScale = 0.063f;
+  float waterShoreNoiseStrength = 316.f;
+  float waterShoreMaskBlend = 0.587f;
+  float waterShoreWidth = 1.8f;
+  float waterShoreEdgeBlend = 0.067f;
+
+  float lightMultiplier = 1.5f;
+  float ambient = 0.02f;
 
   PlanetAtmosphere atmosphere;
 
@@ -81,8 +79,5 @@ private:
   bool useTerrainFaceColors = false;
   bool useTerrainFaceChunkColors = false;
   bool printBuildInfo = false;
-
-private:
-  static void tileLoad(const fspath& path, const Texture2DArray& tex);
 };
 

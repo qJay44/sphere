@@ -3,7 +3,7 @@
 #include "global.hpp"
 #include "utils/status.hpp"
 #include "utils/clrp.hpp"
-#include "VAO.hpp"
+#include "../gui/gui.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
@@ -138,23 +138,16 @@ Mesh::Mesh(const std::vector<Vertex4>&  vertices, GLenum mode, GLenum usage) : M
 Mesh::Mesh(const std::vector<VertexPT>& vertices, GLenum mode, GLenum usage) : Mesh(std::span(vertices), {}, mode, usage) {}
 Mesh::Mesh(const std::vector<VertexPC>& vertices, GLenum mode, GLenum usage) : Mesh(std::span(vertices), {}, mode, usage) {}
 
-Mesh::~Mesh() {
-  clear();
-};
-
 void Mesh::screenDraw(const Camera* camera, Shader& shader) {
   static const VAO& vao = VAO::getEmpty();
   setCamUniforms(camera, shader);
+  setGlobalUniforms(shader);
+  setExtraUniforms(shader);
 
   vao.bind();
+  shader.use();
   glDrawArrays(GL_TRIANGLES, 0, 6);
   vao.unbind();
-}
-
-void Mesh::clear() {
-  vao.clear();
-  vbo.clear();
-  ebo.clear();
 }
 
 void Mesh::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) const {
@@ -164,11 +157,15 @@ void Mesh::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) con
   vao.bind();
 
   setCamUniforms(camera, shader);
+  setGlobalUniforms(shader);
+  setExtraUniforms(shader);
+
   shader.setUniformMatrix4f("u_model", getModel());
 
   if (global::drawWireframe & !forceNoWireframe)
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+  shader.use();
   drawFunc(mode, count);
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -177,7 +174,6 @@ void Mesh::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) con
 }
 
 void Mesh::setCamUniforms(const Camera* c, Shader& s) {
-  s.use();
   s.setUniform1f      ("u_camNear"   , c->getNearPlane());
   s.setUniform1f      ("u_camFar"    , c->getFarPlane());
   s.setUniform1f      ("u_camFov"    , c->getFov());
@@ -188,6 +184,23 @@ void Mesh::setCamUniforms(const Camera* c, Shader& s) {
   s.setUniformMatrix4f("u_camProj"   , c->getProj());
   s.setUniformMatrix4f("u_camView"   , c->getView());
   s.setUniformMatrix4f("u_camPV"     , c->getProjView());
+}
+
+void Mesh::setGlobalUniforms(Shader& s) {
+  s.setUniform1f("u_globalTime", global::time);
+  s.setUniform1f("u_globalGamma", global::gamma);
+}
+
+void Mesh::setExtraUniforms(Shader& s) {
+  s.setUniform1f("u_1f0", gui::_slider1f0);
+  s.setUniform1f("u_1f1", gui::_slider1f1);
+  s.setUniform1f("u_1f2", gui::_slider1f2);
+  s.setUniform2f("u_2f0", gui::_slider2f0);
+  s.setUniform2f("u_2f1", gui::_slider2f1);
+  s.setUniform2f("u_2f2", gui::_slider2f2);
+  s.setUniform3f("u_3f0", gui::_slider3f0);
+  s.setUniform3f("u_3f1", gui::_slider3f1);
+  s.setUniform3f("u_3f2", gui::_slider3f2);
 }
 
 void Mesh::drawElements(GLenum mode, GLsizei count) {

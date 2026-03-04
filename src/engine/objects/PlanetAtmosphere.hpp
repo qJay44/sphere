@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../Shader.hpp"
-#include "Light.hpp"
 
 struct PlanetAtmosphere {
   float radius;
@@ -9,10 +8,9 @@ struct PlanetAtmosphere {
   int opticalDepthPoints = 50;
   float densityFalloff = 20.f;
   float scatteringStrength = 0.02f;
-  float sunIntensity = 2.f;
   vec3 scatteringCoefficients = vec3(1.f);
+  vec3 waveLengths{700.f, 530.f, 440.f};
 
-  bool useGammaCorrection = false;
   bool apply = true;
 
   inline static float transmittance(float x, float a, float b) {
@@ -23,13 +21,13 @@ struct PlanetAtmosphere {
     return std::exp(-x * a);
   }
 
-  void update(const Light& light) {
+  void update() {
     static float prev{0xFFFFFF};
 
     if (prev == scatteringStrength)
       return;
 
-    scatteringCoefficients = glm::pow(400.f / light.getWaveLengths(), vec3(4.f)) * scatteringStrength;
+    scatteringCoefficients = glm::pow(400.f / waveLengths, vec3(4.f)) * scatteringStrength;
 
     prev = scatteringStrength;
   }
@@ -40,8 +38,6 @@ struct PlanetAtmosphere {
     shader.setUniform1i("u_opticalDepthPoints", opticalDepthPoints);
     shader.setUniform1f("u_densityFalloff", densityFalloff);
     shader.setUniform1f("u_atmosphereRadius", radius);
-    shader.setUniform1f("u_sunIntensity", sunIntensity);
-    shader.setUniform1f("u_maskGammaCorrection", useGammaCorrection);
     shader.setUniform1f("u_maskApply", apply);
   }
 };

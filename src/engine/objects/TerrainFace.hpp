@@ -12,6 +12,7 @@ struct TerrainFace {
 
   void build(vec3 up, int chunksPerSide, int resolution, float radius) {
     chunks.clear();
+    color = max(up, abs(up) * 0.5f);
 
     for (int y = 0; y < chunksPerSide; y++)
       for (int x = 0; x < chunksPerSide; x++)

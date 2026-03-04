@@ -25,8 +25,6 @@ public:
   Mesh(const std::vector<VertexPT>& vertices, GLenum mode, GLenum usage);
   Mesh(const std::vector<VertexPC>& vertices, GLenum mode, GLenum usage);
 
-  ~Mesh();
-
   static Mesh loadObj(const fspath& file, bool printInfo = false);
   static void screenDraw(const Camera* camera, Shader& shader);
 
@@ -37,7 +35,6 @@ public:
   }
 
   void draw(const Camera* camera, Shader& shader, bool forceNoWireframe = false) const;
-  void clear();
 
 private:
   GLsizei count = 0;
@@ -50,6 +47,8 @@ private:
 
 private:
   static void setCamUniforms(const Camera* c, Shader& s);
+  static void setGlobalUniforms(Shader& s);
+  static void setExtraUniforms(Shader& s);
 
   static void drawElements(GLenum mode, GLsizei count);
   static void drawArrays(GLenum mode, GLsizei count);
@@ -77,5 +76,4 @@ private:
     if (useEBO) ebo.unbind();
   }
 };
-
 

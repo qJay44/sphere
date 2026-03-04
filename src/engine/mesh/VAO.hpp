@@ -20,7 +20,7 @@ struct VAO {
   VAO(const VAO&) = delete;
   VAO& operator=(const VAO&) = delete;
 
-  VAO(VAO &&other) {
+  VAO(VAO&& other) {
     id = other.id;
     other.id = 0;
   }
@@ -33,6 +33,10 @@ struct VAO {
     }
 
     return *this;
+  }
+
+  ~VAO() {
+    clear();
   }
 
   void gen() {

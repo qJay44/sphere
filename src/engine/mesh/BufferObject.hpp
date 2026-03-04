@@ -39,6 +39,10 @@ struct BufferObject {
     gen();
   }
 
+  ~BufferObject() {
+    clear();
+  }
+
   void gen() {
     glGenBuffers(size, &id);
   }

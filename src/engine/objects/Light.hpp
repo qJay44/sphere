@@ -8,7 +8,6 @@ public:
 
   const vec3& getPosition() const;
   const vec3& getColor() const;
-  const vec3& getWaveLengths() const;
 
   void update();
   void setUniforms(Shader& shader) const;
@@ -21,7 +20,5 @@ private:
   vec3 position;
   float radius;
   vec3 color;
-
-  vec3 waveLengths{700.f, 530.f, 440.f};
 };
 
