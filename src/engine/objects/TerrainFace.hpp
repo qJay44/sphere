@@ -48,7 +48,7 @@ struct TerrainFace {
           uvMax.x = 1.f;
         }
 
-        tm.requestTile(uvMin, uvMax);
+        tm.requestTile(uvMin, uvMax); // FIXME: Still heaving loading on small radius
 
         chunk.draw(camera, shader);
         cnt++;

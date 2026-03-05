@@ -6,7 +6,6 @@ out vec4 FragColor;
 in DATA {
   vec4 worldPos;
   float maskWater;
-  mat3 TBN;
 } dataIn;
 
 layout(binding = 0) uniform usampler2D u_texIndirection32k;
@@ -85,7 +84,7 @@ vec3 directionalLight(vec3 normal) {
 
 vec3 specularLight(vec3 normal) {
   vec3 halfwayDir = normalize(-u_sunDir + viewDir);
-  float spec = pow(max(dot(normal, halfwayDir), 0.f), 32.f);
+  float spec = pow(max(dot(normal, halfwayDir), 0.f), 128.f);
 
   return u_sunColor * spec;
 }
@@ -100,48 +99,26 @@ vec3 triplanarSample(sampler2D tex, float scale, vec2 offset) {
   return xProj + yProj + zProj;
 }
 
-vec3 unpackScaleNormal(vec4 packedNormal) {
-  vec3 normal;
-  normal.xy = packedNormal.xy * 2.f - 1.f; // suppoused to be wy
-  normal.xy *= u_triplanarBlendSharpness;
-  normal.z = sqrt(1.f - saturate(dot(normal.xy, normal.xy)));
-
-  return normal;
-}
-
-vec3 blend_rnm(vec3 n1, vec3 n2) {
-  n1.z += 1.f;
-  n2.xy = -n2.xy;
-
-  return n1 * dot(n1, n2) / n1.z - n2;
-}
-
 vec3 triplanarNormal(sampler2D normalmap, vec3 normal, float scale, float timeStep) {
   vec3 absNormal = abs(normal);
-  vec3 blendWeight = saturate(pow(absNormal, vec3(4.f)));
-  blendWeight /= dot(blendWeight, vec3(1.f));
+  vec3 weights = pow(absNormal, vec3(u_triplanarBlendSharpness));
+  weights /= (weights.x + weights.y + weights.z);
 
   vec3 scaledWorldPos = dataIn.worldPos.xyz * scale + timeStep;
-  vec3 tangentNormalX = unpackScaleNormal(texture(normalmap, scaledWorldPos.zy));
-  vec3 tangentNormalY = unpackScaleNormal(texture(normalmap, scaledWorldPos.xz));
-  vec3 tangentNormalZ = unpackScaleNormal(texture(normalmap, scaledWorldPos.xy));
-
-  tangentNormalX = blend_rnm(vec3(normal.zy, absNormal.x), tangentNormalX);
-  tangentNormalY = blend_rnm(vec3(normal.xz, absNormal.y), tangentNormalY);
-  tangentNormalZ = blend_rnm(vec3(normal.xy, absNormal.z), tangentNormalZ);
+  vec3 tangentNormalX = texture(normalmap, scaledWorldPos.zy).rgb * 2.f - 1.f;
+  vec3 tangentNormalY = texture(normalmap, scaledWorldPos.xz).rgb * 2.f - 1.f;
+  vec3 tangentNormalZ = texture(normalmap, scaledWorldPos.xy).rgb * 2.f - 1.f;
 
   vec3 axisSign = sign(normal);
-  tangentNormalX.z *= axisSign.x;
-  tangentNormalY.z *= axisSign.y;
-  tangentNormalZ.z *= axisSign.z;
+  tangentNormalX.xy *= axisSign.x;
+  tangentNormalY.xy *= axisSign.y;
+  tangentNormalZ.xy *= axisSign.z;
 
-  vec3 outputNormal = normalize(
-    tangentNormalX.zyx * blendWeight.x +
-    tangentNormalY.xzy * blendWeight.y +
-    tangentNormalZ.xyz * blendWeight.z
-  );
+  vec3 worldX = vec3(normal.x, tangentNormalX.yx);
+  vec3 worldY = vec3(tangentNormalY.x, normal.y, tangentNormalY.y);
+  vec3 worldZ = vec3(tangentNormalZ.xy, normal.z);
 
-  return outputNormal;
+  return normalize(worldX * weights.x + worldY * weights.y + worldZ * weights.z);
 }
 
 vec4 textureVirtual(sampler2DArray texVirtual, usampler2D texIndirection) {
@@ -182,19 +159,26 @@ float getShoreFoam(float sdf) {
 }
 
 vec3 getWavesNormal() {
-  float noise = triplanarSample(u_texNoise, 0.15f, vec2(0.f)).r;
   float waveFreq = u_time * u_waterWaveFreq;
   vec3 normalWave0 = triplanarNormal(u_texNormalmapWave0, sphereNormal, u_waterWaveResScale, -waveFreq);
-  vec3 normalWave1 = triplanarNormal(u_texNormalmapWave0, sphereNormal, u_waterWaveResScale * 0.9f,  waveFreq);
-  vec3 normalWaves = triplanarNormal(u_texNormalmapWave1, mix(normalWave0, normalWave1, noise), u_waterWaveResScale * 1.25f, waveFreq);
+  vec3 normalWave1 = triplanarNormal(u_texNormalmapWave1, sphereNormal, u_waterWaveResScale,  waveFreq);
 
-  return normalWaves;
+  return normalize(normalWave0 + normalWave1);
+}
+
+vec3 getLandNormal() {
+  vec4 landNormalSample = textureVirtual(u_texVirt32kNormalmapLand, u_texIndirection32k);
+  vec3 landNormal = normalize(landNormalSample.rgb * 2.f - 1.f);
+
+  landNormal.z *= -1.f;
+  landNormal.xz = landNormal.zx;
+
+  return landNormal;
 }
 
 void main() {
   vec3 surfaceColor = textureVirtual(u_texVirt32kColors, u_texIndirection32k).rgb;
-  vec4 surfaceNormalSample = textureVirtual(u_texVirt32kNormalmapLand, u_texIndirection32k);
-  vec3 surfaceNormal = normalize(surfaceNormalSample.rgb * 2.f - 1.f);
+  vec3 landNormal = getLandNormal();
   vec3 waterWavesNormal = getWavesNormal();
 
   float border = texture(u_texBorders, globalUV).r;
@@ -203,10 +187,8 @@ void main() {
   float maskWater = dataIn.maskWater;
   float maskLand = 1.f - maskWater;
 
-  surfaceNormal.x *= -1.f; // FIXME: Still wrong
-
   vec3 landColor = surfaceColor;
-  landColor *= directionalLight(surfaceNormal);
+  landColor *= directionalLight(landNormal);
   landColor *= maskLand;
 
   vec3 waterColor = getDeepnessWaterColor(deepness);
