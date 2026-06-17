@@ -26,8 +26,7 @@ public:
   const Texture2D* getIndirection() const;
   const vips::VImage& getImage() const;
 
-  void bind(ivec2 slotsPhyInd);
-  void bind();
+  void bind(GLuint slotPhysical);
 
 private:
   Texture2D* texIndirection;

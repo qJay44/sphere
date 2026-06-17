@@ -6,7 +6,7 @@
 
 class Texture2D : public Texture {
 public:
-  static const Texture2D& getDebug0Tex();
+  static const Texture2D& getDebugTex0();
 
   Texture2D() = default;
 
@@ -17,6 +17,6 @@ public:
   void upload(ivec2 coord, ivec2 size, const void* data, GLenum type) const;
 
 private:
-  static Texture2D debug0Tex;
+  static Texture2D debugTex0;
 };
 

@@ -17,8 +17,8 @@ Airplane::Airplane(vec3 position, float flyHeight, const fspath& model, float me
     lightLeft(position, 0.1f, global::green),
     lightRight(position, 0.1f, global::red)
 {
-  if (texDiffuse.getUniformName().empty())
-    texDiffuse = Texture2D(image2D("res/tex/airplane/11804_Airplane_diff.jpg", IMAGE2D_LOAD_STB, true), {"diffuse0", 0});
+  if (texDiffuse.getId() == 0)
+    texDiffuse = Texture2D(image2D("res/tex/airplane/11804_Airplane_diff.jpg", IMAGE2D_LOAD_STB, true), {});
 
   // Facing +Y
   Mesh::scale(meshScale);
@@ -42,8 +42,8 @@ void Airplane::moveBack()    {}
 void Airplane::moveLeft()  { turn(-1.f); }
 void Airplane::moveRight() { turn( 1.f); }
 
-void Airplane::moveUp()   { speedDefault = 0.f;   }
-void Airplane::moveDown() { speedDefault = 0.05f; }
+void Airplane::moveUp()   { stop = true;  }
+void Airplane::moveDown() { stop = false; }
 
 void Airplane::onMouseMove(dvec2 mousePos) {
   camera.onMouseMove(mousePos);
@@ -79,7 +79,8 @@ void Airplane::update(const Earth& earth) {
   rollQuat = glm::angleAxis(tiltMomentumRad, localOrientation);
   pitchQuat = glm::angleAxis(frameSpeedRad, localRight);
 
-  orientationQuat = orientationQuat * yawQuat * pitchQuat;
+  if (!stop)
+    orientationQuat = orientationQuat * yawQuat * pitchQuat;
 
   up = orientationQuat * localUp;
   orientation = orientationQuat * localOrientation;
@@ -96,11 +97,8 @@ void Airplane::update(const Earth& earth) {
 }
 
 void Airplane::draw(const Camera* camera, Shader& shader) const {
-  Airplane::texDiffuse.bind();
-
+  Airplane::texDiffuse.bind(0);
   Mesh::draw(camera, shader);
-
-  Airplane::texDiffuse.unbind();
 }
 
 void Airplane::drawTrails(const Camera* camera, Shader& shader) const {

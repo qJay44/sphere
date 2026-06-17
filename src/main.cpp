@@ -136,8 +136,6 @@ int main() {
   // ===== Framebuffers ========================================= //
 
   TextureDescriptor fboTexDesc{};
-  fboTexDesc.uniformName = "u_screenColorTex";
-  fboTexDesc.unit = 0;
   fboTexDesc.internalFormat = GL_RGBA16F;
   fboTexDesc.minFilter = GL_NEAREST;
   fboTexDesc.magFilter = GL_NEAREST;
@@ -145,8 +143,6 @@ int main() {
   FBO fboScreen;
   Texture2D screenColorTexture(winSize, fboTexDesc);
 
-  fboTexDesc.uniformName = "u_screenDepthTex";
-  fboTexDesc.unit = 1;
   fboTexDesc.internalFormat = GL_DEPTH_COMPONENT;
   fboTexDesc.format = GL_DEPTH_COMPONENT;
 
@@ -232,8 +228,8 @@ int main() {
     glDisable(GL_CULL_FACE);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    screenColorTexture.bind();
-    screenDepthTexture.bind();
+    screenColorTexture.bind(0);
+    screenDepthTexture.bind(1);
 
     atmosphereShader.setUniform1f("u_gamma", global::gamma);
     earth.drawAtmosphere(cameraATM, atmosphereShader);

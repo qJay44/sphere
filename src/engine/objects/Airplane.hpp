@@ -58,6 +58,8 @@ private:
 
   float camDistance = 10.f;
 
+  bool stop = false;
+
   float turnMomentumRad = 0.f;
   float tiltMomentumRad = 0.f;
 

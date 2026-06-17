@@ -4,8 +4,6 @@
 
 Texture2D TextureVirtual::generateIndirection(const TextureDescriptor& desc, const Capabilities& caps) {
   auto tex =  Texture2D(caps.virtualDims, {
-    .uniformName    = desc.uniformName,
-    .unit           = desc.unit,
     .internalFormat = GL_R8UI,
     .format         = GL_RED_INTEGER,
     .minFilter      = GL_NEAREST,
@@ -22,8 +20,6 @@ TextureVirtual::TextureVirtual(const fspath& filePath, const TextureDescriptor& 
   : texIndirection(indirection)
 {
   texPhysical = Texture2DArray(caps.tileSlots, caps.tileSize, {
-    .uniformName    = desc.uniformName,
-    .unit           = desc.unit,
     .target         = GL_TEXTURE_2D_ARRAY,
     .internalFormat = desc.internalFormat,
     .format         = desc.format,
@@ -44,8 +40,7 @@ const Texture2DArray& TextureVirtual::getPhysical() const { return texPhysical; 
 const Texture2D* TextureVirtual::getIndirection() const { return texIndirection; }
 const vips::VImage& TextureVirtual::getImage() const { return image; }
 
-void TextureVirtual::bind() {
-  texPhysical.bind();
-  texIndirection->bind();
+void TextureVirtual::bind(GLuint slotPhysical) {
+  texPhysical.bind(slotPhysical);
 }
 

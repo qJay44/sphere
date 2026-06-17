@@ -6,7 +6,7 @@ TextureCubemap::TextureCubemap(const fspath& folder, const TextureDescriptor& de
   : Texture(desc)
 {
   if (desc.target != GL_TEXTURE_CUBE_MAP)
-    error("[TextureCubemap::TextureCubemap] Wrong tartget for [{}]", desc.uniformName);
+    error("[TextureCubemap::TextureCubemap] Wrong target [{:#x}]", desc.target);
 
   if (async) {
     texFuture = std::async(std::launch::async, load, folder, desc.internalFormat);
@@ -80,7 +80,7 @@ TextureCubemap::ImageData TextureCubemap::load(fspath folder, GLenum internalFor
 
 void TextureCubemap::upload(const ImageData& data) {
   glGenTextures(1, &id);
-  bind();
+  bind(0);
   glTexParameteri(desc.target, GL_TEXTURE_MIN_FILTER, desc.minFilter);
   glTexParameteri(desc.target, GL_TEXTURE_MAG_FILTER, desc.magFilter);
   glTexParameteri(desc.target, GL_TEXTURE_WRAP_S, desc.wrapS);
@@ -90,7 +90,7 @@ void TextureCubemap::upload(const ImageData& data) {
   for (int i = 0; i < 6; i++) {
     const image2D& img = data.images[i];
     if (!img.pixels)
-      error("[TextureCubemap::upload] Got no pixels to upload [{}]", desc.uniformName);
+      error("[TextureCubemap::upload] Got no pixels to upload");
 
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, desc.internalFormat, img.width, img.height, 0, desc.format, desc.type, img.pixels);
   }

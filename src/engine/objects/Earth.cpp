@@ -45,34 +45,23 @@ void Earth::build() {
 }
 
 void Earth::createTextures() {
-  texIndir32k = TextureVirtual::generateIndirection({
-    .uniformName = "Indirection32k",
-    .unit = 0,
-  }, caps32k);
+  texIndir32k = TextureVirtual::generateIndirection({}, caps32k);
 
   texVirt32kColors = TextureVirtual("res/tex/earth/32768x16384/colormap.tif", {
-    .uniformName = "u_texVirt32kColors",
-    .unit = 1,
     .internalFormat = GL_SRGB8
   }, caps32k, &texIndir32k);
 
   texVirt32kHeightmapLand = TextureVirtual("res/tex/earth/32768x16384/heightmapLand.tif", {
-    .uniformName = "u_texVirt32kHeightmapLand",
-    .unit = 2,
     .internalFormat = GL_R16,
     .format = GL_RED
   }, caps32k, &texIndir32k);
 
   texVirt32kNormalmapLand = TextureVirtual("res/tex/earth/32768x16384/normalmapLand.tif", {
-    .uniformName = "u_texVirt32kNormalmapLand",
-    .unit = 3,
   }, caps32k, &texIndir32k);
 
   texBathymetry = Texture2D(
     "res/tex/earth/Bathymetry.png",
     {
-      .uniformName    = "u_texBathymetry",
-      .unit           = 4,
       .internalFormat = GL_R8,
       .format         = GL_RED,
     }
@@ -81,8 +70,6 @@ void Earth::createTextures() {
   texShoreSDF = Texture2D(
     "res/tex/earth/shoreSDF.png",
     {
-      .uniformName    = "u_texShoreSDF",
-      .unit           = 5,
       .internalFormat = GL_R8,
       .format         = GL_RED,
     }
@@ -91,8 +78,6 @@ void Earth::createTextures() {
   texBorders = Texture2D(
     "res/tex/earth/borders.png",
     {
-      .uniformName    = "u_texBorders",
-      .unit           = 6,
       .internalFormat = GL_R8,
       .format         = GL_RED,
     }
@@ -101,8 +86,6 @@ void Earth::createTextures() {
   texNormalmapWave0 = Texture2D(
     "res/tex/earth/normalmapWave0.png",
     {
-      .uniformName = "u_texNormalmapWave0",
-      .unit = 7,
       .wrapS = GL_REPEAT,
       .wrapT = GL_REPEAT,
     }
@@ -111,8 +94,6 @@ void Earth::createTextures() {
   texNormalmapWave1 = Texture2D(
     "res/tex/earth/normalmapWave1.png",
     {
-      .uniformName = "u_texNormalmapWave1",
-      .unit = 8,
       .wrapS = GL_REPEAT,
       .wrapT = GL_REPEAT,
     }
@@ -121,8 +102,6 @@ void Earth::createTextures() {
   texNoise = Texture2D(
     "res/tex/earth/noise.png",
     {
-      .uniformName = "u_texNoise",
-      .unit = 9,
       .internalFormat = GL_R8,
       .format = GL_RED,
       .wrapS = GL_REPEAT,
@@ -131,8 +110,6 @@ void Earth::createTextures() {
   );
 
   texBakedOpticalDepth = Texture2D(ivec2(256), {
-    .uniformName    = "u_texBakedOpticalDepth",
-    .unit           = 2,
     .internalFormat = GL_R32F,
   });
 }
@@ -184,15 +161,16 @@ void Earth::draw(const Camera* camera, const frustum::Frustum& frustum, Shader& 
   shader.setUniform3f("u_waterShallowColor", waterShallowColor);
   shader.setUniform3f("u_waterDeepColor", waterDeepColor);
 
-  texVirt32kColors.bind();
-  texVirt32kHeightmapLand.bind();
-  texVirt32kNormalmapLand.bind();
-  texBathymetry.bind();
-  texShoreSDF.bind();
-  texBorders.bind();
-  texNormalmapWave0.bind();
-  texNormalmapWave1.bind();
-  texNoise.bind();
+  texIndir32k.bind(0);
+  texVirt32kColors.bind(1);
+  texVirt32kHeightmapLand.bind(2);
+  texVirt32kNormalmapLand.bind(3);
+  texBathymetry.bind(4);
+  texShoreSDF.bind(5);
+  texBorders.bind(6);
+  texNormalmapWave0.bind(7);
+  texNormalmapWave1.bind(8);
+  texNoise.bind(9);
 
   chunksDrawn = 0;
 
@@ -212,7 +190,7 @@ void Earth::drawAtmosphere(const Camera* camera, Shader& shader) const {
   shader.setUniformMatrix4f("u_camInv", camera->getProjViewInv());
   atmosphere.setUniforms(shader);
 
-  texBakedOpticalDepth.bind();
+  texBakedOpticalDepth.bind(2);
   Mesh::drawScreen(camera, shader);
   texBakedOpticalDepth.unbind();
 }
