@@ -107,7 +107,9 @@ void gui::draw() {
     SliderFloat("Heightmap scale", &earthPtr->heightmapScale, 0.01f, 100.f);
     SliderFloat("Triplanar blend sharpness", &earthPtr->triplanarBlendSharpness, 1.f, 10.f);
     SliderFloat("Sea level", &earthPtr->seaLevel, -1.f, 1.f);
+
     ColorEdit3("Border color", glm::value_ptr(earthPtr->bordersColor));
+    SliderFloat("Border thickness", &earthPtr->borderThickness, 0.f, 1.f);
 
     SeparatorText("Water");
     SliderFloat("Deep factor", &earthPtr->waterDeepFactor, -1.f, 1.f);
@@ -196,6 +198,7 @@ void gui::draw() {
       CheckboxFlags("Right##2", &camAirplane.flags, CameraFlags_DrawRight);
       CheckboxFlags("Up##2", &camAirplane.flags, CameraFlags_DrawUp);
       CheckboxFlags("Forward##2", &camAirplane.flags, CameraFlags_DrawForward);
+      CheckboxFlags("Frustum##2", &camAirplane.flags, CameraFlags_DrawFrustum);
 
       TreePop();
     }

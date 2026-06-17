@@ -21,7 +21,6 @@ layout(binding = 7) uniform sampler2D u_texNormalmapWave0;
 layout(binding = 8) uniform sampler2D u_texNormalmapWave1;
 layout(binding = 9) uniform sampler2D u_texNoise;
 
-uniform vec2 u_virtualDims;
 uniform vec3 u_camPos;
 uniform vec3 u_sunDir;
 uniform vec3 u_sunColor;
@@ -30,11 +29,13 @@ uniform vec3 u_waterDeepColor;
 uniform vec3 u_waterShallowColor;
 uniform vec3 u_terrainFaceColor;
 uniform vec3 u_terrainFaceChunkColor;
+uniform vec2 u_virtualDims;
 uniform float u_time;
 uniform float u_radius;
 uniform float u_ambient;
 uniform float u_seaLevel;
 uniform float u_lightMultiplier;
+uniform float u_borderThickness;
 uniform float u_maskTerrainFaceColor;
 uniform float u_maskTerrainFaceChunkColor;
 uniform float u_waterDeepFactor;
@@ -171,7 +172,6 @@ void main() {
   vec3 landNormal = getLandNormal();
   vec3 waterWavesNormal = getWavesNormal();
 
-  float border = texture(u_texBorders, globalUV).r;
   float deepness = texture(u_texBathymetry, globalUV).r;
   float sdf = texture(u_texShoreSDF, globalUV).r;
   float maskWater = dataIn.maskWater;
@@ -189,7 +189,11 @@ void main() {
 
   vec3 finalColor = landColor + waterColor;
 
-  finalColor = mix(finalColor, u_bordersColor, border); // TODO: Generate smoother borders
+  float rawBorder = texture(u_texBorders, globalUV).r;
+  float delta = fwidth(rawBorder);
+  float center = 1.f - u_borderThickness * 0.5f;
+  float smoothBorder = smoothstep(center - delta, center + delta, rawBorder);
+  finalColor = mix(finalColor, u_bordersColor, smoothBorder);
 
   // debug
   finalColor = applyMask(finalColor, u_terrainFaceColor, u_maskTerrainFaceColor);

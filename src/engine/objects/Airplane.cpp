@@ -46,6 +46,7 @@ void Airplane::moveUp()   { stop = true;  }
 void Airplane::moveDown() { stop = false; }
 
 void Airplane::onMouseMove(dvec2 mousePos) {
+  mousePos.y = global::getWinSize().y - mousePos.y;
   camera.onMouseMove(mousePos);
 }
 

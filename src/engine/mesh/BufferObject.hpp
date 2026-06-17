@@ -87,6 +87,12 @@ struct BufferObject {
     unbind();
   }
 
+  void storage(const void* data, GLsizeiptr dataSize, GLbitfield flags) const {
+    bind();
+    glBufferStorage(target, dataSize, data, flags);
+    unbind();
+  }
+
   void unbind() const {
     glBindBuffer(target, 0);
   }

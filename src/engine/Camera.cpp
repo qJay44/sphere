@@ -60,10 +60,11 @@ void Camera::draw(const Camera* cam, Shader& shader) const {
     if (flags & CameraFlags_DrawUp)      Mesh::drawDirectionLine(cam, shader, p, up, global::green);
     if (flags & CameraFlags_DrawForward) Mesh::drawDirectionLine(cam, shader, p, orientation, global::blue);
 
-    if (flags & CameraFlags_DrawFrustum) {
-      Mesh frustumMesh = meshes::frustum(*this);
-      frustumMesh.draw(cam, shader);
-    }
+    // if (flags & CameraFlags_DrawFrustum) {
+    //   // TODO: Change this after Mesh refactor
+    //   Mesh frustumMesh = meshes::frustum(*this);
+    //   frustumMesh.draw(cam, shader);
+    // }
   }
 }
 

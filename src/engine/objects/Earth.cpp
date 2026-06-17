@@ -142,6 +142,7 @@ void Earth::draw(const Camera* camera, const frustum::Frustum& frustum, Shader& 
   shader.setUniform1f("u_ambient", ambient);
   shader.setUniform1f("u_seaLevel", seaLevel);
   shader.setUniform1f("u_lightMultiplier", lightMultiplier);
+  shader.setUniform1f("u_borderThickness", borderThickness);
   shader.setUniform1f("u_triplanarBlendSharpness", triplanarBlendSharpness);
   shader.setUniform1f("u_waterDeepFactor", waterDeepFactor);
   shader.setUniform1f("u_waterWaveFreq", waterWaveFreq);

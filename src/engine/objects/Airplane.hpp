@@ -4,7 +4,7 @@
 #include "Earth.hpp"
 #include "Trail.hpp"
 #include "Light.hpp"
-#include "glm/gtc/quaternion.hpp"
+#include "glm/ext/quaternion_float.hpp"
 
 enum AirplaneFlags : u32 {
   AirplaneFlags_None        = 0,
@@ -70,11 +70,11 @@ private:
   vec3 localUp{0.f, 0.f, 1.f};
   vec3 localOrientation{0.f, 1.f, 0.f};
 
-  glm::quat localRotationQuat = glm::identity<glm::quat>();
-  glm::quat orientationQuat   = glm::identity<glm::quat>();
-  glm::quat yawQuat           = glm::identity<glm::quat>();
-  glm::quat pitchQuat         = glm::identity<glm::quat>();
-  glm::quat rollQuat          = glm::identity<glm::quat>();
+  glm::quat localRotationQuat = glm::quat(1.f, 0.f, 0.f, 0.f);
+  glm::quat orientationQuat   = glm::quat(1.f, 0.f, 0.f, 0.f);
+  glm::quat yawQuat           = glm::quat(1.f, 0.f, 0.f, 0.f);
+  glm::quat pitchQuat         = glm::quat(1.f, 0.f, 0.f, 0.f);
+  glm::quat rollQuat          = glm::quat(1.f, 0.f, 0.f, 0.f);
 
   u32 flags = 0;
 

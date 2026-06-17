@@ -1,7 +1,9 @@
 #pragma once
 
 #include "../texture/TextureVirtual.hpp"
-#include "../PingPongBuffer.hpp"
+#include "../mesh/BufferObject.hpp"
+#include <functional>
+#include <queue>
 
 class TileManager {
 public:
@@ -24,8 +26,8 @@ protected:
 
   struct Request {
     bool isUsing = false;
-    ivec2 tileCoord;
-    int slot;
+    ivec2 tileCoord{};
+    int slot = -1;
   };
 
   struct TexData {
@@ -35,11 +37,31 @@ protected:
     GLenum physicalTexFormat;
   };
 
-  TextureVirtual::Capabilities caps;
-  PingPongBuffer ppBuffer;
+  struct PBO {
+    BufferObject native;
+    void* persistentPtr;
+    bool isAvailable;
+    GLsync fence;
+  };
 
+  struct LayerTask {
+    TexData texData;
+    size_t pboByteOffset;
+  };
+
+  TextureVirtual::Capabilities caps;
+  size_t tileSizeInBytes;
+  size_t tileSizeInBytesMax;
   std::vector<PhysicalSlot> physicalSlots;
   std::vector<Request> requests;
+
+  // Need a lot only at the app launch (chunks per axis dependent)
+  static constexpr int pboPoolSize = 32;
+  PBO pboPool[pboPoolSize];
+
+  std::queue<std::function<void()>> mainThreadQueue;
+  std::mutex queueMutex;
+
   std::list<TexData> texs;
 
   int tilesLoaded = 0;
@@ -49,9 +71,13 @@ protected:
 
   int getTileSlot(int virtualIdx) const;
   int getFirstAvailableSlot() const;
+
   VipsRect prepareArea(VipsRegion* img, ivec2 coord) const;
 
-  void uploadPhysical(const TexData& texData, ivec2 coord, int slot);
-  void uploadIndirection(const TexData& tecData, ivec2 coord, int slot);
+  int leaseAvailablePBO();
+  void uploadTextures(std::vector<LayerTask>&& layerTasks, ivec2 coord, int slot);
+
+  void enqueMainThreadUpload(std::function<void()> task);
+  void processMainThreadUploads();
 };
 

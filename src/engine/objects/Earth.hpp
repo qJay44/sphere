@@ -52,7 +52,8 @@ private:
   float triplanarBlendSharpness = 2.f;
   float tessDivs = 2.5f;
   float seaLevel = 0.f;
-  vec3 bordersColor = vec3(0.55f);
+  float borderThickness = 1.f;
+  vec3 bordersColor{0.55f};
 
   vec3 waterShallowColor{0.f, 0.705f, 0.799f};
   vec3 waterDeepColor{0.f, 0.127f, 0.255f};
