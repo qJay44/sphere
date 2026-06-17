@@ -208,30 +208,30 @@ Mesh frustum(const Camera& cam, vec3 color) {
   vec3 centerRight  = (centerTR + centerBR) * 0.5f;
   vec3 centerLeft   = (centerTL + centerBL) * 0.5f;
 
-  std::vector<VertexPC> vertices {
+  std::vector<VertexP> vertices {
     // Near plane
-    {nearTR, color},
-    {nearTL, color},
-    {nearBL, color},
-    {nearBR, color},
+    {nearTR},
+    {nearTL},
+    {nearBL},
+    {nearBR},
     // Far plane
-    {farTR, color},
-    {farTL, color},
-    {farBL, color},
-    {farBR, color},
+    {farTR},
+    {farTL},
+    {farBL},
+    {farBR},
     // Normals
-    {centerTop, global::green},
-    {centerTop + frustum.topFace.normal, global::green},
-    {centerBottom, global::green},
-    {centerBottom + frustum.bottomFace.normal, global::green},
-    {centerRight, global::red},
-    {centerRight + frustum.rightFace.normal, global::red},
-    {centerLeft, global::red},
-    {centerLeft + frustum.leftFace.normal, global::red},
-    {nearPos, global::blue},
-    {nearPos + frustum.nearFace.normal, global::blue},
-    {farPos, global::blue},
-    {farPos + frustum.farFace.normal, global::blue},
+    {centerTop},
+    {centerTop + frustum.topFace.normal},
+    {centerBottom},
+    {centerBottom + frustum.bottomFace.normal},
+    {centerRight},
+    {centerRight + frustum.rightFace.normal},
+    {centerLeft},
+    {centerLeft + frustum.leftFace.normal},
+    {nearPos},
+    {nearPos + frustum.nearFace.normal},
+    {farPos},
+    {farPos + frustum.farFace.normal},
   };
 
   std::vector<GLuint> indices {

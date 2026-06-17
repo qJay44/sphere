@@ -133,6 +133,7 @@ Mesh Mesh::loadObj(const fspath& file, bool printInfo) {
 Mesh::Mesh(const std::vector<Vertex4>&  vertices, const std::vector<GLuint>& indices, GLenum mode, GLenum usage) : Mesh(std::span(vertices), indices, mode, usage) {}
 Mesh::Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& indices, GLenum mode, GLenum usage) : Mesh(std::span(vertices), indices, mode, usage) {}
 Mesh::Mesh(const std::vector<VertexPC>& vertices, const std::vector<GLuint>& indices, GLenum mode, GLenum usage) : Mesh(std::span(vertices), indices, mode, usage) {}
+Mesh::Mesh(const std::vector<VertexP>&  vertices, const std::vector<GLuint>& indices, GLenum mode, GLenum usage) : Mesh(std::span(vertices), indices, mode, usage) {}
 
 Mesh::Mesh(const std::vector<Vertex4>&  vertices, GLenum mode, GLenum usage) : Mesh(std::span(vertices), {}, mode, usage) {}
 Mesh::Mesh(const std::vector<VertexPT>& vertices, GLenum mode, GLenum usage) : Mesh(std::span(vertices), {}, mode, usage) {}

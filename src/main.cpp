@@ -91,6 +91,7 @@ int main() {
   Shader sunShader("sun.vert", "sun.frag");
   Shader lightShader("light.vert", "light.frag");
   Shader directionShader("direction.vert", "direction.frag");
+  Shader linesShader("lines.vert", "lines.frag");
 
   const float earthInitRadius = 300.f;
 
@@ -241,7 +242,7 @@ int main() {
     airplane.drawLights(cameraATM, lightShader);
     airplane.drawDirections(cameraATM, directionShader);
 
-    cameraAirplane.draw(cameraATM, directionShader);
+    cameraAirplane.draw(cameraATM, linesShader);
 
     if (global::drawGlobalAxis) {
       Mesh::drawDirectionLine(cameraATM, directionShader, {}, {1e6f, 0.f, 0.f}, global::red);

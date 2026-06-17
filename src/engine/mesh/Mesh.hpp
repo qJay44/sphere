@@ -20,11 +20,12 @@ public:
   Mesh(const std::vector<Vertex4>&  vertices, const std::vector<GLuint>& indices, GLenum mode, GLenum usage = GL_STATIC_DRAW);
   Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& indices, GLenum mode, GLenum usage = GL_STATIC_DRAW);
   Mesh(const std::vector<VertexPC>& vertices, const std::vector<GLuint>& indices, GLenum mode, GLenum usage = GL_STATIC_DRAW);
+  Mesh(const std::vector<VertexP>&  vertices, const std::vector<GLuint>& indices, GLenum mode, GLenum usage = GL_STATIC_DRAW);
 
   Mesh(const std::vector<Vertex4>&  vertices, GLenum mode, GLenum usage);
   Mesh(const std::vector<VertexPT>& vertices, GLenum mode, GLenum usage);
   Mesh(const std::vector<VertexPC>& vertices, GLenum mode, GLenum usage);
-  Mesh(const std::vector<VertexP> & vertices, GLenum mode, GLenum usage);
+  Mesh(const std::vector<VertexP>&  vertices, GLenum mode, GLenum usage);
 
   static Mesh loadObj(const fspath& file, bool printInfo = false);
   static void drawScreen(const Camera* camera, Shader& shader);
