@@ -11,7 +11,7 @@ uniform float u_sunFocus;
 uniform float u_sunIntensity;
 
 vec3 getSun(vec3 viewDir) {
-  float sun = pow(max(0, dot(viewDir, -u_sunDir)), u_sunFocus) * u_sunIntensity;
+  float sun = pow(max(0, dot(viewDir, u_sunDir)), u_sunFocus) * u_sunIntensity;
   return u_sunColor * sun;
 }
 

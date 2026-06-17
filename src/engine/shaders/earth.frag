@@ -2,6 +2,8 @@
 
 #define PI 3.141592265359f
 
+#define saturate(x) clamp(x, 0.f, 1.f)
+
 out vec4 FragColor;
 in DATA {
   vec4 worldPos;
@@ -59,31 +61,19 @@ vec2 globalUV = vec2(
   0.5f - (asin(sphereNormal.y) / PI)
 );
 
-float saturate(float n) {
-  return clamp(n, 0.f, 1.f);
-}
-
-vec2 saturate(vec2 n) {
-  return clamp(n, vec2(0.f), vec2(1.f));
-}
-
-vec3 saturate(vec3 n) {
-  return clamp(n, vec3(0.f), vec3(1.f));
-}
-
 vec3 applyMask(vec3 no, vec3 yes, float mask) {
   return yes * mask + (1.f - mask) * no;
 }
 
 vec3 directionalLight(vec3 normal) {
-  float diffuse = max(dot(normal, -u_sunDir), 0.f);
+  float diffuse = max(dot(normal, u_sunDir), 0.f);
   float total = diffuse + u_ambient;
 
   return u_sunColor * total * u_lightMultiplier;
 }
 
 vec3 specularLight(vec3 normal) {
-  vec3 halfwayDir = normalize(-u_sunDir + viewDir);
+  vec3 halfwayDir = normalize(u_sunDir + viewDir);
   float spec = pow(max(dot(normal, halfwayDir), 0.f), 128.f);
 
   return u_sunColor * spec;

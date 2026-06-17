@@ -32,6 +32,7 @@ public:
   void setNearPlane(float p);
   void setFarPlane(float p);
   void setFlags(u32 f);
+  void setUniforms(Shader& s) const;
 
   void update();
   void draw(const Camera* cam, Shader& shader) const;

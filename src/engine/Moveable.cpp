@@ -60,7 +60,7 @@ void Moveable::onMouseMove(dvec2 mousePos) {
 
   dvec2 delta = dvec2(sensitivity) * distFromCenter / winCenter;
   yaw += delta.x;
-  pitch = std::clamp(pitch - delta.y, -PI_2 + 0.1, PI_2 - 0.1);
+  pitch = std::clamp(pitch + delta.y, -PI_2 + 0.1, PI_2 - 0.1);
 
   calcOrientation();
 }

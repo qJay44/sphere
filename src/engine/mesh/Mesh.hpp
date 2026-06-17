@@ -24,9 +24,11 @@ public:
   Mesh(const std::vector<Vertex4>&  vertices, GLenum mode, GLenum usage);
   Mesh(const std::vector<VertexPT>& vertices, GLenum mode, GLenum usage);
   Mesh(const std::vector<VertexPC>& vertices, GLenum mode, GLenum usage);
+  Mesh(const std::vector<VertexP> & vertices, GLenum mode, GLenum usage);
 
   static Mesh loadObj(const fspath& file, bool printInfo = false);
-  static void screenDraw(const Camera* camera, Shader& shader);
+  static void drawScreen(const Camera* camera, Shader& shader);
+  static void drawDirectionLine(const Camera* camera, Shader& shader, const vec3& p, const vec3& d, const vec3& color);
 
   template<typename T>
   void updateData(const std::vector<T>& vertices, GLenum usage) {
@@ -34,7 +36,13 @@ public:
     count = vertices.size();
   }
 
-  void draw(const Camera* camera, Shader& shader, bool forceNoWireframe = false) const;
+  template<typename T>
+  void updateSubData(const std::vector<T>& vertices, GLenum usage) {
+    vbo.updateSubData(vertices.data(), vertices.size() * sizeof(T));
+    count = vertices.size();
+  }
+
+  void draw(const Camera* camera, Shader& shader) const;
 
 private:
   GLsizei count = 0;

@@ -6,15 +6,6 @@
 
 namespace meshes {
 
-Mesh line(vec3 p1, vec3 p2, vec3 color) {
-  std::vector<VertexPC> vertices{
-    {p1, color},
-    {p2, color}
-  };
-
-  return Mesh(vertices, GL_LINES, GL_STATIC_DRAW);
-}
-
 Mesh axis() {
   std::vector<VertexPC> vertices{
     {{0.f, 0.f, 0.f}, global::red},

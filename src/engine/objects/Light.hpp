@@ -12,7 +12,7 @@ public:
   void update();
   void setUniforms(Shader& shader) const;
 
-  void draw(const Camera* camera, Shader& shader, bool forceNoWireframe = false) const;
+  void draw(const Camera* camera, Shader& shader) const;
 
 private:
   friend struct gui;

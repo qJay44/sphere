@@ -3,15 +3,14 @@
 
 #include "Earth.hpp"
 #include "Trail.hpp"
-#include "glm/gtc/quaternion.hpp"
 #include "Light.hpp"
+#include "glm/gtc/quaternion.hpp"
 
 enum AirplaneFlags : u32 {
   AirplaneFlags_None        = 0,
   AirplaneFlags_DrawRight   = 1,
   AirplaneFlags_DrawUp      = 1 << 1,
   AirplaneFlags_DrawForward = 1 << 2,
-  AirplaneFlags_DrawFrustum = 1 << 3,
   AirplaneFlags_DrawDirections = AirplaneFlags_DrawRight | AirplaneFlags_DrawUp | AirplaneFlags_DrawForward,
 };
 
@@ -32,6 +31,7 @@ public:
   Camera& getCamera();
 
   void setTurnSpeed(float speedRad);
+  void setFlags(u32 f);
 
   void turn(float dir);
   void update(const Earth& earth);
@@ -58,16 +58,21 @@ private:
 
   float camDistance = 10.f;
 
-  float turnMomentumDecreaseFactor = 0.45f;
-  float tiltMomentumDecreaseFactor = 0.91f;
-  float tiltRecoverMomentumDecreaseFactor = 0.11f;
-
   float turnMomentumRad = 0.f;
   float tiltMomentumRad = 0.f;
-  float tiltRecoverMomentumRad = 0.f;
 
-  glm::quat turnQuat   = glm::identity<glm::quat>();
-  glm::quat rotateQuat = glm::identity<glm::quat>();
+  float turnMomentumDamping = 0.45f;
+  float tiltMomentumDamping = 0.95f;
+
+  vec3 localRight{1.f, 0.f, 0.f};
+  vec3 localUp{0.f, 0.f, 1.f};
+  vec3 localOrientation{0.f, 1.f, 0.f};
+
+  glm::quat localRotationQuat = glm::identity<glm::quat>();
+  glm::quat orientationQuat   = glm::identity<glm::quat>();
+  glm::quat yawQuat           = glm::identity<glm::quat>();
+  glm::quat pitchQuat         = glm::identity<glm::quat>();
+  glm::quat rollQuat          = glm::identity<glm::quat>();
 
   u32 flags = 0;
 

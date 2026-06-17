@@ -53,7 +53,7 @@ void Earth::createTextures() {
   texVirt32kColors = TextureVirtual("res/tex/earth/32768x16384/colormap.tif", {
     .uniformName = "u_texVirt32kColors",
     .unit = 1,
-    // .internalFormat = GL_SRGB8
+    .internalFormat = GL_SRGB8
   }, caps32k, &texIndir32k);
 
   texVirt32kHeightmapLand = TextureVirtual("res/tex/earth/32768x16384/heightmapLand.tif", {
@@ -213,7 +213,7 @@ void Earth::drawAtmosphere(const Camera* camera, Shader& shader) const {
   atmosphere.setUniforms(shader);
 
   texBakedOpticalDepth.bind();
-  Mesh::screenDraw(camera, shader);
+  Mesh::drawScreen(camera, shader);
   texBakedOpticalDepth.unbind();
 }
 

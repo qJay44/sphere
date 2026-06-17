@@ -138,8 +138,8 @@ void gui::draw() {
     SliderFloat("Gamma", &global::gamma, 0, 5.f);
 
     SeparatorText("Atmosphere");
-    Checkbox("Apply", &atmosphere.apply);
-    BeginDisabled(!atmosphere.apply);
+    Checkbox("Apply", &atmosphere.enable);
+    BeginDisabled(!atmosphere.enable);
     rebakeOpticalDepth |= SliderFloat("Radius##2", &atmosphere.radius, earthPtr->radius, 1000.f);
     rebakeOpticalDepth |= SliderInt("Scattering points", &atmosphere.scatteringPoints, 2, 50);
     rebakeOpticalDepth |= SliderInt("Optical depth points", &atmosphere.opticalDepthPoints, 2, 50);
@@ -156,21 +156,16 @@ void gui::draw() {
 
   assert(airplanePtr);
   if (CollapsingHeader("Airplane")) {
-    SliderFloat("Speed", &airplanePtr->speedDefault, 0.f, PI * 2.f);
-    SetItemTooltip("Radians");
+    SliderFloat("Speed", &airplanePtr->speedDefault, 0.f, 20.f);
 
     SliderFloat("Fly height", &airplanePtr->flyHeight, 1.f, 100.f);
     SliderFloat("Turn speed", &airplanePtr->turnSpeedRad, 0.f, 10.f);
     SetItemTooltip("Radians");
 
-    SliderFloat("Turn momementum decrease factor", &airplanePtr->turnMomentumDecreaseFactor, 0.1f, 0.99f);
-    SetItemTooltip("How long the momementum is decreasing");
-    SliderFloat("Tilt momementum decrease factor", &airplanePtr->tiltMomentumDecreaseFactor, 0.1f, 0.99f);
-    SetItemTooltip("How long the momementum is decreasing");
-    SliderFloat("Tilt recover momementum decrease factor", &airplanePtr->tiltRecoverMomentumDecreaseFactor, 0.1f, 0.99f);
-    SetItemTooltip("How long the momementum is decreasing");
+    SliderFloat("Turn momementum damping", &airplanePtr->turnMomentumDamping, 0.f, 1.f);
+    SliderFloat("Tilt momementum damping", &airplanePtr->tiltMomentumDamping, 0.f, 1.f);
 
-    if (SliderFloat("Scale", &airplanePtr->meshScale, 0.01f, 10.f))
+    if (SliderFloat("Mesh scale", &airplanePtr->meshScale, 0.01f, 10.f))
       airplanePtr->setScale(airplanePtr->meshScale);
 
     SeparatorText("Trail");
@@ -182,7 +177,6 @@ void gui::draw() {
       CheckboxFlags("Right", &airplanePtr->flags, AirplaneFlags_DrawRight);
       CheckboxFlags("Up", &airplanePtr->flags, AirplaneFlags_DrawUp);
       CheckboxFlags("Forward", &airplanePtr->flags, AirplaneFlags_DrawForward);
-      CheckboxFlags("Frustum", &airplanePtr->flags, AirplaneFlags_DrawFrustum);
 
       TreePop();
     }
@@ -193,15 +187,15 @@ void gui::draw() {
   Camera& camAirplane = airplanePtr->getCamera();
 
   if (CollapsingHeader("Airplane Camera")) {
-    SliderFloat("Near", &camAirplane.nearPlane, 0.01f, 1.f);
-    SliderFloat("Far", &camAirplane.farPlane, 10.f, 1000.f);
-    SliderFloat("Distance", &airplanePtr->camDistance, 1.f, 50.f);
-    SliderFloat("FOV", &camAirplane.fov, 45.f, 179.f);
+    SliderFloat("Near##2", &camAirplane.nearPlane, 0.01f, 1.f);
+    SliderFloat("Far##2", &camAirplane.farPlane, 10.f, 1000.f);
+    SliderFloat("Distance##2", &airplanePtr->camDistance, 1.f, 50.f);
+    SliderFloat("FOV##2", &camAirplane.fov, 45.f, 179.f);
 
-    if (TreeNode("Flags")) {
-      CheckboxFlags("Right", &camAirplane.flags, CameraFlags_DrawRight);
-      CheckboxFlags("Up", &camAirplane.flags, CameraFlags_DrawUp);
-      CheckboxFlags("Forward", &camAirplane.flags, CameraFlags_DrawForward);
+    if (TreeNode("Flags##2")) {
+      CheckboxFlags("Right##2", &camAirplane.flags, CameraFlags_DrawRight);
+      CheckboxFlags("Up##2", &camAirplane.flags, CameraFlags_DrawUp);
+      CheckboxFlags("Forward##2", &camAirplane.flags, CameraFlags_DrawForward);
 
       TreePop();
     }
@@ -211,19 +205,19 @@ void gui::draw() {
 
   assert(camSpecatePtr);
   if (CollapsingHeader("Spectate camera")) {
-    SliderFloat("Near##2", &camSpecatePtr->nearPlane, 0.01f, 1.f);
-    SliderFloat("Far##2", &camSpecatePtr->farPlane,  10.f, 1000.f);
-    SliderFloat("Speed##2", &camSpecatePtr->speedDefault, 1.f, 50.f);
-    SliderFloat("FOV##2", &camSpecatePtr->fov, 45.f, 179.f);
-    DragFloat("Yaw##2", &camSpecatePtr->yaw);
-    DragFloat("Pitch##2", &camSpecatePtr->pitch);
-    DragFloat3("Position", glm::value_ptr(camSpecatePtr->position));
+    SliderFloat("Near##3", &camSpecatePtr->nearPlane, 0.01f, 1.f);
+    SliderFloat("Far##3", &camSpecatePtr->farPlane,  10.f, 1000.f);
+    SliderFloat("Speed##3", &camSpecatePtr->speedDefault, 1.f, 50.f);
+    SliderFloat("FOV##3", &camSpecatePtr->fov, 45.f, 179.f);
+    DragFloat("Yaw##3", &camSpecatePtr->yaw);
+    DragFloat("Pitch##3", &camSpecatePtr->pitch);
+    DragFloat3("Position##3", glm::value_ptr(camSpecatePtr->position));
 
-    if (TreeNode("Flags")) {
-      CheckboxFlags("Right", &camSpecatePtr->flags, CameraFlags_DrawRight);
-      CheckboxFlags("Up", &camSpecatePtr->flags, CameraFlags_DrawUp);
-      CheckboxFlags("Forward", &camSpecatePtr->flags, CameraFlags_DrawForward);
-      CheckboxFlags("Frustum", &camSpecatePtr->flags, CameraFlags_DrawFrustum);
+    if (TreeNode("Flags##3")) {
+      CheckboxFlags("Right##3", &camSpecatePtr->flags, CameraFlags_DrawRight);
+      CheckboxFlags("Up##3", &camSpecatePtr->flags, CameraFlags_DrawUp);
+      CheckboxFlags("Forward##3", &camSpecatePtr->flags, CameraFlags_DrawForward);
+      CheckboxFlags("Frustum##3", &camSpecatePtr->flags, CameraFlags_DrawFrustum);
 
       TreePop();
     }
@@ -253,7 +247,6 @@ void gui::draw() {
   // ===== Other ========================================================================================= //
 
   if (CollapsingHeader("Other")) {
-    Checkbox("Show global axis", &global::drawGlobalAxis);
     Checkbox("Planet print build info", &earthPtr->printBuildInfo);
 
     DragFloat("_slider1f0", &_slider1f0);

@@ -81,6 +81,12 @@ struct BufferObject {
     update(s.data(), s.size_bytes(), access);
   }
 
+  void updateSubData(const void* data, GLsizeiptr dataSize, GLintptr offset = 0) const {
+    bind();
+    glBufferSubData(target, offset, dataSize, data);
+    unbind();
+  }
+
   void unbind() const {
     glBindBuffer(target, 0);
   }

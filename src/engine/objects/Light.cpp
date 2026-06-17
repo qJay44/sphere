@@ -18,14 +18,14 @@ void Light::setUniforms(Shader& shader) const {
   shader.setUniform3f("u_lightColor", color);
 }
 
-void Light::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) const {
+void Light::draw(const Camera* camera, Shader& shader) const {
   setUniforms(shader);
 
   glDepthMask(GL_FALSE);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  Mesh::draw(camera, shader, forceNoWireframe);
+  Mesh::draw(camera, shader);
 
   glDepthMask(GL_TRUE);
   glDisable(GL_BLEND);

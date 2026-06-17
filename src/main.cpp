@@ -1,19 +1,9 @@
-#include "engine/objects/Sun.hpp"
-#ifdef _WIN32
-  #include <direct.h>
-  #define CHDIR(p) _chdir(p);
-#else
-  #include <unistd.h>
-  #define CHDIR(p) chdir(p);
-#endif
-
 #include "global.hpp"
 #include "engine/gui/gui.hpp"
 #include "engine/Camera.hpp"
 #include "engine/Shader.hpp"
 #include "engine/InputsHandler.hpp"
 #include "engine/FBO.hpp"
-#include "engine/mesh/meshes.hpp"
 #include "engine/texture/Texture2D.hpp"
 #include "engine/objects/Airplane.hpp"
 #include "engine/objects/Earth.hpp"
@@ -100,7 +90,7 @@ int main() {
   Shader atmosphereShader("atmosphere.vert", "atmosphere.frag");
   Shader sunShader("sun.vert", "sun.frag");
   Shader lightShader("light.vert", "light.frag");
-  Shader linesShader("lines.vert", "lines.frag");
+  Shader directionShader("direction.vert", "direction.frag");
 
   const float earthInitRadius = 300.f;
 
@@ -119,8 +109,9 @@ int main() {
   float airplaneFlyHeight = 10.f;
   airplanePosInit.z = earthInitRadius + airplaneFlyHeight;
   Airplane airplane(airplanePosInit, airplaneFlyHeight, "res/obj/11804_Airplane_v2_l2.obj", 0.001f);
-  airplane.setSpeedDefault(PI / 100.f);
-  airplane.setTurnSpeed(PI / 10.f);
+  airplane.setSpeedDefault(5.f);
+  airplane.setTurnSpeed(PI / 5.f);
+  // airplane.setFlags(AirplaneFlags::AirplaneFlags_DrawDirections);
 
   // ===== Cameras ============================================== //
 
@@ -130,7 +121,7 @@ int main() {
 
   Camera& cameraAirplane = airplane.getCamera();
   cameraAirplane.setFarPlane(100.f);
-  cameraAirplane.setSensitivity(50.f);
+  cameraAirplane.setSensitivity(1.f);
 
   Camera* cameraATM = global::controllingAirplane ? &cameraAirplane : &cameraSpectate;
 
@@ -165,9 +156,6 @@ int main() {
   fboScreen.attach2D(GL_DEPTH_ATTACHMENT, screenDepthTexture);
 
   // ============================================================ //
-
-  Mesh axis = meshes::axis();
-  axis.scale(1e4f);
 
   glCullFace(GL_BACK);
   glFrontFace(GL_CCW);
@@ -226,13 +214,10 @@ int main() {
     fboScreen.bind();
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-
-    sun.draw(cameraATM, sunShader);
-
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
+    glEnable(GL_FRAMEBUFFER_SRGB);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE + !global::wireframeMode);
 
     earth.draw(cameraATM, frustum::Frustum(cameraAirplane), earthShader);
 
@@ -245,6 +230,7 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     screenColorTexture.bind();
     screenDepthTexture.bind();
@@ -257,15 +243,18 @@ int main() {
 
     airplane.drawTrails(cameraATM, trailShader);
     airplane.drawLights(cameraATM, lightShader);
-    airplane.drawDirections(cameraATM, linesShader);
+    airplane.drawDirections(cameraATM, directionShader);
 
-    cameraAirplane.draw(cameraATM, linesShader);
+    cameraAirplane.draw(cameraATM, directionShader);
 
-    if (global::drawGlobalAxis)
-      axis.draw(cameraATM, linesShader);
-
+    if (global::drawGlobalAxis) {
+      Mesh::drawDirectionLine(cameraATM, directionShader, {}, {1e6f, 0.f, 0.f}, global::red);
+      Mesh::drawDirectionLine(cameraATM, directionShader, {}, {0.f, 1e6f, 0.f}, global::green);
+      Mesh::drawDirectionLine(cameraATM, directionShader, {}, {0.f, 0.f, 1e6f}, global::blue);
+    }
     // ============================================================ //
 
+    glDisable(GL_FRAMEBUFFER_SRGB);
     gui::draw();
 
     glfwSwapBuffers(window);

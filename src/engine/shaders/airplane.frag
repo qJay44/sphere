@@ -20,7 +20,7 @@ vec3 directionalLight() {
 
   float specularLight = 0.5f;
   vec3 viewDirection = normalize(u_camPos - worldPos.xyz);
-  vec3 reflectionDirection = reflect(-u_sunDir, normal);
+  vec3 reflectionDirection = reflect(u_sunDir, normal);
   float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.f), 8);
   float specular = specAmount * specularLight;
 

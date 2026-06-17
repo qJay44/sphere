@@ -6,14 +6,15 @@
 
 struct Sun {
   float focus;
-  float intensity;
-  float yaw = PI_2;
-  float pitch = 0.f; vec3 color{1.f};
+  float intensity;  // radians
+  float yaw = PI_2; // radians
+  float pitch = 0.f;
+  vec3 color{1.f};
 
-  vec3 dir{1.f, 0.f, 0.f};
+  vec3 dir{1.f, 0.f, 0.f}; // Towards light source
 
   void updateDir() {
-    dir = -normalize(vec3{
+    dir = normalize(vec3{
       cos(yaw) * cos(pitch),
       sin(pitch),
       sin(yaw) * cos(pitch)
@@ -35,7 +36,7 @@ struct Sun {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
 
-    Mesh::screenDraw(cam, shader);
+    Mesh::drawScreen(cam, shader);
 
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);

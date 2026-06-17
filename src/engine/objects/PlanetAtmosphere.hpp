@@ -11,7 +11,7 @@ struct PlanetAtmosphere {
   vec3 scatteringCoefficients = vec3(1.f);
   vec3 waveLengths{700.f, 530.f, 440.f};
 
-  bool apply = true;
+  bool enable = true;
 
   inline static float transmittance(float x, float a, float b) {
     return std::exp(-x * a * b);
@@ -38,7 +38,7 @@ struct PlanetAtmosphere {
     shader.setUniform1i("u_opticalDepthPoints", opticalDepthPoints);
     shader.setUniform1f("u_densityFalloff", densityFalloff);
     shader.setUniform1f("u_atmosphereRadius", radius);
-    shader.setUniform1f("u_maskApply", apply);
+    shader.setUniform1i("u_enableAtmosphere", enable);
   }
 };
 

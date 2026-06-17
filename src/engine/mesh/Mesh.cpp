@@ -137,10 +137,11 @@ Mesh::Mesh(const std::vector<VertexPC>& vertices, const std::vector<GLuint>& ind
 Mesh::Mesh(const std::vector<Vertex4>&  vertices, GLenum mode, GLenum usage) : Mesh(std::span(vertices), {}, mode, usage) {}
 Mesh::Mesh(const std::vector<VertexPT>& vertices, GLenum mode, GLenum usage) : Mesh(std::span(vertices), {}, mode, usage) {}
 Mesh::Mesh(const std::vector<VertexPC>& vertices, GLenum mode, GLenum usage) : Mesh(std::span(vertices), {}, mode, usage) {}
+Mesh::Mesh(const std::vector<VertexP>&  vertices, GLenum mode, GLenum usage) : Mesh(std::span(vertices), {}, mode, usage) {}
 
-void Mesh::screenDraw(const Camera* camera, Shader& shader) {
+void Mesh::drawScreen(const Camera* camera, Shader& shader) {
   static const VAO& vao = VAO::getEmpty();
-  setCamUniforms(camera, shader);
+  camera->setUniforms(shader);
   setGlobalUniforms(shader);
   setExtraUniforms(shader);
 
@@ -150,40 +151,39 @@ void Mesh::screenDraw(const Camera* camera, Shader& shader) {
   vao.unbind();
 }
 
-void Mesh::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) const {
+void Mesh::drawDirectionLine(const Camera* camera, Shader& shader, const vec3& p, const vec3& d, const vec3& color) {
+  static const VAO& vao = VAO::getEmpty();
+  vao.bind();
+
+  camera->setUniforms(shader);
+  setGlobalUniforms(shader);
+  setExtraUniforms(shader);
+
+  shader.use();
+  shader.setUniform3f("u_pos", p);
+  shader.setUniform3f("u_dir", d);
+  shader.setUniform3f("u_color", color);
+
+  glDrawArrays(GL_LINES, 0, 2);
+  vao.unbind();
+}
+
+void Mesh::draw(const Camera* camera, Shader& shader) const {
   assert(count);
   assert(mode);
 
   vao.bind();
 
-  setCamUniforms(camera, shader);
+  camera->setUniforms(shader);
   setGlobalUniforms(shader);
   setExtraUniforms(shader);
 
   shader.setUniformMatrix4f("u_model", getModel());
 
-  if (global::drawWireframe & !forceNoWireframe)
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
   shader.use();
   drawFunc(mode, count);
 
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
   vao.unbind();
-}
-
-void Mesh::setCamUniforms(const Camera* c, Shader& s) {
-  s.setUniform1f      ("u_camNear"   , c->getNearPlane());
-  s.setUniform1f      ("u_camFar"    , c->getFarPlane());
-  s.setUniform1f      ("u_camFov"    , c->getFov());
-  s.setUniform3f      ("u_camPos"    , c->getPosition());
-  s.setUniform3f      ("u_camRight"  , c->getRight());
-  s.setUniform3f      ("u_camUp"     , c->getUp());
-  s.setUniform3f      ("u_camForward", c->getForward());
-  s.setUniformMatrix4f("u_camProj"   , c->getProj());
-  s.setUniformMatrix4f("u_camView"   , c->getView());
-  s.setUniformMatrix4f("u_camPV"     , c->getProjView());
 }
 
 void Mesh::setGlobalUniforms(Shader& s) {

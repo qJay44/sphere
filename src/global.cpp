@@ -11,8 +11,7 @@ float gamma = 2.2f;
 
 bool controllingAirplane = true;
 bool guiFocused     = false;
-bool drawWireframe  = false;
-bool drawNormals    = false;
+bool wireframeMode  = false;
 bool drawGlobalAxis = false;
 
 }// global
