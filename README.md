@@ -38,4 +38,5 @@
 
 ## TODO
 - [ ] Better borders
+- [ ] Fix waves
 

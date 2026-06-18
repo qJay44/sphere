@@ -212,8 +212,8 @@ void gui::draw() {
     SliderFloat("Far##3", &camSpecatePtr->farPlane,  10.f, 1000.f);
     SliderFloat("Speed##3", &camSpecatePtr->speedDefault, 1.f, 50.f);
     SliderFloat("FOV##3", &camSpecatePtr->fov, 45.f, 179.f);
-    DragFloat("Yaw##3", &camSpecatePtr->yaw);
-    DragFloat("Pitch##3", &camSpecatePtr->pitch);
+    SliderAngle("Yaw##3", &camSpecatePtr->yaw, -180.f, 180.f);
+    SliderAngle("Pitch##3", &camSpecatePtr->pitch, -89.f, 89.f);
     DragFloat3("Position##3", glm::value_ptr(camSpecatePtr->position));
 
     if (TreeNode("Flags##3")) {
@@ -234,10 +234,10 @@ void gui::draw() {
     rebakeOpticalDepth |= SliderFloat("Intensity", &sunPtr->intensity, 0.f, 20.f);
 
     SliderFloat("Focus", &sunPtr->focus, 0.f, 2000.f);
-    updateDir |= DragFloat("Yaw##3", &sunPtr->yaw, PI_2 * 0.01f);
-    updateDir |= DragFloat("Pitch##3", &sunPtr->pitch, PI_2 * 0.01f);
+    updateDir |= SliderAngle("Yaw##3", &sunPtr->yaw, -180.f, 180.f);
+    updateDir |= SliderAngle("Pitch##3", &sunPtr->pitch, -90.f, 90.f);
     ColorEdit3("Color", glm::value_ptr(sunPtr->color));
-    Text("Direction: [%.2f, %.2f, %.2f]", sunPtr->dir.x, sunPtr->dir.y, sunPtr->dir.z);
+    Text("Direction towards the sun: [%.2f, %.2f, %.2f]", sunPtr->dir.x, sunPtr->dir.y, sunPtr->dir.z);
 
     if (updateDir)
       sunPtr->updateDir();

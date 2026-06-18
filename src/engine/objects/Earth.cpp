@@ -48,7 +48,6 @@ void Earth::createTextures() {
   texIndir32k = TextureVirtual::generateIndirection({}, caps32k);
 
   texVirt32kColors = TextureVirtual("res/tex/earth/32768x16384/colormap.tif", {
-    .internalFormat = GL_SRGB8
   }, caps32k, &texIndir32k);
 
   texVirt32kHeightmapLand = TextureVirtual("res/tex/earth/32768x16384/heightmapLand.tif", {

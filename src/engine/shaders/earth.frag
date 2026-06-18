@@ -159,12 +159,14 @@ vec3 getWavesNormal() {
 
 vec3 getLandNormal() {
   vec4 landNormalSample = textureVirtual(u_texVirt32kNormalmapLand, u_texIndirection32k);
-  vec3 landNormal = normalize(landNormalSample.rgb * 2.f - 1.f);
+  vec3 rawNormal = landNormalSample.rgb * 2.f - 1.f;
+  vec3 normal;
 
-  landNormal.z *= -1.f;
-  landNormal.xz = landNormal.zx;
+  normal.x = -rawNormal.z;
+  normal.y =  rawNormal.y;
+  normal.z = -rawNormal.x;
 
-  return landNormal;
+  return normalize(normal);
 }
 
 void main() {
