@@ -247,6 +247,30 @@ void gui::draw() {
   if (rebakeOpticalDepth)
     earthPtr->bakeOpticalDepth();
 
+  // ===== Generators ==================================================================================== //
+
+  if (CollapsingHeader("Generators")) {
+    SeparatorText("Borders");
+    {
+      static const GLint swizzle[4] = {GL_RED, GL_RED, GL_RED, GL_ONE};
+      static int resolution{2048};
+      static float lineThickness = 1.f;
+      static float lineSmoothingSize = 0.8f;
+
+      earthPtr->texBorders.bind(0);
+      glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
+      earthPtr->texBorders.unbind();
+
+      SliderInt("Resolution", &resolution, 256, 4096);
+      SliderFloat("Line thickness", &lineThickness, 0.f, 10.f);
+      SliderFloat("Line smoothing size", &lineSmoothingSize, 0.f, 10.f);
+      if (Button("Regenerate"))
+        earthPtr->regenerateTextureBorders(ivec2(resolution, resolution / 2), lineThickness, lineSmoothingSize);
+
+      Image(earthPtr->texBorders.getId(), vec2(global::getWinSize()) * 0.25f);
+    }
+  }
+
   // ===== Other ========================================================================================= //
 
   if (CollapsingHeader("Other")) {

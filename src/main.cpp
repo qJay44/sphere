@@ -1,12 +1,12 @@
-#include "global.hpp"
-#include "engine/gui/gui.hpp"
 #include "engine/Camera.hpp"
-#include "engine/Shader.hpp"
-#include "engine/InputsHandler.hpp"
 #include "engine/FBO.hpp"
-#include "engine/texture/Texture2D.hpp"
+#include "engine/InputsHandler.hpp"
+#include "engine/Shader.hpp"
+#include "engine/gui/gui.hpp"
 #include "engine/objects/Airplane.hpp"
 #include "engine/objects/Earth.hpp"
+#include "engine/texture/Texture2D.hpp"
+#include "global.hpp"
 #include "utils/clrp.hpp"
 
 using global::window;
@@ -86,7 +86,6 @@ int main() {
   Shader earthShader("earth.vert", "earth.frag", "earth.tesc", "earth.tese");
   Shader airplaneShader("airplane.vert", "airplane.frag");
   Shader trailShader("trail.vert", "trail.frag");
-  Shader planetBordersShader("borders.vert", "borders.frag");
   Shader atmosphereShader("atmosphere.vert", "atmosphere.frag");
   Shader sunShader("sun.vert", "sun.frag");
   Shader lightShader("light.vert", "light.frag");

@@ -62,7 +62,7 @@ struct BufferObject {
     glBindBuffer(target, id);
   }
 
-  void base(GLuint index) const {
+  void bindBase(GLuint index) const {
     glBindBufferBase(target, index, id);
   }
 

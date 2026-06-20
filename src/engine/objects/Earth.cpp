@@ -2,6 +2,7 @@
 
 #include "TerrainFace.hpp"
 #include "TileManager.hpp"
+#include "../generators/borders.hpp"
 
 static constexpr auto caps32k = TextureVirtual::Capabilities({
   128,
@@ -14,6 +15,7 @@ Earth::Earth(int resolution, int chunksPerSide, float radius)
     chunksPerSide(chunksPerSide),
     radius(radius),
     tileManager(caps32k),
+    shapefileCountries("ne_10m_admin_0_countries_lakes"),
     atmosphere(radius * 1.55f)
 {
   build();
@@ -74,13 +76,7 @@ void Earth::createTextures() {
     }
   );
 
-  texBorders = Texture2D(
-    "res/tex/earth/borders.png",
-    {
-      .internalFormat = GL_R8,
-      .format         = GL_RED,
-    }
-  );
+  texBorders = generators::generateTextureBorders(shapefileCountries);
 
   texNormalmapWave0 = Texture2D(
     "res/tex/earth/normalmapWave0.png",
@@ -132,6 +128,10 @@ void Earth::bakeOpticalDepth() {
   glBindImageTexture(0, texBakedOpticalDepth.getId(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32F);
   glDispatchCompute(numGroups.x, numGroups.y, 1);
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+}
+
+void Earth::regenerateTextureBorders(ivec2 resolution, float lineThickness, float lineSmoothingSizef) {
+  texBorders = generators::generateTextureBorders(shapefileCountries, resolution, lineThickness, lineSmoothingSizef);
 }
 
 void Earth::draw(const Camera* camera, const frustum::Frustum& frustum, Shader& shader) {

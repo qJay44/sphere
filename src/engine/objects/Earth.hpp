@@ -6,6 +6,7 @@
 #include "TerrainFace.hpp"
 #include "PlanetAtmosphere.hpp"
 #include "TileManager.hpp"
+#include "../shapefile/shapefile.hpp"
 
 class Earth {
 public:
@@ -20,6 +21,7 @@ public:
   void createTextures();
   void update();
   void bakeOpticalDepth();
+  void regenerateTextureBorders(ivec2 resolution = ivec2(1024), float lineThickness = 1.f, float lineSmoothingSize = 0.8f);
   void draw(const Camera* camera, const frustum::Frustum& frustum, Shader& shader);
   void drawAtmosphere(const Camera* camera, Shader& shader) const;
 
@@ -32,6 +34,8 @@ private:
   int chunksPerSide;
   float radius;
   TileManager tileManager;
+  shapefile::ShapefileReader shapefileCountries;
+  PlanetAtmosphere atmosphere;
 
   Texture2D texIndir32k;
   TextureVirtual texVirt32kColors;
@@ -52,8 +56,8 @@ private:
   float triplanarBlendSharpness = 2.f;
   float tessDivs = 2.5f;
   float seaLevel = 0.f;
-  float borderThickness = 1.f;
-  vec3 bordersColor{0.55f};
+  float borderThickness = 0.8f;
+  vec3 bordersColor{0.f};
 
   vec3 waterShallowColor{0.f, 0.705f, 0.799f};
   vec3 waterDeepColor{0.f, 0.127f, 0.255f};
@@ -71,8 +75,6 @@ private:
 
   float lightMultiplier = 1.5f;
   float ambient = 0.02f;
-
-  PlanetAtmosphere atmosphere;
 
   int chunksDrawn = 0;
 

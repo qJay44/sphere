@@ -1,0 +1,70 @@
+#version 460 core
+
+#define PI 3.14159265358979f
+#define TAU (2.f * PI)
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout(r16f, binding = 0) writeonly uniform image2D imageWrite;
+
+struct Metadata {
+  vec4 bounds; // Xmin, Ymin, Xmax, Ymax
+  int pointBufferOffset;
+  int numPoints;
+};
+
+uniform float u_lineThickness;
+uniform float u_lineSmoothingSize;
+
+layout(std430, binding = 0) readonly buffer MetadataBuffer {
+  Metadata metas[];
+};
+
+layout(std430, binding = 1) readonly buffer PointsBuffer {
+  vec2 points[];
+};
+
+float sqrtDistToLineSegment(vec2 p, vec2 a, vec2 b) {
+  vec2 aB = b - a;
+  float sqrLenAB = dot(aB, aB);
+  float t = clamp(dot(p - a, aB) / sqrLenAB, 0.f, 1.f);
+  vec2 nearestPointOnLine = a + aB * t;
+
+  return dot(p - nearestPointOnLine, p - nearestPointOnLine);
+}
+
+void main() {
+  const ivec2 texCoord = ivec2(gl_GlobalInvocationID.xy);
+  const ivec2 imgSize = imageSize(imageWrite);
+
+  if (texCoord.x >= imgSize.x || texCoord.y >= imgSize.y)
+    return;
+
+  vec2 uv = vec2(texCoord) / vec2(imgSize - 1);
+  vec2 p = (uv - 0.5f) * vec2(360.f, 180.f);
+  float minSqrDist = u_lineThickness * u_lineThickness;
+
+  for (int i = 0; i < metas.length(); i++) {
+    Metadata meta = metas[i];
+    if (p.x > meta.bounds.x && p.x < meta.bounds.z && p.y > meta.bounds.y && p.y < meta.bounds.w) {
+      int start = meta.pointBufferOffset;
+      int count = meta.numPoints;
+
+      for (int j = 0; j < count; j++) {
+        int currIdx = start + j;
+        int nextIdx = start + (j + 1) % count;
+
+        float sqrDistToLine = sqrtDistToLineSegment(p, points[currIdx], points[nextIdx]);
+        minSqrDist = min(minSqrDist, sqrDistToLine);
+      }
+    }
+  }
+
+  float lineStrength = smoothstep(u_lineThickness, u_lineThickness - u_lineSmoothingSize, sqrt(minSqrDist));
+
+  ivec2 texCoordFlipped = texCoord;
+  texCoordFlipped.y = imgSize.y - 1 - texCoord.y;
+
+  imageStore(imageWrite, texCoordFlipped, vec4(lineStrength, 0.f, 0.f, 1.f));
+}
+

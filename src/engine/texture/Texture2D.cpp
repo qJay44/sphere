@@ -12,6 +12,20 @@ const Texture2D& Texture2D::getDebugTex0() {
   return debugTex0;
 }
 
+Texture2D Texture2D::storage(const ivec2& size, const TextureDescriptor& desc, GLsizei levels) {
+  Texture2D tex;
+
+  tex.onInit(desc);
+  glTexStorage2D(tex.desc.target, levels, desc.internalFormat, size.x, size.y);
+
+  if (desc.genMipMap)
+    glGenerateMipmap(desc.target);
+
+  tex.unbind();
+
+  return tex;
+}
+
 Texture2D::Texture2D(const image2D& img, const TextureDescriptor& d) : Texture(d) {
   if (desc.target != GL_TEXTURE_2D)
     error("[Texture2D::Texture2D] Wrong tartget [{:#x}]", desc.target);
@@ -40,5 +54,19 @@ void Texture2D::upload(ivec2 coord, ivec2 size, const void* data, GLenum type) c
   bind(0);
   glTexSubImage2D(desc.target, 0, coord.x, coord.y, size.x, size.y, desc.format, type, data);
   unbind();
+}
+
+void Texture2D::onInit(const TextureDescriptor& desc) {
+  this->desc.target = desc.target;
+
+  if (desc.target != GL_TEXTURE_2D)
+    error("[Texture2D::Texture2D] Wrong target ({:#x})", desc.target);
+
+  glGenTextures(1, &id);
+  bind(0);
+  glTexParameteri(desc.target, GL_TEXTURE_MIN_FILTER, desc.minFilter);
+  glTexParameteri(desc.target, GL_TEXTURE_MAG_FILTER, desc.magFilter);
+  glTexParameteri(desc.target, GL_TEXTURE_WRAP_S, desc.wrapS);
+  glTexParameteri(desc.target, GL_TEXTURE_WRAP_T, desc.wrapT);
 }
 
