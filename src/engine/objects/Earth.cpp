@@ -130,8 +130,8 @@ void Earth::bakeOpticalDepth() {
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
 
-void Earth::regenerateTextureBorders(ivec2 resolution, float lineThickness, float lineSmoothingSizef) {
-  texBorders = generators::generateTextureBorders(shapefileCountries, resolution, lineThickness, lineSmoothingSizef);
+void Earth::regenerateTextureBorders(ivec2 resolution) {
+  texBorders = generators::generateTextureBorders(shapefileCountries, resolution);
 }
 
 void Earth::draw(const Camera* camera, const frustum::Frustum& frustum, Shader& shader) {

@@ -8,12 +8,7 @@
 namespace generators {
 
 [[nodiscard]]
-static Texture2D generateTextureBorders(
-  const shapefile::ShapefileReader& shapefile,
-  ivec2 resolution = ivec2(2048, 1024),
-  float lineThickness = 1.f,
-  float lineSmoothingSize = 1.6f
-) {
+static Texture2D generateTextureBorders(const shapefile::ShapefileReader& shapefile, ivec2 resolution = ivec2(2048, 1024)) {
   static Shader shader("generators/borders.comp");
 
   // ----- Allocate buffers ---------------------------------------------------------------------------------------- //
@@ -83,8 +78,6 @@ static Texture2D generateTextureBorders(
   ssbo.points.bindBase(1);
 
   shader.use();
-  shader.setUniform1f("u_lineThickness", lineThickness);
-  shader.setUniform1f("u_lineSmoothingSize", lineSmoothingSize);
   glBindImageTexture(0, texture.getId(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16F);
   glDispatchCompute(numWorkGruops.x, numWorkGruops.y, 1);
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);

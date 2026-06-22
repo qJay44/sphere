@@ -169,6 +169,14 @@ vec3 getLandNormal() {
   return normalize(normal);
 }
 
+float getBorderValue() {
+  float dist = texture(u_texBorders, globalUV).r;
+  float delta = fwidth(dist);
+  float center = u_borderThickness * 0.5f;
+
+  return 1.f - smoothstep(center - delta, center + delta, dist);
+}
+
 void main() {
   vec3 surfaceColor = textureVirtual(u_texVirt32kColors, u_texIndirection32k).rgb;
   vec3 landNormal = getLandNormal();
@@ -190,12 +198,7 @@ void main() {
   waterColor *= maskWater;
 
   vec3 finalColor = landColor + waterColor;
-
-  float rawBorder = texture(u_texBorders, globalUV).r;
-  float delta = fwidth(rawBorder);
-  float center = 1.f - u_borderThickness * 0.5f;
-  float smoothBorder = smoothstep(center - delta, center + delta, rawBorder);
-  finalColor = mix(finalColor, u_bordersColor, smoothBorder);
+  finalColor = mix(finalColor, u_bordersColor, getBorderValue());
 
   // debug
   finalColor = applyMask(finalColor, u_terrainFaceColor, u_maskTerrainFaceColor);

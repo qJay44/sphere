@@ -21,7 +21,7 @@ public:
   void createTextures();
   void update();
   void bakeOpticalDepth();
-  void regenerateTextureBorders(ivec2 resolution = ivec2(1024), float lineThickness = 1.f, float lineSmoothingSize = 0.8f);
+  void regenerateTextureBorders(ivec2 resolution = ivec2(1024));
   void draw(const Camera* camera, const frustum::Frustum& frustum, Shader& shader);
   void drawAtmosphere(const Camera* camera, Shader& shader) const;
 
@@ -56,7 +56,7 @@ private:
   float triplanarBlendSharpness = 2.f;
   float tessDivs = 2.5f;
   float seaLevel = 0.f;
-  float borderThickness = 0.8f;
+  float borderThickness = 0.2f;
   vec3 bordersColor{0.f};
 
   vec3 waterShallowColor{0.f, 0.705f, 0.799f};
