@@ -115,14 +115,14 @@ void gui::draw() {
     SliderFloat("Deep factor", &earthPtr->waterDeepFactor, -1.f, 1.f);
     SliderFloat("Wave frequency", &earthPtr->waterWaveFreq, -0.5f, 0.5f);
     SliderFloat("Wave resolution scale", &earthPtr->waterWaveResScale, 0.1f, 1.f);
-    SliderFloat("Shore frequency", &earthPtr->waterShoreFreq, 0.f, 300.f);
-    SliderFloat("Shore scale", &earthPtr->waterShoreScale, 0.f, 300.f);
+    SliderFloat("Shore frequency", &earthPtr->waterShoreFreq, 0.f, 500.f);
+    SliderFloat("Shore scale", &earthPtr->waterShoreScale, 0.f, 1.f);
+    SliderFloat("Shore speed", &earthPtr->waterShoreSpeed, 0.f, 300.f);
+    SliderFloat("Shore thickness", &earthPtr->waterShoreThickness, 0.f, 1.f);
+    SliderFloat("Shore macro noise scale", &earthPtr->waterShoreMacroNoiseScale, 0.f, 200.f);
+    SliderFloat("Shore micro noise scale", &earthPtr->waterShoreMicroNoiseScale, 0.f, 200.f);
     SliderFloat("Shore noise frequency", &earthPtr->waterShoreNoiseFreq, 0.f, 1.f);
-    SliderFloat("Shore noise scale", &earthPtr->waterShoreNoiseScale, 0.f, 1.f);
-    SliderFloat("Shore noise strength", &earthPtr->waterShoreNoiseStrength, 0.f, 1000.f);
-    SliderFloat("Shore mask blend", &earthPtr->waterShoreMaskBlend, 0.f, 1.f);
-    SliderFloat("Shore width", &earthPtr->waterShoreWidth, 0.f, 1.f);
-    SliderFloat("Shore edge blend", &earthPtr->waterShoreEdgeBlend, 0.f, 1.f);
+    SliderFloat("Shore noise strength", &earthPtr->waterShoreNoiseStrength, 0.f, 1.f);
     ColorEdit3("Shallow color", glm::value_ptr(earthPtr->waterShallowColor));
     ColorEdit3("Deep color", glm::value_ptr(earthPtr->waterDeepColor));
 

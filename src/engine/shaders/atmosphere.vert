@@ -1,7 +1,7 @@
 #version 460 core
 
-out vec2 texCoord;
-out vec3 viewVec;
+out vec2 v_uv;
+out vec3 v_viewVec;
 
 uniform mat4 u_camInv;
 uniform vec3 u_camPos;
@@ -26,8 +26,9 @@ vec3 calcViewVec(vec2 uv) {
 
 void main() {
   vec3 vert = vec3(vertices[gl_VertexID], 0.f);
-  texCoord = vert.xy * 0.5f + 0.5f;
-  viewVec = calcViewVec(texCoord);
+
+  v_uv = vert.xy * 0.5f + 0.5f;
+  v_viewVec = calcViewVec(v_uv);
 	gl_Position = vec4(vert, 1.f);
 }
 

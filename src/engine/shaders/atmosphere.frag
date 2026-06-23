@@ -3,8 +3,8 @@
 #define FLOAT_MAX 3.4028235e38f
 #define PI 3.141592265359f
 
-in vec2 texCoord;
-in vec3 viewVec;
+in vec2 v_uv;
+in vec3 v_viewVec;
 
 out vec4 FragColor;
 
@@ -106,7 +106,7 @@ vec3 calcLight(Ray ray, float rayLength, vec3 originalColor) {
 }
 
 void main() {
-  vec3 color = texture(u_screenColorTex, texCoord).rgb;
+  vec3 color = texture(u_screenColorTex, v_uv).rgb;
 
   if (!u_enableAtmosphere) {
     FragColor = vec4(color, 1.f);
@@ -115,11 +115,11 @@ void main() {
 
   Ray ray;
   ray.origin = u_camPos;
-  ray.dir = normalize(viewVec);
+  ray.dir = normalize(v_viewVec);
 
   vec2 hitInfo = raySphere(u_planetCenter, u_atmosphereRadius, ray);
 
-  float sceneDepthNonLinear = texture(u_screenDepthTex, texCoord).r;
+  float sceneDepthNonLinear = texture(u_screenDepthTex, v_uv).r;
   float eyeDepth = linearizeDepth(sceneDepthNonLinear);
   float sceneDepth = eyeDepth / dot(ray.dir, u_camForward);
 

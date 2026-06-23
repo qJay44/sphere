@@ -19,7 +19,7 @@ layout(std430, binding = 1) readonly buffer PointsBuffer {
 };
 
 float sqrDistToLineSegment(vec2 p, vec2 a, vec2 b) {
-  vec2 aB = b - a;
+  vec2 aB = b - a + 1e-4f;
   float sqrLenAB = dot(aB, aB);
   float t = clamp(dot(p - a, aB) / sqrLenAB, 0.f, 1.f);
   vec2 nearestPointOnLine = a + aB * t;
@@ -36,7 +36,7 @@ void main() {
 
   vec2 uv = vec2(texCoord) / vec2(imgSize - 1);
   vec2 p = (uv - 0.5f) * vec2(360.f, 180.f);
-  float minSqrDist = 1e6f;
+  float minSqrDist = 1e10f;
 
   for (int i = 0; i < metas.length(); i++) {
     Metadata meta = metas[i];

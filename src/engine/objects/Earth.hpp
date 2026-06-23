@@ -64,14 +64,14 @@ private:
   float waterDeepFactor = 0.4f;
   float waterWaveFreq = 0.01f;
   float waterWaveResScale = 0.1f;
-  float waterShoreFreq = -2.f;
-  float waterShoreScale = 59.f;
-  float waterShoreNoiseFreq = 1.f;
-  float waterShoreNoiseScale = 0.063f;
-  float waterShoreNoiseStrength = 316.f;
-  float waterShoreMaskBlend = 0.587f;
-  float waterShoreWidth = 1.8f;
-  float waterShoreEdgeBlend = 0.067f;
+  float waterShoreFreq = 500.f;
+  float waterShoreScale = 0.02f;
+  float waterShoreSpeed = 1.f;
+  float waterShoreThickness = 0.2f;
+  float waterShoreNoiseFreq = 0.01f;
+  float waterShoreMacroNoiseScale = 5.f;
+  float waterShoreMicroNoiseScale = 50.f;
+  float waterShoreNoiseStrength = 0.01f;
 
   float lightMultiplier = 1.5f;
   float ambient = 0.02f;

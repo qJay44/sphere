@@ -106,6 +106,7 @@ void Earth::createTextures() {
 
   texBakedOpticalDepth = Texture2D(ivec2(256), {
     .internalFormat = GL_R32F,
+    .format = GL_RED
   });
 }
 
@@ -150,12 +151,12 @@ void Earth::draw(const Camera* camera, const frustum::Frustum& frustum, Shader& 
   shader.setUniform1f("u_maskTerrainFaceChunkColor", useTerrainFaceChunkColors);
   shader.setUniform1f("u_waterShoreFreq", waterShoreFreq);
   shader.setUniform1f("u_waterShoreScale", waterShoreScale);
+  shader.setUniform1f("u_waterShoreSpeed", waterShoreSpeed);
+  shader.setUniform1f("u_waterShoreThickness", waterShoreThickness);
+  shader.setUniform1f("u_waterShoreMacroNoiseScale", waterShoreMacroNoiseScale);
+  shader.setUniform1f("u_waterShoreMicroNoiseScale", waterShoreMicroNoiseScale);
   shader.setUniform1f("u_waterShoreNoiseFreq", waterShoreNoiseFreq);
-  shader.setUniform1f("u_waterShoreNoiseScale", waterShoreNoiseScale);
   shader.setUniform1f("u_waterShoreNoiseStrength", waterShoreNoiseStrength);
-  shader.setUniform1f("u_waterShoreMaskBlend", waterShoreMaskBlend);
-  shader.setUniform1f("u_waterShoreWidth", waterShoreWidth);
-  shader.setUniform1f("u_waterShoreEdgeBlend", waterShoreEdgeBlend);
   shader.setUniform2f("u_virtualDims", caps32k.virtualDims);
   shader.setUniform3f("u_bordersColor", bordersColor);
   shader.setUniform3f("u_waterShallowColor", waterShallowColor);

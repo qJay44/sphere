@@ -41,17 +41,19 @@ uniform float u_maskTerrainFaceChunkColor;
 uniform float u_waterDeepFactor;
 uniform float u_waterWaveFreq;
 uniform float u_waterWaveResScale;
-uniform float u_waterShoreScale;
 uniform float u_waterShoreFreq;
+uniform float u_waterShoreScale;
+uniform float u_waterShoreSpeed;
+uniform float u_waterShoreThickness;
+uniform float u_waterShoreMacroNoiseScale;
+uniform float u_waterShoreMicroNoiseScale;
 uniform float u_waterShoreNoiseFreq;
-uniform float u_waterShoreNoiseScale;
 uniform float u_waterShoreNoiseStrength;
-uniform float u_waterShoreMaskBlend;
-uniform float u_waterShoreWidth;
-uniform float u_waterShoreEdgeBlend;
 uniform float u_triplanarBlendSharpness;
 
 uniform float u_1f0;
+uniform float u_1f1;
+uniform float u_1f2;
 
 vec3 sphereNormal = normalize(dataIn.worldPos.xyz);
 vec3 viewDir = normalize(u_camPos - dataIn.worldPos.xyz);
@@ -131,22 +133,28 @@ vec3 getDeepnessWaterColor(float deepness) {
 }
 
 float getShoreFoam(float sdf) {
-  float dist = sdf * u_waterShoreScale;
+  vec2 macroNoiseUV = globalUV * u_waterShoreMacroNoiseScale;
+  float macroNoise = texture(u_texNoise, macroNoiseUV).r;
 
-  vec2 noiseOffset = vec2(0.0617f, 0.0314f) * u_waterShoreNoiseFreq * u_time;
-  float noise = triplanarSample(u_texNoise, u_waterShoreNoiseScale, noiseOffset).r;
-  noise = (noise - 0.5f) * u_waterShoreNoiseStrength * sdf;
+  vec2 microNoiseUV = globalUV * u_waterShoreMicroNoiseScale + u_time * u_waterShoreNoiseFreq;
+  float microNoise = texture(u_texNoise, microNoiseUV).r * 2.f - 1.f;
 
-  vec2 maskOffset = vec2(-0.021f, 0.07f) * u_waterShoreNoiseFreq * u_time;
-  float mask = triplanarSample(u_texNoise, u_waterShoreNoiseScale, maskOffset).r;
-  float threshold = mix(0.375f, 0.55f, sdf);
-  mask = smoothstep(threshold, threshold + u_waterShoreMaskBlend, mask);
+  float sdfNoised = sdf + microNoise * u_waterShoreNoiseStrength;
 
-  float strength = sin(dist - (u_time + 1000.f) * u_waterShoreFreq + noise);
-  strength = saturate(smoothstep(u_waterShoreWidth, u_waterShoreWidth + u_waterShoreEdgeBlend, strength + 1.f)) * mask;
-  strength *= 1.f - smoothstep(0.7f, 1.f, dist);
+  if (sdfNoised > u_waterShoreScale)
+    return 0.f;
 
-  return strength;
+  float localFreq = u_waterShoreFreq   * (0.8f + macroNoise * 0.4f);
+  float localSpeed = u_waterShoreSpeed * (0.9f + macroNoise * 0.2f);
+  float localPhase = macroNoise * 67.2831f;
+  float localThickness = u_waterShoreThickness * (0.7f + macroNoise * 0.6f);
+
+  float wave = (sdfNoised * localFreq) - (u_time * localSpeed) + localPhase;
+  float waveRepeat = sin(wave) * 0.5f + 0.5f;
+  float waveLine = smoothstep(1.f - localThickness, 1.f, waveRepeat);
+  float deepOceanFade = 1.f - smoothstep(0.f, u_waterShoreScale, sdf);
+
+  return waveLine * deepOceanFade;
 }
 
 vec3 getWavesNormal() {
@@ -171,10 +179,9 @@ vec3 getLandNormal() {
 
 float getBorderValue() {
   float dist = texture(u_texBorders, globalUV).r;
-  float delta = fwidth(dist);
   float center = u_borderThickness * 0.5f;
 
-  return 1.f - smoothstep(center - delta, center + delta, dist);
+  return 1.f - smoothstep(center, center, dist);
 }
 
 void main() {
